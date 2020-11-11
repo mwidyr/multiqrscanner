@@ -1,11 +1,14 @@
 package com.example.multiqrscanner.qrcode;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -25,6 +28,9 @@ import com.example.multiqrscanner.misc.RenderCube3D;
 
 import org.ddogleg.struct.FastQueue;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,6 +50,7 @@ import georegression.struct.se.Se3_F64;
  */
 public class QrCodeDetectActivity extends DemoCamera2Activity {
     private static final String TAG = "QrCodeDetect";
+    private static final String TAG2 = "QrCodeDetect2";
 
     // Switches what information is displayed
     Mode mode = Mode.NORMAL;
@@ -54,7 +61,7 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
     TextView textUnqiueCount;
     // List of unique qr codes
     public static final Object uniqueLock = new Object();
-    public static final Map<String,QrCodeWrapper> unique = new HashMap<>();
+    public static final Map<String, QrCodeWrapper> unique = new HashMap<>();
     // qr which has been selected and should be viewed
     public static String selectedQR = null;
     // TODO don't use a static method and forget detection if the activity is exited by the user
@@ -63,7 +70,7 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
     Point2D_F64 touched = new Point2D_F64();
     boolean touching = false;
     boolean touchProcessed = false;
-    boolean scanList = false;
+//    boolean scanList = false;
 
 
     // Which standard configuration to use
@@ -80,7 +87,7 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
         super.onCreate(savedInstanceState);
 
         LayoutInflater inflater = getLayoutInflater();
-        LinearLayout controls = (LinearLayout)inflater.inflate(R.layout.qrcode_detect_controls,null);
+        LinearLayout controls = (LinearLayout) inflater.inflate(R.layout.qrcode_detect_controls, null);
 
         spinnerDetector = controls.findViewById(R.id.spinner_algs);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -119,18 +126,20 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
 
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            switch( motionEvent.getAction() ) {
-                case MotionEvent.ACTION_DOWN:{
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN: {
                     touching = true;
-                } break;
+                }
+                break;
 
-                case MotionEvent.ACTION_UP:{
+                case MotionEvent.ACTION_UP: {
                     touching = false;
-                } break;
+                }
+                break;
             }
 
-            if( touching ) {
-                applyToPoint(viewToImage,motionEvent.getX(),motionEvent.getY(),touched);
+            if (touching) {
+                applyToPoint(viewToImage, motionEvent.getX(), motionEvent.getY(), touched);
             }
 
             return true;
@@ -142,8 +151,12 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
         setProcessing(new QrCodeProcessing());
     }
 
-    public void pressedListView( View view ) {
-        Intent intent = new Intent(this, QrCodeListActivity.class );
+    public void pressedListView(View view) {
+        String imagePath = takeScreenshot();
+        Intent intent = new Intent(this, QrCodeListActivity.class);
+        if (!imagePath.equalsIgnoreCase("")) {
+            intent.putExtra("imagePath", imagePath);
+        }
         setProcessing(new QrCodeProcessing());
         startActivity(intent);
     }
@@ -171,21 +184,22 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
 
             ConfigQrCode config;
 
-            switch( detectorType ) {
-                case FAST:{
+            switch (detectorType) {
+                case FAST: {
                     config = ConfigQrCode.fast();
-                }break;
+                }
+                break;
 
                 default: {
                     config = new ConfigQrCode();
                 }
             }
 
-            detector = FactoryFiducial.qrcode3D(config,GrayU8.class);
+            detector = FactoryFiducial.qrcode3D(config, GrayU8.class);
 
-            colorDetected.setARGB(0xA0,0,0xFF,0);
+            colorDetected.setARGB(0xA0, 0, 0xFF, 0);
             colorDetected.setStyle(Paint.Style.FILL);
-            colorFailed.setARGB(0xA0,0xFF,0x11,0x11);
+            colorFailed.setARGB(0xA0, 0xFF, 0x11, 0x11);
             colorFailed.setStyle(Paint.Style.FILL);
         }
 
@@ -197,7 +211,7 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
 
             renderCube.initialize(cameraToDisplayDensity);
             intrinsic = lookupIntrinsics();
-            detector.setLensDistortion(LensDistortionFactory.narrow(intrinsic),imageWidth,imageHeight);
+            detector.setLensDistortion(LensDistortionFactory.narrow(intrinsic), imageWidth, imageHeight);
 
             synchronized (uniqueLock) {
                 uniqueCount = unique.size();
@@ -208,40 +222,42 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
         public void onDraw(Canvas canvas, Matrix imageToView) {
             canvas.concat(imageToView);
             synchronized (lockGui) {
-                if( oldValue != uniqueCount ) {
+                if (oldValue != uniqueCount) {
                     oldValue = uniqueCount;
                     textUnqiueCount.setText(uniqueCount + "");
                 }
-                switch( mode ) {
-                    case NORMAL:{
-                        for( int i = 0; i < detected.size; i++ ) {
+                switch (mode) {
+                    case NORMAL: {
+                        for (int i = 0; i < detected.size; i++) {
                             QrCode qr = detected.get(i);
-                            MiscUtil.renderPolygon(qr.bounds,path,canvas,colorDetected);
+                            MiscUtil.renderPolygon(qr.bounds, path, canvas, colorDetected);
 
-                            if(touching && Intersection2D_F64.containConvex(qr.bounds,touched)) {
+                            if (touching && Intersection2D_F64.containConvex(qr.bounds, touched)) {
                                 selectedQR = qr.message;
                             }
                         }
-                        for( int i = 0; showFailures && i < failures.size; i++ ) {
+                        for (int i = 0; showFailures && i < failures.size; i++) {
                             QrCode qr = failures.get(i);
-                            MiscUtil.renderPolygon(qr.bounds,path,canvas,colorFailed);
+                            MiscUtil.renderPolygon(qr.bounds, path, canvas, colorFailed);
                         }
-                    }break;
+                    }
+                    break;
 
-                    case GRAPH:{
+                    case GRAPH: {
                         // TODO implement this in the future
-                    }break;
+                    }
+                    break;
                 }
 
-                for ( int i = 0; i < listPose.size; i++ ) {
+                for (int i = 0; i < listPose.size; i++) {
                     renderCube.drawCube("", listPose.get(i), intrinsic, 1, canvas);
                 }
             }
 
             // touchProcessed is needed to prevent multiple intent from being sent
-            if( selectedQR != null && !touchProcessed ) {
+            if (selectedQR != null && !touchProcessed) {
                 touchProcessed = true;
-                Intent intent = new Intent(QrCodeDetectActivity.this, QrCodeListActivity.class );
+                Intent intent = new Intent(QrCodeDetectActivity.this, QrCodeListActivity.class);
                 startActivity(intent);
             }
         }
@@ -251,7 +267,7 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
             detector.detect(input);
             synchronized (uniqueLock) {
                 // always clear map, so doesnt duplicate when processing
-//                unique.clear();
+                unique.clear();
                 for (QrCode qr : detector.getDetector().getDetections()) {
                     if (qr.message == null) {
                         Log.e(TAG, "qr with null message?!?");
@@ -259,16 +275,16 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
                     // default only contain unique message
                     // modified to save uniue message but with size
                     if (!unique.containsKey(qr.message)) {
-                        Log.i(TAG,"Adding new qr code with message of length="+qr.message.length());
+                        Log.i(TAG, "Adding new qr code with message of length=" + qr.message.length());
                         QrCodeWrapper qrCodeWrapper = new QrCodeWrapper();
                         qrCodeWrapper.setQrCode(qr.clone());
                         qrCodeWrapper.setCount(1L);
                         unique.put(qr.message, qrCodeWrapper);
-                    }else{
-                        Log.i(TAG,"Adding existing qr code with message of length="+qr.message.length());
+                    } else {
+                        Log.i(TAG, "Adding existing qr code with message of length=" + qr.message.length());
                         QrCodeWrapper qrCodeWrapper = unique.get(qr.message);
                         assert qrCodeWrapper != null;
-                        qrCodeWrapper.setCount(qrCodeWrapper.getCount()+1L);
+                        qrCodeWrapper.setCount(qrCodeWrapper.getCount() + 1L);
                         unique.put(qr.message, qrCodeWrapper);
                     }
                 }
@@ -283,7 +299,7 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
 
                 failures.reset();
                 for (QrCode qr : detector.getDetector().getFailures()) {
-                    if( qr.failureCause.ordinal() >= QrCode.Failure.ERROR_CORRECTION.ordinal()) {
+                    if (qr.failureCause.ordinal() >= QrCode.Failure.ERROR_CORRECTION.ordinal()) {
                         failures.grow().set(qr);
                     }
                 }
@@ -304,6 +320,36 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
     enum Detector {
         STANDARD,
         FAST
+    }
+
+    private String takeScreenshot() {
+        Date now = new Date();
+        android.text.format.DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
+        String filePath = "";
+
+        try {
+            // image naming and path  to include sd card  appending name you choose for file
+            filePath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpg";
+
+            // create bitmap screen capture
+            View v1 = getWindow().getDecorView().getRootView();
+            v1.setDrawingCacheEnabled(true);
+            Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());
+            v1.setDrawingCacheEnabled(false);
+
+            File imageFile = new File(filePath);
+
+            FileOutputStream outputStream = new FileOutputStream(imageFile);
+            int quality = 100;
+            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
+            outputStream.flush();
+            outputStream.close();
+
+        } catch (Throwable e) {
+            // Several error may come out with file handling or DOM
+            e.printStackTrace();
+        }
+        return filePath;
     }
 
 }

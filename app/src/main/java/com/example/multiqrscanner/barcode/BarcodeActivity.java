@@ -1,4 +1,4 @@
-package com.example.multiqrscanner;
+package com.example.multiqrscanner.barcode;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
