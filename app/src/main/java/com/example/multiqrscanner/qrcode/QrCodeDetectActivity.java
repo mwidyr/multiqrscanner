@@ -251,7 +251,7 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
             detector.detect(input);
             synchronized (uniqueLock) {
                 // always clear map, so doesnt duplicate when processing
-                unique.clear();
+//                unique.clear();
                 for (QrCode qr : detector.getDetector().getDetections()) {
                     if (qr.message == null) {
                         Log.e(TAG, "qr with null message?!?");

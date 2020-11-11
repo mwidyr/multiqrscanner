@@ -74,6 +74,11 @@ public class DemoMain extends AppCompatActivity {
 			Intent intent = new Intent(this, QrCodeDetectActivity.class);
 			startActivity(intent);
 		});
+		Button btnBarCodeScanner = findViewById(R.id.btn_barcode_scanner);
+		btnBarCodeScanner.setOnClickListener(view -> {
+			Intent intent = new Intent(this, BarcodeActivity.class);
+			startActivity(intent);
+		});
 	}
 
 	@Override
