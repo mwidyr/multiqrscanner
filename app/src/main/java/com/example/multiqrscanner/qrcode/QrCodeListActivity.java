@@ -4,23 +4,27 @@ import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.example.multiqrscanner.R;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import boofcv.alg.fiducial.qrcode.QrCode;
+import boofcv.android.ConvertBitmap;
 
 import static com.example.multiqrscanner.qrcode.QrCodeDetectActivity.uniqueLock;
 
@@ -31,7 +35,8 @@ public class QrCodeListActivity extends AppCompatActivity {
     // List of all qr codes found in the order they were added to the listview
     List<QrCode> qrcodes = new ArrayList<>();
 
-    TextView textMessage;
+    //    TextView textMessage;
+    ImageView imageView;
     ListView listView;
 
     @SuppressLint("DefaultLocale")
@@ -59,20 +64,29 @@ public class QrCodeListActivity extends AppCompatActivity {
                 (this, android.R.layout.simple_list_item_1, listItems);
         listView.setAdapter(adapter);
 
-        TextView textVersion = findViewById(R.id.text_version);
-        TextView textError = findViewById(R.id.text_error);
-        TextView textMask = findViewById(R.id.text_mask);
-        TextView textMode = findViewById(R.id.text_mode);
-        textMessage = findViewById(R.id.text_message);
+//        TextView textVersion = findViewById(R.id.text_version);
+//        TextView textError = findViewById(R.id.text_error);
+//        TextView textMask = findViewById(R.id.text_mask);
+//        TextView textMode = findViewById(R.id.text_mode);
+        imageView = findViewById(R.id.image_view_scanned);
+
+        // start set image
+        Intent intent = getIntent();
+        String imagePath = intent.getStringExtra("imagePath");
+        Bitmap imageBitmap = readImageFromUri(imagePath);
+        if (imageBitmap != null) {
+            imageView.setImageBitmap(imageBitmap);
+        }
+        // done set image
 
         listView.setClickable(true);
         listView.setOnItemClickListener((adapterView, view, position, l) -> {
             QrCode qr = qrcodes.get(position);
-            textVersion.setText("" + qr.version);
-            textError.setText("" + qr.error);
-            textMask.setText("" + qr.mask);
-            textMode.setText("" + qr.mode);
-            textMessage.setText("" + qr.message);
+//            textVersion.setText("" + qr.version);
+//            textError.setText("" + qr.error);
+//            textMask.setText("" + qr.mask);
+//            textMode.setText("" + qr.mode);
+//            textMessage.setText("" + qr.message);
         });
 
         if (QrCodeDetectActivity.selectedQR != null) {
@@ -97,20 +111,54 @@ public class QrCodeListActivity extends AppCompatActivity {
     }
 
     public void pressedCopyMessage(View view) {
-        CharSequence message = textMessage.getText();
-        if (message.length() > 0) {
-            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("qrcode", message);
-            clipboard.setPrimaryClip(clip);
-            Toast.makeText(this, "Copied " + message.length() + " characters", Toast.LENGTH_SHORT).show();
+        CharSequence message = "";
+        StringBuilder sequenceMessage = new StringBuilder();
+        ArrayList<String> listItems = new ArrayList<>();
+        synchronized (uniqueLock) {
+            for (QrCodeWrapper qrCodeWrapper : QrCodeDetectActivity.unique.values()) {
+                QrCode qr = qrCodeWrapper.getQrCode();
+                qrcodes.add(qr);
+                // filter out bad characters and new lines
+                String messageLine = qr.message.replaceAll("\\p{C}", " ");
+                sequenceMessage.append(messageLine).append(" ");
+            }
+            message = sequenceMessage;
+            if (message.length() > 0) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("qrcode", message);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(this, "Copied " + message.length() + " characters", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
-    public void pressedClearList(View view) {
+    public void pressedScanAgain(View view) {
         synchronized (uniqueLock) {
             QrCodeDetectActivity.unique.clear();
         }
         recreate();
+        onBackPressed();
     }
 
+    public void pressedSubmit(View view) {
+        Toast.makeText(this, "Submit to Local DB", Toast.LENGTH_SHORT).show();
+        ConvertBitmap convertBitmap = new ConvertBitmap();
+    }
+
+    public Bitmap readImageFromUri(String filePath) {
+        File imgFile = new File(filePath);
+        if (imgFile.exists()) {
+            return BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+        }
+        return null;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        File imgFile = new File(getIntent().getStringExtra("imagePath"));
+        if (imgFile.exists()) {
+            imgFile.delete();
+        }
+    }
 }

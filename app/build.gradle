@@ -91,6 +91,7 @@ dependencies {
     implementation "ch.acra:acra-http:$acraVersion"
     implementation "ch.acra:acra-toast:$acraVersion"
     implementation "ch.acra:acra-limiter:$acraVersion"
+    implementation 'me.dm7.barcodescanner:zxing:1.9.8'
 
 
 }
