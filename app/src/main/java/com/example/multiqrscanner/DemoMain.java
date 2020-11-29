@@ -17,14 +17,20 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.Size;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.multiqrscanner.barcode.BarcodeActivity;
+import com.example.multiqrscanner.model.RetroLogin;
+import com.example.multiqrscanner.model.RetroUser;
+import com.example.multiqrscanner.network.RetrofitClientInstance;
+import com.example.multiqrscanner.network.user.GetLoginService;
 import com.example.multiqrscanner.qrcode.QrCodeDetectActivity;
 
 import java.io.File;
@@ -38,6 +44,9 @@ import java.util.List;
 
 import boofcv.io.calibration.CalibrationIO;
 import boofcv.struct.calib.CameraPinholeBrown;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DemoMain extends AppCompatActivity {
 
@@ -79,6 +88,25 @@ public class DemoMain extends AppCompatActivity {
         btnBarCodeScanner.setOnClickListener(view -> {
             Intent intent = new Intent(this, BarcodeActivity.class);
             startActivity(intent);
+        });
+        Button btnLogin = findViewById(R.id.btn_try_login);
+        btnLogin.setOnClickListener(view -> {
+            /*Create handle for the RetrofitInstance interface*/
+            GetLoginService service = RetrofitClientInstance.getRetrofitInstance().create(GetLoginService.class);
+            Call<RetroLogin> call = service.loginUser(new RetroUser("m.widy.ramadhani@gmail.com", "mwidyr", "sakti123"));
+            call.enqueue(new Callback<RetroLogin>() {
+                @Override
+                public void onResponse(Call<RetroLogin> call, Response<RetroLogin> response) {
+                    Log.d(TAG, "onResponse login user success : "+response.toString());
+                    Log.d(TAG, "onResponse login user success : "+response.body());
+                    Toast.makeText(DemoMain.this, response.body().toString(), Toast.LENGTH_LONG).show();
+                }
+
+                @Override
+                public void onFailure(Call<RetroLogin> call, Throwable t) {
+                    Log.d(TAG, "onResponse login user: failure");
+                }
+            });
         });
     }
 
