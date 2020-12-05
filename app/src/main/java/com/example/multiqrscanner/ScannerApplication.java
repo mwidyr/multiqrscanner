@@ -30,14 +30,14 @@ import boofcv.BoofVersion;
  * get discarded if the main activity was unloaded.
  */
 @AcraCore(buildConfigClass = BuildConfig.class)
-public class DemoApplication extends Application
+public class ScannerApplication extends Application
 {
     public static final String TAG = "DEMOAPP";
 
     // contains information on all the cameras.  less error prone and easier to deal with
     public final List<CameraSpecs> specs = new ArrayList<>();
     // specifies which camera to use an image size
-    public DemoPreference preference = new DemoPreference();
+    public ScannerPreference preference = new ScannerPreference();
     // If another activity modifies the demo preferences this needs to be set to true so that it knows to reload
     // camera parameters.
     public boolean changedPreferences = false;

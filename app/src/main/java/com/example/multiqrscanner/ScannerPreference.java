@@ -8,7 +8,7 @@ import boofcv.struct.calib.CameraPinholeBrown;
 /**
  * @author Peter Abeles
  */
-public class DemoPreference {
+public class ScannerPreference {
 	public final Object lock = new Object();
 	public String cameraId="";
 	public boolean showSpeed;

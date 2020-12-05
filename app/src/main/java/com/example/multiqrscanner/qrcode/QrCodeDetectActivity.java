@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -20,18 +19,24 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.example.multiqrscanner.DemoCamera2Activity;
-import com.example.multiqrscanner.DemoProcessingAbstract;
+import com.example.multiqrscanner.ScannerCamera2Activity;
+import com.example.multiqrscanner.ScannerProcessingAbstract;
 import com.example.multiqrscanner.R;
+import com.example.multiqrscanner.inbound.GoodsVerificationActivity;
+import com.example.multiqrscanner.inbound.GoodsVerificationScanResultActivity;
 import com.example.multiqrscanner.misc.MiscUtil;
 import com.example.multiqrscanner.misc.RenderCube3D;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import org.ddogleg.struct.FastQueue;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import boofcv.abst.fiducial.QrCodeDetectorPnP;
@@ -48,9 +53,14 @@ import georegression.struct.se.Se3_F64;
 /**
  * Used to detect and read information from QR codes
  */
-public class QrCodeDetectActivity extends DemoCamera2Activity {
+public class QrCodeDetectActivity extends ScannerCamera2Activity {
     private static final String TAG = "QrCodeDetect";
-    private static final String TAG2 = "QrCodeDetect2";
+    private String currentActivityFrom = "";
+    public static String ImagePathKey = "imagePath";
+    public static String QrCodeGsonKey = "qr_code_gson";
+    private Gson gson = new Gson();
+    private String currentSelectedInboundNo;
+    private Integer totalScanFromParent = 0;
 
     // Switches what information is displayed
     Mode mode = Mode.NORMAL;
@@ -88,6 +98,20 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
 
         LayoutInflater inflater = getLayoutInflater();
         LinearLayout controls = (LinearLayout) inflater.inflate(R.layout.qrcode_detect_controls, null);
+        Intent intentParent = getIntent();
+        String inboundNo = intentParent.getStringExtra(GoodsVerificationActivity.InboundNoKey);
+        if (inboundNo != null && !inboundNo.trim().equalsIgnoreCase("")) {
+            currentSelectedInboundNo = inboundNo;
+        }
+        String fromActivityExtra = intentParent.getStringExtra(GoodsVerificationActivity.FromActivityKey);
+        if (fromActivityExtra != null && !fromActivityExtra.trim().equalsIgnoreCase("")) {
+            currentActivityFrom = fromActivityExtra;
+        }
+        String totalScan = intentParent.getStringExtra(GoodsVerificationActivity.TotalScanKey);
+        if (totalScan != null && !totalScan.trim().equalsIgnoreCase("")) {
+            Log.d(TAG, "onCreate: totalScan = "+totalScanFromParent);
+            totalScanFromParent = Integer.parseInt(totalScan);
+        }
 
         spinnerDetector = controls.findViewById(R.id.spinner_algs);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -153,15 +177,45 @@ public class QrCodeDetectActivity extends DemoCamera2Activity {
 
     public void pressedListView(View view) {
         String imagePath = takeScreenshot();
-        Intent intent = new Intent(this, QrCodeListActivity.class);
-        if (!imagePath.equalsIgnoreCase("")) {
-            intent.putExtra("imagePath", imagePath);
+        if (currentActivityFrom != null && !currentActivityFrom.trim().equalsIgnoreCase("")) {
+            if (currentActivityFrom.trim().equalsIgnoreCase(GoodsVerificationActivity.GoodsVerificationValue)) {
+                Intent intent = new Intent(this, GoodsVerificationScanResultActivity.class);
+                setProcessing(new QrCodeProcessing());
+                intent.putExtra(GoodsVerificationActivity.InboundNoKey, currentSelectedInboundNo);
+                if (!imagePath.equalsIgnoreCase("")) {
+                    intent.putExtra(ImagePathKey, imagePath);
+                }
+                List<QrCodeSimpleWrapper> qrCodeSimpleWrapperList = new ArrayList<>();
+                synchronized (uniqueLock) {
+                    for (QrCodeWrapper qrCodeWrapper : QrCodeDetectActivity.unique.values()) {
+                        QrCode qr = qrCodeWrapper.getQrCode();
+                        // filter out bad characters and new lines
+                        String message = qr.message.replaceAll("\\p{C}", " ");
+                        QrCodeSimpleWrapper qrCodeSimpleWrapper = new QrCodeSimpleWrapper();
+                        qrCodeSimpleWrapper.setCount(qrCodeWrapper.getCount().toString());
+                        qrCodeSimpleWrapper.setQrValue(message);
+                        qrCodeSimpleWrapperList.add(qrCodeSimpleWrapper);
+                    }
+                }
+                if (qrCodeSimpleWrapperList.size() > 0) {
+                    String qrCodeJsonValue = gson.toJson(qrCodeSimpleWrapperList);
+                    intent.putExtra(QrCodeGsonKey, qrCodeJsonValue);
+                }
+                intent.putExtra(GoodsVerificationActivity.TotalScanKey, totalScanFromParent.toString());
+                startActivity(intent);
+                finish();
+            }
+        } else {
+            Intent intent = new Intent(this, QrCodeListActivity.class);
+            if (!imagePath.equalsIgnoreCase("")) {
+                intent.putExtra("imagePath", imagePath);
+            }
+            setProcessing(new QrCodeProcessing());
+            startActivity(intent);
         }
-        setProcessing(new QrCodeProcessing());
-        startActivity(intent);
     }
 
-    protected class QrCodeProcessing extends DemoProcessingAbstract<GrayU8> {
+    protected class QrCodeProcessing extends ScannerProcessingAbstract<GrayU8> {
 
         QrCodeDetectorPnP<GrayU8> detector;
 

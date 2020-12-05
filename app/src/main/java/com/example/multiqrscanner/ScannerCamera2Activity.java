@@ -39,13 +39,13 @@ import georegression.struct.point.Point2D_F64;
  * useful variables and methods
  * visualizationPending
  */
-public abstract class DemoCamera2Activity extends VisualizeCamera2Activity {
+public abstract class ScannerCamera2Activity extends VisualizeCamera2Activity {
 
     private static final String TAG = "DemoCamera2";
 
     //######## Start variables owned by lock
     protected final Object lockProcessor = new Object();
-    protected DemoProcessing processor;
+    protected ScannerProcessing processor;
     // if false no processor functions will be called. Will not be set to true until the
     // resolution is known and init has been called
     protected boolean cameraInitialized;
@@ -89,9 +89,9 @@ public abstract class DemoCamera2Activity extends VisualizeCamera2Activity {
     private Rect bounds2 = new Rect();
     private final Matrix tempMatrix = new Matrix();
 
-    protected DemoApplication app;
+    protected ScannerApplication app;
 
-    public DemoCamera2Activity(Resolution resolution) {
+    public ScannerCamera2Activity(Resolution resolution) {
         super.targetResolution = resolutionToPixels(resolution);
 
         super.bitmapMode = BitmapMode.UNSAFE;
@@ -104,7 +104,7 @@ public abstract class DemoCamera2Activity extends VisualizeCamera2Activity {
     protected void onCreate(Bundle savedInstanceState) {
         // Assign app before letting the parent initialize because there's a chance the camera
         // could be initialized before this gets assigned and generate a NPE
-        app = (DemoApplication)getApplication();
+        app = (ScannerApplication)getApplication();
         super.onCreate(savedInstanceState);
 
         BoofConcurrency.USE_CONCURRENT = app.preference.useConcurrent;
@@ -158,7 +158,7 @@ public abstract class DemoCamera2Activity extends VisualizeCamera2Activity {
             return super.selectResolution(widthTexture, heightTexture, resolutions);
 
         // A specific on requested
-        CameraSpecs s = DemoMain.defaultCameraSpecs(app);
+        CameraSpecs s = ScannerMainActivity.defaultCameraSpecs(app);
         Size target = s.sizes.get( app.preference.resolution-1);
         for( int i = 0; i < resolutions.length; i++  ) {
             Size r = resolutions[i];
@@ -179,7 +179,7 @@ public abstract class DemoCamera2Activity extends VisualizeCamera2Activity {
         ACRA.getErrorReporter().putCustomData("Resolution", width+" x "+height);
 
         triggerSlow = false;
-        DemoProcessing p;
+        ScannerProcessing p;
         synchronized ( lockProcessor) {
             p = processor;
             this.cameraWidth = width;
@@ -232,7 +232,7 @@ public abstract class DemoCamera2Activity extends VisualizeCamera2Activity {
             ConvertBitmap.boofToBitmap(image, bitmap, bitmapTmp);
             return;
         }
-        DemoProcessing processor;
+        ScannerProcessing processor;
         synchronized (lockProcessor) {
             if( !cameraInitialized || this.processor == null )
                 return;
@@ -288,7 +288,7 @@ public abstract class DemoCamera2Activity extends VisualizeCamera2Activity {
         }
     }
 
-    private void handleReduceResolution(DemoProcessing processor) {
+    private void handleReduceResolution(ScannerProcessing processor) {
         int original = cameraWidth*cameraHeight;
         targetResolution = Math.max(320*240,original/4);
         if( original != targetResolution ) {
@@ -305,7 +305,7 @@ public abstract class DemoCamera2Activity extends VisualizeCamera2Activity {
             if( verbose )
                 Log.i("Demo","Changing resolution because of slow process. pixels="+targetResolution);
             runOnUiThread(()->{
-                Toast.makeText(DemoCamera2Activity.this,"Reducing resolution for performance",Toast.LENGTH_SHORT).show();
+                Toast.makeText(ScannerCamera2Activity.this,"Reducing resolution for performance",Toast.LENGTH_SHORT).show();
                 closeCamera();
                 openCamera(viewWidth,viewHeight);
             });
@@ -342,7 +342,7 @@ public abstract class DemoCamera2Activity extends VisualizeCamera2Activity {
     /**
      * Changes the processor used to process the video frames
      */
-    public void setProcessing(DemoProcessing processor ) {
+    public void setProcessing(ScannerProcessing processor ) {
         synchronized (lockProcessor) {
             // shut down the previous processor
             if( this.processor != null ) {
@@ -378,7 +378,7 @@ public abstract class DemoCamera2Activity extends VisualizeCamera2Activity {
                 canvas.drawBitmap(bitmap, imageToView, null);
             }
         } else {
-            DemoProcessing processor = null;
+            ScannerProcessing processor = null;
             synchronized (lockProcessor) {
                 if( cameraInitialized )
                     processor = this.processor;

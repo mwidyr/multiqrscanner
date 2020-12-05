@@ -5,20 +5,20 @@ import boofcv.struct.image.ImageBase;
 import boofcv.struct.image.ImageInterleaved;
 import boofcv.struct.image.ImageType;
 
-public abstract class DemoProcessingAbstract<T extends ImageBase<T>> implements DemoProcessing<T> {
+public abstract class ScannerProcessingAbstract<T extends ImageBase<T>> implements ScannerProcessing<T> {
 
     protected ImageType<T> imageType;
     protected final Object lockGui = new Object();
 
-    public DemoProcessingAbstract( ImageType<T> type ) {
+    public ScannerProcessingAbstract(ImageType<T> type ) {
         imageType = type;
     }
 
-    public DemoProcessingAbstract( Class type ) {
+    public ScannerProcessingAbstract(Class type ) {
         imageType = ImageType.single(type);
     }
 
-    public DemoProcessingAbstract( Class type , int numBands ) {
+    public ScannerProcessingAbstract(Class type , int numBands ) {
         if( ImageInterleaved.class.isAssignableFrom(type) ) {
             imageType = ImageType.il(numBands, type);
         } else {

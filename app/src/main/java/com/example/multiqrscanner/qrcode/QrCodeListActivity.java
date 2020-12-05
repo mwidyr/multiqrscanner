@@ -55,7 +55,6 @@ public class QrCodeListActivity extends AppCompatActivity {
                 // filter out bad characters and new lines
                 String message = qr.message.replaceAll("\\p{C}", " ");
                 int N = Math.min(25, message.length());
-//                listItems.add(String.format("%4d: %25s",qr.message.length(),message.substring(0,N)));
                 listItems.add(String.format("%4d: %25s", qrCodeWrapper.getCount(), message.substring(0, N)));
             }
         }
@@ -64,10 +63,6 @@ public class QrCodeListActivity extends AppCompatActivity {
                 (this, android.R.layout.simple_list_item_1, listItems);
         listView.setAdapter(adapter);
 
-//        TextView textVersion = findViewById(R.id.text_version);
-//        TextView textError = findViewById(R.id.text_error);
-//        TextView textMask = findViewById(R.id.text_mask);
-//        TextView textMode = findViewById(R.id.text_mode);
         imageView = findViewById(R.id.image_view_scanned);
 
         // start set image
@@ -82,11 +77,6 @@ public class QrCodeListActivity extends AppCompatActivity {
         listView.setClickable(true);
         listView.setOnItemClickListener((adapterView, view, position, l) -> {
             QrCode qr = qrcodes.get(position);
-//            textVersion.setText("" + qr.version);
-//            textError.setText("" + qr.error);
-//            textMask.setText("" + qr.mask);
-//            textMode.setText("" + qr.mode);
-//            textMessage.setText("" + qr.message);
         });
 
         if (QrCodeDetectActivity.selectedQR != null) {
