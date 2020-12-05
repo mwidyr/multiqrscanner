@@ -13,7 +13,7 @@ import boofcv.struct.image.ImageType;
  * proccess more than one thread then this class needs to be thread safe
  * @param <T>
  */
-public interface DemoProcessing<T extends ImageBase<T>> {
+public interface ScannerProcessing<T extends ImageBase<T>> {
     /**
      * Called before {@link #process} and once the camera has been fully initialized and
      * all these parameters are known.

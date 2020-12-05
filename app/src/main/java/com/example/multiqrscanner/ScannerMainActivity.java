@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.Size;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.multiqrscanner.barcode.BarcodeActivity;
+import com.example.multiqrscanner.inbound.GoodsVerificationActivity;
 import com.example.multiqrscanner.qrcode.QrCodeDetectActivity;
 
 import java.io.File;
@@ -39,15 +41,17 @@ import java.util.List;
 import boofcv.io.calibration.CalibrationIO;
 import boofcv.struct.calib.CameraPinholeBrown;
 
-public class DemoMain extends AppCompatActivity {
+public class ScannerMainActivity extends AppCompatActivity {
 
     public static final String TAG = "DemoMain";
 
-    List<Group> groups = new ArrayList<>();
+    private String currentActivityFrom = "";
+    private String currentSelectedInboundNo = "";
+    private Integer totalScanFromParent = 0;
 
     boolean waitingCameraPermissions = true;
 
-    DemoApplication app;
+    ScannerApplication app;
 
     /**
      * Called when the activity is first created.
@@ -57,7 +61,7 @@ public class DemoMain extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        app = (DemoApplication) getApplication();
+        app = (ScannerApplication) getApplication();
         if (app == null)
             throw new RuntimeException("App is null!");
 
@@ -70,14 +74,35 @@ public class DemoMain extends AppCompatActivity {
             abortDialog("Camera2 API Required");
             return;
         }
+        Intent intentParent = getIntent();
+        String fromActivityExtra = intentParent.getStringExtra(GoodsVerificationActivity.FromActivityKey);
+        if (fromActivityExtra != null && !fromActivityExtra.trim().equalsIgnoreCase("")) {
+            currentActivityFrom = fromActivityExtra;
+        }
+        String inboundNo = intentParent.getStringExtra(GoodsVerificationActivity.InboundNoKey);
+        if (inboundNo != null && !inboundNo.trim().equalsIgnoreCase("")) {
+            currentSelectedInboundNo = inboundNo;
+        }
+        String totalScan = intentParent.getStringExtra(GoodsVerificationActivity.TotalScanKey);
+        if (totalScan != null && !totalScan.trim().equalsIgnoreCase("")) {
+            Log.d(TAG, "onCreate: totalScan = "+totalScanFromParent);
+            totalScanFromParent = Integer.parseInt(totalScan);
+        }
+
         Button btnQrCodeScanner = findViewById(R.id.btn_qr_code_scanner);
         btnQrCodeScanner.setOnClickListener(view -> {
             Intent intent = new Intent(this, QrCodeDetectActivity.class);
+            intent.putExtra(GoodsVerificationActivity.FromActivityKey, currentActivityFrom);
+            intent.putExtra(GoodsVerificationActivity.InboundNoKey, currentSelectedInboundNo);
+            intent.putExtra(GoodsVerificationActivity.TotalScanKey, totalScanFromParent.toString());
             startActivity(intent);
         });
         Button btnBarCodeScanner = findViewById(R.id.btn_barcode_scanner);
         btnBarCodeScanner.setOnClickListener(view -> {
             Intent intent = new Intent(this, BarcodeActivity.class);
+            intent.putExtra(GoodsVerificationActivity.FromActivityKey, currentActivityFrom);
+            intent.putExtra(GoodsVerificationActivity.InboundNoKey, currentSelectedInboundNo);
+            intent.putExtra(GoodsVerificationActivity.TotalScanKey, totalScanFromParent.toString());
             startActivity(intent);
         });
     }
@@ -300,7 +325,7 @@ public class DemoMain extends AppCompatActivity {
         }
     }
 
-    public static CameraSpecs defaultCameraSpecs(DemoApplication app) {
+    public static CameraSpecs defaultCameraSpecs(ScannerApplication app) {
         for (int i = 0; i < app.specs.size(); i++) {
             CameraSpecs s = app.specs.get(i);
             if (s.deviceId.equals(app.preference.cameraId))
@@ -319,7 +344,7 @@ public class DemoMain extends AppCompatActivity {
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 (dialog, which) -> {
                     dialog.dismiss();
-                    DemoMain.this.finish();
+                    ScannerMainActivity.this.finish();
                 });
         alertDialog.show();
     }

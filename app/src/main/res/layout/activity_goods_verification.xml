@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".inbound.GoodsVerificationActivity">
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Goods Verification"
+        android:textAlignment="textStart"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn_goods_verif_confirm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Confirm"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+    <Button
+        android:id="@+id/btn_goods_verif_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancel"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_goods_verif_confirm"
+        app:layout_constraintStart_toEndOf="@+id/btn_goods_verif_confirm"
+        app:layout_constraintTop_toTopOf="@+id/btn_goods_verif_confirm" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/good_verif_inbound_internal_layout"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/WhiteSmoke"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_goods_verif_confirm">
+
+        <TextView
+            android:textColor="@color/Black"
+            android:id="@+id/tv_inbound_no"
+            android:layout_width="120dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="Inbound No."
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:textColor="@color/Black"
+            android:id="@+id/tv_inbound_date"
+            android:layout_width="120dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="8dp"
+            android:text="Inbound Date"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="@+id/tv_inbound_no"
+            app:layout_constraintTop_toBottomOf="@+id/tv_inbound_no" />
+
+        <TextView
+            android:textColor="@color/Black"
+            android:id="@+id/tv_inbound_detail"
+            android:layout_width="120dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="8dp"
+            android:text="Inbound Detail"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="@+id/tv_inbound_date"
+            app:layout_constraintTop_toBottomOf="@+id/tv_inbound_date" />
+
+        <TextView
+            android:textColor="@color/Black"
+            android:id="@+id/tv_inbound_warehouse"
+            android:layout_width="120dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="8dp"
+            android:text="Warehouse"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="@+id/tv_inbound_detail"
+            app:layout_constraintTop_toBottomOf="@+id/tv_inbound_detail" />
+
+        <Spinner
+            android:textColor="@color/Black"
+            android:id="@+id/spinner_inbound_no"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_inbound_no"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tv_inbound_no"
+            app:layout_constraintTop_toTopOf="@+id/tv_inbound_no" />
+
+        <TextView
+            android:textColor="@color/Black"
+            android:id="@+id/tv_inbound_date_val"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="16dp"
+            android:text="Static Date Text"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_inbound_date"
+            app:layout_constraintEnd_toEndOf="@+id/spinner_inbound_no"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/tv_inbound_date"
+            app:layout_constraintTop_toTopOf="@+id/tv_inbound_date" />
+
+        <TextView
+            android:textColor="@color/Black"
+            android:id="@+id/tv_inbound_detail_val"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="16dp"
+            android:text="Static Detail Text"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_inbound_detail"
+            app:layout_constraintEnd_toEndOf="@+id/tv_inbound_date_val"
+            app:layout_constraintStart_toEndOf="@+id/tv_inbound_detail"
+            app:layout_constraintTop_toTopOf="@+id/tv_inbound_detail" />
+
+        <TextView
+            android:textColor="@color/Black"
+            android:id="@+id/tv_inbound_warehouse_val"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="16dp"
+            android:text="Static Warehouse Text"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_inbound_warehouse"
+            app:layout_constraintEnd_toEndOf="@+id/tv_inbound_detail_val"
+            app:layout_constraintStart_toEndOf="@+id/tv_inbound_warehouse"
+            app:layout_constraintTop_toTopOf="@+id/tv_inbound_warehouse" />
+
+        <Button
+            android:textColor="@color/WhiteSmoke"
+            android:id="@+id/btn_goods_verif_scan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Scan"
+            app:layout_constraintStart_toStartOf="@+id/tv_inbound_warehouse"
+            app:layout_constraintTop_toBottomOf="@+id/tv_inbound_warehouse" />
+
+        <TextView
+            android:textColor="@color/Black"
+            android:id="@+id/tv_total_scan"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="Total Scan"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toTopOf="@+id/tv_total_summary_inbounds"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:textColor="@color/Black"
+            android:id="@+id/tv_total_summary_inbounds"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="16dp"
+            android:text="Total Summary Inbounds"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:textColor="@color/Black"
+            android:id="@+id/tv_total_scan_div"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=":"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_total_scan"
+            app:layout_constraintStart_toEndOf="@+id/tv_total_scan"
+            app:layout_constraintTop_toTopOf="@+id/tv_total_scan" />
+
+        <TextView
+            android:textColor="@color/Black"
+            android:id="@+id/tv_total_summary_inbounds_div"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=":"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_total_summary_inbounds"
+            app:layout_constraintStart_toEndOf="@+id/tv_total_summary_inbounds"
+            app:layout_constraintTop_toTopOf="@+id/tv_total_summary_inbounds" />
+
+        <TextView
+            android:textColor="@color/Black"
+            android:id="@+id/tv_total_scan_val"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:text="Total Scan Value"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_total_scan_div"
+            app:layout_constraintEnd_toEndOf="@+id/tv_total_summary_inbounds_val"
+            app:layout_constraintStart_toEndOf="@+id/tv_total_scan_div"
+            app:layout_constraintTop_toTopOf="@+id/tv_total_scan_div"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <TextView
+            android:textColor="@color/Black"
+            android:id="@+id/tv_total_summary_inbounds_val"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="Total Summary Inbounds Value"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_total_summary_inbounds"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/tv_total_summary_inbounds_div"
+            app:layout_constraintTop_toTopOf="@+id/tv_total_summary_inbounds" />
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.constraint.ConstraintLayout>

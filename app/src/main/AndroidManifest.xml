@@ -16,7 +16,7 @@
         android:required="false" />
 
     <application
-        android:name=".DemoApplication"
+        android:name=".ScannerApplication"
         android:allowBackup="true"
         android:background="#111111"
         android:hardwareAccelerated="true"
@@ -27,15 +27,25 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar"
         android:usesCleartextTraffic="true">
+        <activity android:name=".inbound.GoodsVerificationScanResultActivity"></activity>
+        <activity android:name=".inbound.GoodsVerificationActivity" />
         <activity
-            android:name=".DemoMain"
-            android:label="@string/app_name">
+            android:name=".navdrawer.NavigationViewActivity"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".SplashScreenActivity"
+            android:label="@string/app_name"
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ScannerMainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme" />
         <activity android:name=".barcode.BarcodeActivity" /> <!-- <activity android:name=".MainActivity"> -->
         <!-- <intent-filter> -->
         <!-- <action android:name="android.intent.action.MAIN" /> -->
