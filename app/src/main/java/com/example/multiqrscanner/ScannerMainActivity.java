@@ -25,8 +25,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import com.example.multiqrscanner.barcode.BarcodeActivity;
-import com.example.multiqrscanner.inbound.GoodsVerificationActivity;
+import com.example.multiqrscanner.barcode.MainBarcodeQRCodeActivity;
+import com.example.multiqrscanner.misc.MiscUtil;
 import com.example.multiqrscanner.qrcode.QrCodeDetectActivity;
 
 import java.io.File;
@@ -75,35 +75,37 @@ public class ScannerMainActivity extends AppCompatActivity {
             return;
         }
         Intent intentParent = getIntent();
-        String fromActivityExtra = intentParent.getStringExtra(GoodsVerificationActivity.FromActivityKey);
+        String fromActivityExtra = intentParent.getStringExtra(MiscUtil.FromActivityKey);
         if (fromActivityExtra != null && !fromActivityExtra.trim().equalsIgnoreCase("")) {
             currentActivityFrom = fromActivityExtra;
         }
-        String inboundNo = intentParent.getStringExtra(GoodsVerificationActivity.InboundNoKey);
+        String inboundNo = intentParent.getStringExtra(MiscUtil.InboundNoKey);
         if (inboundNo != null && !inboundNo.trim().equalsIgnoreCase("")) {
             currentSelectedInboundNo = inboundNo;
         }
-        String totalScan = intentParent.getStringExtra(GoodsVerificationActivity.TotalScanKey);
+        String totalScan = intentParent.getStringExtra(MiscUtil.TotalScanKey);
         if (totalScan != null && !totalScan.trim().equalsIgnoreCase("")) {
-            Log.d(TAG, "onCreate: totalScan = "+totalScanFromParent);
+            Log.d(TAG, "onCreate: totalScan = " + totalScanFromParent);
             totalScanFromParent = Integer.parseInt(totalScan);
         }
 
         Button btnQrCodeScanner = findViewById(R.id.btn_qr_code_scanner);
         btnQrCodeScanner.setOnClickListener(view -> {
             Intent intent = new Intent(this, QrCodeDetectActivity.class);
-            intent.putExtra(GoodsVerificationActivity.FromActivityKey, currentActivityFrom);
-            intent.putExtra(GoodsVerificationActivity.InboundNoKey, currentSelectedInboundNo);
-            intent.putExtra(GoodsVerificationActivity.TotalScanKey, totalScanFromParent.toString());
+            intent.putExtra(MiscUtil.FromActivityKey, currentActivityFrom);
+            intent.putExtra(MiscUtil.InboundNoKey, currentSelectedInboundNo);
+            intent.putExtra(MiscUtil.TotalScanKey, totalScanFromParent.toString());
             startActivity(intent);
+            finish();
         });
         Button btnBarCodeScanner = findViewById(R.id.btn_barcode_scanner);
         btnBarCodeScanner.setOnClickListener(view -> {
-            Intent intent = new Intent(this, BarcodeActivity.class);
-            intent.putExtra(GoodsVerificationActivity.FromActivityKey, currentActivityFrom);
-            intent.putExtra(GoodsVerificationActivity.InboundNoKey, currentSelectedInboundNo);
-            intent.putExtra(GoodsVerificationActivity.TotalScanKey, totalScanFromParent.toString());
+            Intent intent = new Intent(this, MainBarcodeQRCodeActivity.class);
+            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.FromActivityKey, currentActivityFrom);
+            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
+            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanFromParent.toString());
             startActivity(intent);
+            finish();
         });
     }
 
