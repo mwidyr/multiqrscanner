@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.multiqrscanner.barcode;
+package com.multiqrscanner.barcode;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.example.multiqrscanner.barcode.camera.GraphicOverlay;
-import com.example.multiqrscanner.misc.MiscUtil;
-import com.example.multiqrscanner.navdrawer.NavigationViewActivity;
+import com.multiqrscanner.barcode.camera.GraphicOverlay;
+import com.multiqrscanner.misc.MiscUtil;
+import com.multiqrscanner.navdrawer.NavigationViewActivity;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.barcode.Barcode;

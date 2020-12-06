@@ -7,17 +7,17 @@
     android:keepScreenOn="true"
     android:orientation="vertical">
 
-  <com.example.multiqrscanner.barcode.camera.CameraSourcePreview
+  <com.multiqrscanner.barcode.camera.CameraSourcePreview
       android:id="@+id/preview"
       android:layout_width="match_parent"
       android:layout_height="600dp">
 
-    <com.example.multiqrscanner.barcode.camera.GraphicOverlay
+    <com.multiqrscanner.barcode.camera.GraphicOverlay
         android:id="@+id/graphicOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-  </com.example.multiqrscanner.barcode.camera.CameraSourcePreview>
+  </com.multiqrscanner.barcode.camera.CameraSourcePreview>
   <Button
       android:id="@+id/btn_scan"
       android:layout_width="wrap_content"

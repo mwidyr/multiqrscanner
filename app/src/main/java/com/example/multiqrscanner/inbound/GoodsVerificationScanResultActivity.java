@@ -1,4 +1,4 @@
-package com.example.multiqrscanner.inbound;
+package com.multiqrscanner.inbound;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -11,11 +11,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.multiqrscanner.R;
-import com.example.multiqrscanner.ScannerMainActivity;
-import com.example.multiqrscanner.misc.MiscUtil;
-import com.example.multiqrscanner.qrcode.QrCodeDetectActivity;
-import com.example.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
+import com.multiqrscanner.R;
+import com.multiqrscanner.ScannerMainActivity;
+import com.multiqrscanner.misc.MiscUtil;
+import com.multiqrscanner.qrcode.QrCodeDetectActivity;
+import com.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

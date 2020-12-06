@@ -1,4 +1,4 @@
-package com.example.multiqrscanner.misc;
+package com.multiqrscanner.misc;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -6,7 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 
-import com.example.multiqrscanner.navdrawer.NavigationViewActivity;
+import com.multiqrscanner.navdrawer.NavigationViewActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

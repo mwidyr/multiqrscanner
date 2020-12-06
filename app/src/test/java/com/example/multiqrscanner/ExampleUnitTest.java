@@ -1,4 +1,4 @@
-package com.example.multiqrscanner;
+package com.multiqrscanner;
 
 import org.junit.Test;
 

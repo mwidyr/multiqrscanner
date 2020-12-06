@@ -1,4 +1,4 @@
-package com.example.multiqrscanner.qrcode;
+package com.multiqrscanner.qrcode;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -19,12 +19,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.example.multiqrscanner.ScannerCamera2Activity;
-import com.example.multiqrscanner.ScannerProcessingAbstract;
-import com.example.multiqrscanner.R;
-import com.example.multiqrscanner.inbound.GoodsVerificationScanResultActivity;
-import com.example.multiqrscanner.misc.MiscUtil;
-import com.example.multiqrscanner.misc.RenderCube3D;
+import com.multiqrscanner.ScannerCamera2Activity;
+import com.multiqrscanner.ScannerProcessingAbstract;
+import com.multiqrscanner.R;
+import com.multiqrscanner.inbound.GoodsVerificationScanResultActivity;
+import com.multiqrscanner.misc.MiscUtil;
+import com.multiqrscanner.misc.RenderCube3D;
 import com.google.gson.Gson;
 
 import org.ddogleg.struct.FastQueue;

@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.multiqrscanner.barcode;
+package com.multiqrscanner.barcode;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 
-import com.example.multiqrscanner.barcode.camera.GraphicOverlay;
+import com.multiqrscanner.barcode.camera.GraphicOverlay;
 import com.google.android.gms.vision.barcode.Barcode;
 
 import java.util.ArrayList;

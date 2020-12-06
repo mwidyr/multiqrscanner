@@ -1,11 +1,11 @@
-package com.example.multiqrscanner;
+package com.multiqrscanner;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.example.multiqrscanner.barcode.MainBarcodeQRCodeActivity;
-import com.example.multiqrscanner.navdrawer.NavigationViewActivity;
+import com.multiqrscanner.barcode.MainBarcodeQRCodeActivity;
+import com.multiqrscanner.navdrawer.NavigationViewActivity;
 
 public class SplashScreenActivity extends AppCompatActivity {
 

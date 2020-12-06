@@ -1,4 +1,4 @@
-package com.example.multiqrscanner.inbound;
+package com.multiqrscanner.inbound;
 
 public class InboundResult {
     private String productName;

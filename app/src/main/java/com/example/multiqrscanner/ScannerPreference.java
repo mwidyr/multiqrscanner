@@ -1,4 +1,4 @@
-package com.example.multiqrscanner;
+package com.multiqrscanner;
 
 import java.util.ArrayList;
 import java.util.List;

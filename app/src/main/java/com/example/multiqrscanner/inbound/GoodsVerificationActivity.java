@@ -1,4 +1,4 @@
-package com.example.multiqrscanner.inbound;
+package com.multiqrscanner.inbound;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,8 +14,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.multiqrscanner.R;
-import com.example.multiqrscanner.misc.MiscUtil;
+import com.multiqrscanner.R;
+import com.multiqrscanner.misc.MiscUtil;
 
 public class GoodsVerificationActivity extends AppCompatActivity {
     private static String TAG = "GVA";

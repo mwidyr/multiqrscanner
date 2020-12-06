@@ -1,4 +1,4 @@
-package com.example.multiqrscanner.navdrawer;
+package com.multiqrscanner.navdrawer;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,9 +16,9 @@ import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
-import com.example.multiqrscanner.R;
-import com.example.multiqrscanner.inbound.GoodsVerificationActivity;
-import com.example.multiqrscanner.misc.MiscUtil;
+import com.multiqrscanner.R;
+import com.multiqrscanner.inbound.GoodsVerificationActivity;
+import com.multiqrscanner.misc.MiscUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;

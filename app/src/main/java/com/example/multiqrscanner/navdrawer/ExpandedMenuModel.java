@@ -1,4 +1,4 @@
-package com.example.multiqrscanner.navdrawer;
+package com.multiqrscanner.navdrawer;
 
 public class ExpandedMenuModel {
 

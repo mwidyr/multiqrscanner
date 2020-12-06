@@ -1,4 +1,4 @@
-package com.example.multiqrscanner.barcode;
+package com.multiqrscanner.barcode;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,10 +8,10 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
-import com.example.multiqrscanner.misc.MiscUtil;
+import com.multiqrscanner.misc.MiscUtil;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
-import com.example.multiqrscanner.R;
+import com.multiqrscanner.R;
 
 /**
  * Main activity demonstrating how to pass extra parameters to an activity that

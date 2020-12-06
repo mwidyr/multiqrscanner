@@ -1,4 +1,4 @@
-package com.example.multiqrscanner.qrcode;
+package com.multiqrscanner.qrcode;
 
 import boofcv.alg.fiducial.qrcode.QrCode;
 

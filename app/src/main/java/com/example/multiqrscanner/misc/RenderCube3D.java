@@ -1,4 +1,4 @@
-package com.example.multiqrscanner.misc;
+package com.multiqrscanner.misc;
 
 import android.graphics.Canvas;
 import android.graphics.Color;

@@ -1,4 +1,4 @@
-package com.example.multiqrscanner.qrcode;
+package com.multiqrscanner.qrcode;
 
 import com.google.gson.annotations.SerializedName;
 

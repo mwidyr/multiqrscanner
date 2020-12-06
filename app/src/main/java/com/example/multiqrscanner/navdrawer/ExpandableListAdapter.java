@@ -1,4 +1,4 @@
-package com.example.multiqrscanner.navdrawer;
+package com.multiqrscanner.navdrawer;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -11,7 +11,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.multiqrscanner.R;
+import com.multiqrscanner.R;
 
 import java.util.HashMap;
 import java.util.List;

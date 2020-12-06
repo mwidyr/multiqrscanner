@@ -1,4 +1,4 @@
-package com.example.multiqrscanner;
+package com.multiqrscanner;
 
 import boofcv.alg.color.ColorFormat;
 import boofcv.struct.image.ImageBase;

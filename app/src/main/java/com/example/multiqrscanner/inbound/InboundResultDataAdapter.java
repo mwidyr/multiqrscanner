@@ -1,4 +1,4 @@
-package com.example.multiqrscanner.inbound;
+package com.multiqrscanner.inbound;
 
 import android.content.Context;
 import android.view.View;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.multiqrscanner.barcode;
+package com.multiqrscanner.barcode;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -44,21 +44,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.example.multiqrscanner.inbound.GoodsVerificationScanResultActivity;
-import com.example.multiqrscanner.misc.MiscUtil;
-import com.example.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
+import com.multiqrscanner.inbound.GoodsVerificationScanResultActivity;
+import com.multiqrscanner.misc.MiscUtil;
+import com.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.CommonStatusCodes;
-import com.example.multiqrscanner.barcode.camera.CameraSource;
-import com.example.multiqrscanner.barcode.camera.CameraSourcePreview;
-import com.example.multiqrscanner.barcode.camera.GraphicOverlay;
+import com.multiqrscanner.barcode.camera.CameraSource;
+import com.multiqrscanner.barcode.camera.CameraSourcePreview;
+import com.multiqrscanner.barcode.camera.GraphicOverlay;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.example.multiqrscanner.R;
+import com.multiqrscanner.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;
