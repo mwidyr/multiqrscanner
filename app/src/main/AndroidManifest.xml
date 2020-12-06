@@ -27,7 +27,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar"
         android:usesCleartextTraffic="true">
-        <activity android:name=".inbound.GoodsVerificationScanResultActivity"></activity>
+        <activity android:name=".barcode.MainBarcodeQRCodeActivity"></activity>
+        <activity android:name=".inbound.GoodsVerificationScanResultActivity" />
         <activity android:name=".inbound.GoodsVerificationActivity" />
         <activity
             android:name=".navdrawer.NavigationViewActivity"
@@ -46,14 +47,14 @@
             android:name=".ScannerMainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme" />
-        <activity android:name=".barcode.BarcodeActivity" /> <!-- <activity android:name=".MainActivity"> -->
+        <!-- <activity android:name=".MainActivity"> -->
         <!-- <intent-filter> -->
         <!-- <action android:name="android.intent.action.MAIN" /> -->
         <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
         <!-- </intent-filter> -->
         <!-- </activity> -->
         <activity android:name=".qrcode.QrCodeDetectActivity" />
-        <activity android:name=".qrcode.QrCodeListActivity" />
+        <activity android:name=".barcode.BarcodeCaptureActivity" /> <!-- <activity android:name=".MainActivity"> -->
     </application>
 
 </manifest>

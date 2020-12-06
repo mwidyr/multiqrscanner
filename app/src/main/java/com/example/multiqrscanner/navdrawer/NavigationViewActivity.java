@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.example.multiqrscanner.R;
 import com.example.multiqrscanner.inbound.GoodsVerificationActivity;
+import com.example.multiqrscanner.misc.MiscUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,6 @@ import java.util.List;
 public class NavigationViewActivity extends AppCompatActivity {
     private String TAG = "NVA";
     private DrawerLayout mDrawerLayout;
-    public static final String mypreference = "mypref";
 
     String headerInbound = "Inbound";
     String headerWarehouse = "Warehouse";
@@ -54,6 +54,8 @@ public class NavigationViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation_view);
         final ActionBar ab = getSupportActionBar();
+        MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.ImagePathKey);
+        MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.QrCodeGsonKey);
         /* to set the menu icon image*/
         ab.setHomeAsUpIndicator(R.drawable.ic_baseline_menu_24);
         ab.setDisplayHomeAsUpEnabled(true);

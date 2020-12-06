@@ -22,12 +22,10 @@ import android.widget.ToggleButton;
 import com.example.multiqrscanner.ScannerCamera2Activity;
 import com.example.multiqrscanner.ScannerProcessingAbstract;
 import com.example.multiqrscanner.R;
-import com.example.multiqrscanner.inbound.GoodsVerificationActivity;
 import com.example.multiqrscanner.inbound.GoodsVerificationScanResultActivity;
 import com.example.multiqrscanner.misc.MiscUtil;
 import com.example.multiqrscanner.misc.RenderCube3D;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import org.ddogleg.struct.FastQueue;
 
@@ -56,8 +54,6 @@ import georegression.struct.se.Se3_F64;
 public class QrCodeDetectActivity extends ScannerCamera2Activity {
     private static final String TAG = "QrCodeDetect";
     private String currentActivityFrom = "";
-    public static String ImagePathKey = "imagePath";
-    public static String QrCodeGsonKey = "qr_code_gson";
     private Gson gson = new Gson();
     private String currentSelectedInboundNo;
     private Integer totalScanFromParent = 0;
@@ -99,17 +95,17 @@ public class QrCodeDetectActivity extends ScannerCamera2Activity {
         LayoutInflater inflater = getLayoutInflater();
         LinearLayout controls = (LinearLayout) inflater.inflate(R.layout.qrcode_detect_controls, null);
         Intent intentParent = getIntent();
-        String inboundNo = intentParent.getStringExtra(GoodsVerificationActivity.InboundNoKey);
+        String inboundNo = intentParent.getStringExtra(MiscUtil.InboundNoKey);
         if (inboundNo != null && !inboundNo.trim().equalsIgnoreCase("")) {
             currentSelectedInboundNo = inboundNo;
         }
-        String fromActivityExtra = intentParent.getStringExtra(GoodsVerificationActivity.FromActivityKey);
+        String fromActivityExtra = intentParent.getStringExtra(MiscUtil.FromActivityKey);
         if (fromActivityExtra != null && !fromActivityExtra.trim().equalsIgnoreCase("")) {
             currentActivityFrom = fromActivityExtra;
         }
-        String totalScan = intentParent.getStringExtra(GoodsVerificationActivity.TotalScanKey);
+        String totalScan = intentParent.getStringExtra(MiscUtil.TotalScanKey);
         if (totalScan != null && !totalScan.trim().equalsIgnoreCase("")) {
-            Log.d(TAG, "onCreate: totalScan = "+totalScanFromParent);
+            Log.d(TAG, "onCreate: totalScan = " + totalScanFromParent);
             totalScanFromParent = Integer.parseInt(totalScan);
         }
 
@@ -178,40 +174,37 @@ public class QrCodeDetectActivity extends ScannerCamera2Activity {
     public void pressedListView(View view) {
         String imagePath = takeScreenshot();
         if (currentActivityFrom != null && !currentActivityFrom.trim().equalsIgnoreCase("")) {
-            if (currentActivityFrom.trim().equalsIgnoreCase(GoodsVerificationActivity.GoodsVerificationValue)) {
+            if (currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.GoodsVerificationValue)) {
                 Intent intent = new Intent(this, GoodsVerificationScanResultActivity.class);
                 setProcessing(new QrCodeProcessing());
-                intent.putExtra(GoodsVerificationActivity.InboundNoKey, currentSelectedInboundNo);
+                intent.putExtra(MiscUtil.InboundNoKey, currentSelectedInboundNo);
                 if (!imagePath.equalsIgnoreCase("")) {
-                    intent.putExtra(ImagePathKey, imagePath);
+//                    intent.putExtra(MiscUtil.ImagePathKey, imagePath);
+                    MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.ImagePathKey, imagePath);
+                    Log.d(TAG, "onCreate: imagePath "+imagePath);
                 }
-                List<QrCodeSimpleWrapper> qrCodeSimpleWrapperList = new ArrayList<>();
+                List<QrCodeBarcodeSimpleWrapper> qrCodeBarcodeSimpleWrapperList = new ArrayList<>();
                 synchronized (uniqueLock) {
                     for (QrCodeWrapper qrCodeWrapper : QrCodeDetectActivity.unique.values()) {
                         QrCode qr = qrCodeWrapper.getQrCode();
                         // filter out bad characters and new lines
                         String message = qr.message.replaceAll("\\p{C}", " ");
-                        QrCodeSimpleWrapper qrCodeSimpleWrapper = new QrCodeSimpleWrapper();
-                        qrCodeSimpleWrapper.setCount(qrCodeWrapper.getCount().toString());
-                        qrCodeSimpleWrapper.setQrValue(message);
-                        qrCodeSimpleWrapperList.add(qrCodeSimpleWrapper);
+                        QrCodeBarcodeSimpleWrapper qrCodeBarcodeSimpleWrapper = new QrCodeBarcodeSimpleWrapper();
+                        qrCodeBarcodeSimpleWrapper.setCount(qrCodeWrapper.getCount().toString());
+                        qrCodeBarcodeSimpleWrapper.setQrValue(message);
+                        qrCodeBarcodeSimpleWrapperList.add(qrCodeBarcodeSimpleWrapper);
                     }
                 }
-                if (qrCodeSimpleWrapperList.size() > 0) {
-                    String qrCodeJsonValue = gson.toJson(qrCodeSimpleWrapperList);
-                    intent.putExtra(QrCodeGsonKey, qrCodeJsonValue);
+                if (qrCodeBarcodeSimpleWrapperList.size() > 0) {
+                    String qrCodeJsonValue = gson.toJson(qrCodeBarcodeSimpleWrapperList);
+//                    intent.putExtra(MiscUtil.QrCodeGsonKey, qrCodeJsonValue);
+                    MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.QrCodeGsonKey, qrCodeJsonValue);
                 }
-                intent.putExtra(GoodsVerificationActivity.TotalScanKey, totalScanFromParent.toString());
+//                intent.putExtra(MiscUtil.TotalScanKey, totalScanFromParent.toString());
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanFromParent.toString());
                 startActivity(intent);
                 finish();
             }
-        } else {
-            Intent intent = new Intent(this, QrCodeListActivity.class);
-            if (!imagePath.equalsIgnoreCase("")) {
-                intent.putExtra("imagePath", imagePath);
-            }
-            setProcessing(new QrCodeProcessing());
-            startActivity(intent);
         }
     }
 
@@ -311,8 +304,6 @@ public class QrCodeDetectActivity extends ScannerCamera2Activity {
             // touchProcessed is needed to prevent multiple intent from being sent
             if (selectedQR != null && !touchProcessed) {
                 touchProcessed = true;
-                Intent intent = new Intent(QrCodeDetectActivity.this, QrCodeListActivity.class);
-                startActivity(intent);
             }
         }
 

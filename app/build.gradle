@@ -97,4 +97,5 @@ dependencies {
     implementation 'de.codecrafters.tableview:tableview:2.8.0'
 //https://github.com/ISchwarz23/SortableTableView
     implementation 'com.google.code.gson:gson:2.8.2'
+    implementation 'com.google.android.gms:play-services:8.1.0'
 }

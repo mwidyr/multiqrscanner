@@ -1,8 +1,6 @@
 package com.example.multiqrscanner.inbound;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
@@ -15,9 +13,9 @@ import android.widget.Toast;
 
 import com.example.multiqrscanner.R;
 import com.example.multiqrscanner.ScannerMainActivity;
-import com.example.multiqrscanner.navdrawer.NavigationViewActivity;
+import com.example.multiqrscanner.misc.MiscUtil;
 import com.example.multiqrscanner.qrcode.QrCodeDetectActivity;
-import com.example.multiqrscanner.qrcode.QrCodeSimpleWrapper;
+import com.example.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -33,7 +31,6 @@ import de.codecrafters.tableview.toolkit.TableDataRowBackgroundProviders;
 
 public class GoodsVerificationScanResultActivity extends AppCompatActivity {
     private static String TAG = "GVSRA";
-    SharedPreferences sharedpreferences;
     private TextView inboundNoVal;
     private Button btnScan, btnConfirm;
     private Integer totalScanFromParentAct = 0;
@@ -43,9 +40,9 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
     private ImageView imageView;
 
     private String[][] dataToShow = {
-            {"Bear Brand", "001", "No"},
-            {"Bear Brand", "002", "No"},
-            {"Bear Brand", "003", "Yes"},
+//            {"Bear Brand", "001", "No"},
+//            {"Bear Brand", "002", "No"},
+//            {"Bear Brand", "003", "Yes"},
     };
 
     private static String[] HEADER_TO_SHOW = {"Product", "Serial No", "Status"};
@@ -65,13 +62,11 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
         inboundNoVal = findViewById(R.id.tv_goods_verif_result_inbound_no_val);
 
         Intent intent = getIntent();
-        sharedpreferences = getSharedPreferences(NavigationViewActivity.mypreference,
-                Context.MODE_PRIVATE);
-        if (sharedpreferences.contains(GoodsVerificationActivity.InboundNoKey)) {
-            currentSelectedInboundNo = sharedpreferences.getString(GoodsVerificationActivity.InboundNoKey, "");
+        if (!MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundNoKey).trim().equalsIgnoreCase("")) {
+            currentSelectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundNoKey);
             Log.d(TAG, "onCreate: dari shared preference = " + currentSelectedInboundNo);
         }
-        String inboundNo = intent.getStringExtra(GoodsVerificationActivity.InboundNoKey);
+        String inboundNo = intent.getStringExtra(MiscUtil.InboundNoKey);
         if (inboundNo != null && !inboundNo.trim().equalsIgnoreCase("")) {
             inboundNoVal.setText(inboundNo);
             currentSelectedInboundNo = inboundNo;
@@ -79,12 +74,17 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
             Toast.makeText(this, "Empty Inbound No", Toast.LENGTH_SHORT).show();
             onBackPressed();
         }
-        String totalScanExtra = intent.getStringExtra(GoodsVerificationActivity.TotalScanKey);
+        String totalScanExtra = intent.getStringExtra(MiscUtil.TotalScanKey);
         if (totalScanExtra != null && !totalScanExtra.trim().equalsIgnoreCase("")) {
             Log.d(TAG, "onCreate: totalScan = " + totalScanExtra);
             totalScanFromParentAct = Integer.parseInt(totalScanExtra);
+        }else{
+            totalScanExtra = MiscUtil.getStringSharedPreferenceByKey(this,MiscUtil.TotalScanKey);
+            totalScanFromParentAct = Integer.parseInt(totalScanExtra);
         }
-        String imagePathExtra = intent.getStringExtra(QrCodeDetectActivity.ImagePathKey);
+//        String imagePathExtra = intent.getStringExtra(MiscUtil.ImagePathKey);
+        String imagePathExtra = MiscUtil.getStringSharedPreferenceByKey(this,MiscUtil.ImagePathKey);
+        Log.d(TAG, "onCreate: imagePath "+imagePathExtra);
         if (imagePathExtra != null && !imagePathExtra.trim().equalsIgnoreCase("")) {
             imageView = findViewById(R.id.iv_goods_verif_scan_result);
             Bitmap imageBitmap = readImageFromUri(imagePathExtra);
@@ -93,25 +93,26 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
             }
             // done set image
         }
-        String qrCodeListExtra = intent.getStringExtra(QrCodeDetectActivity.QrCodeGsonKey);
+//        String qrCodeListExtra = intent.getStringExtra(MiscUtil.QrCodeGsonKey);
+        String qrCodeListExtra = MiscUtil.getStringSharedPreferenceByKey(this,MiscUtil.QrCodeGsonKey);
         if (qrCodeListExtra != null && !qrCodeListExtra.trim().equalsIgnoreCase("")) {
-            List<QrCodeSimpleWrapper> qrCodeSimpleWrappers = gson.fromJson(qrCodeListExtra, new TypeToken<ArrayList<QrCodeSimpleWrapper>>() {
+            List<QrCodeBarcodeSimpleWrapper> qrCodeBarcodeSimpleWrappers = gson.fromJson(qrCodeListExtra, new TypeToken<ArrayList<QrCodeBarcodeSimpleWrapper>>() {
             }.getType());
-            if (qrCodeSimpleWrappers.size() > 0) {
-                dataToShow = new String[qrCodeSimpleWrappers.size()][3];
-                for (int i = 0; i < qrCodeSimpleWrappers.size(); i++) {
-                    dataToShow[i][0] = qrCodeSimpleWrappers.get(i).getQrValue();
-                    dataToShow[i][1] = qrCodeSimpleWrappers.get(i).getCount();
+            if (qrCodeBarcodeSimpleWrappers.size() > 0) {
+                dataToShow = new String[qrCodeBarcodeSimpleWrappers.size()][3];
+                for (int i = 0; i < qrCodeBarcodeSimpleWrappers.size(); i++) {
+                    dataToShow[i][0] = qrCodeBarcodeSimpleWrappers.get(i).getQrValue();
+                    dataToShow[i][1] = qrCodeBarcodeSimpleWrappers.get(i).getCount();
                     dataToShow[i][2] = "Yes";
                 }
-                totalScanFromChildAct = qrCodeSimpleWrappers.size();
+                totalScanFromChildAct = qrCodeBarcodeSimpleWrappers.size();
             }
         }
 
-        List<InboundResult> myData = new ArrayList<>();
-        myData.add(new InboundResult("Bear Brand", "001", "No"));
-        myData.add(new InboundResult("Bear Brand", "002", "Yes"));
-        myData.add(new InboundResult("Bear Brand", "003", "No"));
+//        List<InboundResult> myData = new ArrayList<>();
+//        myData.add(new InboundResult("Bear Brand", "001", "No"));
+//        myData.add(new InboundResult("Bear Brand", "002", "Yes"));
+//        myData.add(new InboundResult("Bear Brand", "003", "No"));
 
         TableView<String[]> tableView = findViewById(R.id.table_view_goods_verif_result);
         tableView.setHeaderAdapter(new SimpleTableHeaderAdapter(this, HEADER_TO_SHOW));
@@ -131,19 +132,20 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
         btnConfirm = findViewById(R.id.btn_goods_verif_result_confirm);
         btnScan.setOnClickListener(view -> {
             Intent intent = new Intent(this, ScannerMainActivity.class);
-            intent.putExtra(GoodsVerificationActivity.TotalScanKey, totalScanFromParentAct.toString());
-            intent.putExtra(GoodsVerificationActivity.FromActivityKey, GoodsVerificationActivity.GoodsVerificationValue);
-            intent.putExtra(GoodsVerificationActivity.InboundNoKey, currentSelectedInboundNo);
-            SharedPreferences.Editor editor = sharedpreferences.edit();
-            editor.putString(GoodsVerificationActivity.FromActivityKey, GoodsVerificationActivity.GoodsVerificationValue);
-            editor.commit();
+            intent.putExtra(MiscUtil.TotalScanKey, totalScanFromParentAct.toString());
+            intent.putExtra(MiscUtil.FromActivityKey, MiscUtil.GoodsVerificationValue);
+            intent.putExtra(MiscUtil.InboundNoKey, currentSelectedInboundNo);
+            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.FromActivityKey, MiscUtil.GoodsVerificationValue);
+            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanFromParentAct.toString());
+            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
             startActivity(intent);
+            finish();
         });
         btnConfirm.setOnClickListener(view -> {
             Intent intent = new Intent(this, GoodsVerificationActivity.class);
             int totalScanAll = totalScanFromParentAct + totalScanFromChildAct;
             Log.d(TAG, "initializeBtn: totalParent = " + totalScanFromParentAct + " totalChild = " + totalScanFromChildAct);
-            intent.putExtra(GoodsVerificationActivity.TotalScanKey, Integer.toString(totalScanAll));
+            intent.putExtra(MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
             startActivity(intent);
             finish();
         });

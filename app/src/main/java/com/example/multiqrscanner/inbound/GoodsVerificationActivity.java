@@ -15,16 +15,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.multiqrscanner.R;
-import com.example.multiqrscanner.navdrawer.NavigationViewActivity;
+import com.example.multiqrscanner.misc.MiscUtil;
 
 public class GoodsVerificationActivity extends AppCompatActivity {
     private static String TAG = "GVA";
-    SharedPreferences sharedpreferences;
     private String currentSelectedInboundNo = "";
-    public static String InboundNoKey = "inbound_no";
-    public static String TotalScanKey = "total_scan";
-    public static String GoodsVerificationValue = "goods_verification";
-    public static String FromActivityKey = "from_activity";
     public static Integer totalScanParent = 0;
 
     private TextView inboundDate, inboundDetail, inboundWarehouse, totalScan, totalSummaryInbound;
@@ -34,8 +29,6 @@ public class GoodsVerificationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_goods_verification);
-        sharedpreferences = getSharedPreferences(NavigationViewActivity.mypreference,
-                Context.MODE_PRIVATE);
 
         inboundDate = findViewById(R.id.tv_inbound_date_val);
         inboundDetail = findViewById(R.id.tv_inbound_detail_val);
@@ -71,7 +64,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
 
         initializeBtn();
         Intent intent = getIntent();
-        String totalScanExtra = intent.getStringExtra(TotalScanKey);
+        String totalScanExtra = intent.getStringExtra(MiscUtil.TotalScanKey);
         if (totalScanExtra != null && !totalScanExtra.trim().equalsIgnoreCase("")) {
             Log.d(TAG, "onCreate: total Scan = " + totalScanExtra);
             totalScanParent = Integer.parseInt(totalScanExtra);
@@ -96,12 +89,10 @@ public class GoodsVerificationActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Go to Scan Result", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(GoodsVerificationActivity.this, GoodsVerificationScanResultActivity.class);
-                intent.putExtra(InboundNoKey, currentSelectedInboundNo);
-                intent.putExtra(TotalScanKey, totalScanParent.toString());
-                SharedPreferences.Editor editor = sharedpreferences.edit();
-                editor.putString(InboundNoKey, currentSelectedInboundNo);
-                editor.putString(TotalScanKey, totalScanParent.toString());
-                editor.commit();
+                intent.putExtra(MiscUtil.InboundNoKey, currentSelectedInboundNo);
+                intent.putExtra(MiscUtil.TotalScanKey, totalScanParent.toString());
+                MiscUtil.saveStringSharedPreferenceAsString(this,MiscUtil.InboundNoKey,currentSelectedInboundNo);
+                MiscUtil.saveStringSharedPreferenceAsString(this,MiscUtil.TotalScanKey,totalScanParent.toString());
                 startActivity(intent);
             }
         });

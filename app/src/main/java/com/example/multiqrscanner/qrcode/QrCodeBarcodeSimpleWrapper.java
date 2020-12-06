@@ -2,16 +2,16 @@ package com.example.multiqrscanner.qrcode;
 
 import com.google.gson.annotations.SerializedName;
 
-public class QrCodeSimpleWrapper {
+public class QrCodeBarcodeSimpleWrapper {
     @SerializedName("qrValue")
     private String qrValue;
     @SerializedName("count")
     private String count;
 
-    public QrCodeSimpleWrapper() {
+    public QrCodeBarcodeSimpleWrapper() {
     }
 
-    public QrCodeSimpleWrapper(String qrValue, String count) {
+    public QrCodeBarcodeSimpleWrapper(String qrValue, String count) {
         this.qrValue = qrValue;
         this.count = count;
     }

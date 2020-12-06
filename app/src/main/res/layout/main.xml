@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-			  android:layout_width="fill_parent"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="fill_parent"
 			  android:layout_height="fill_parent"
 			  android:orientation="vertical" >
 
@@ -9,15 +11,21 @@
 		android:id="@+id/btn_qr_code_scanner"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:text="@string/qr_code_scanner"/>
+		android:text="@string/qr_code_scanner"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintVertical_bias="0.442"
+		tools:layout_editor_absoluteX="0dp" />
 
 	<Button
 		android:id="@+id/btn_barcode_scanner"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:text="Barcode scanner"/>
+		android:text="Barcode scanner"
+		app:layout_constraintEnd_toEndOf="@+id/btn_qr_code_scanner"
+		app:layout_constraintStart_toStartOf="@+id/btn_qr_code_scanner"
+		app:layout_constraintTop_toBottomOf="@+id/btn_qr_code_scanner" />
 
 
-
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>
 
