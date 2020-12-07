@@ -53,6 +53,25 @@
                 android:groupIndicator="@null"
                 android:background="@color/White">
             </ExpandableListView>
+            <TextView
+                android:layout_weight="0.1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="5dp"
+                android:text="Role: Admin Inbound"/>
+            <TextView
+                android:layout_weight="0.5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="5dp"
+                android:text="Warehouse: Warehouse 1"/>
+            <TextView
+                android:layout_weight="1"
+                android:gravity="end"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingEnd="5dp"
+                android:text="Logout"/>
         </LinearLayout>
     </android.support.design.widget.NavigationView>
 </android.support.v4.widget.DrawerLayout>

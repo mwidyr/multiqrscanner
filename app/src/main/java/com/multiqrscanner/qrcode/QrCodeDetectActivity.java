@@ -203,7 +203,7 @@ public class QrCodeDetectActivity extends ScannerCamera2Activity {
 //                intent.putExtra(MiscUtil.TotalScanKey, totalScanFromParent.toString());
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanFromParent.toString());
                 startActivity(intent);
-                finish();
+//                finish();
             }
         }
     }
