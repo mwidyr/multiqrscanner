@@ -11,11 +11,11 @@
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:text="Inbound No."
         android:textSize="15sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toTopOf="@+id/table_view_goods_verif_result"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tv_goods_verif_result_inbound_no_div"
@@ -44,14 +44,15 @@
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
         android:text="Scan Result"
         android:textSize="15sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_goods_verif_result_inbound_no" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <de.codecrafters.tableview.TableView
-        app:tableView_headerColor="@color/White"
+        app:tableView_headerColor="@color/LightBlue"
+        android:divider="@color/Black"
+        android:dividerHeight="1dip"
         android:id="@+id/table_view_goods_verif_result"
         android:layout_width="wrap_content"
         android:layout_height="300dp"
@@ -67,10 +68,13 @@
 
     <Button
         android:id="@+id/btn_goods_verif_result_scan"
-        android:layout_width="wrap_content"
+        android:layout_width="102dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:text="Scan"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/round_red"
+        android:text="Scan Again"
+        android:textColor="@color/Black"
         app:layout_constraintBottom_toTopOf="@+id/iv_goods_verif_scan_result"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -78,7 +82,10 @@
         android:id="@+id/btn_goods_verif_result_confirm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Confirm"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/round_blue"
+        android:text="Submit"
+        android:textColor="@color/Black"
         app:layout_constraintBottom_toBottomOf="@+id/btn_goods_verif_result_scan"
         app:layout_constraintEnd_toStartOf="@+id/btn_goods_verif_result_scan"
         app:layout_constraintTop_toTopOf="@+id/btn_goods_verif_result_scan" />

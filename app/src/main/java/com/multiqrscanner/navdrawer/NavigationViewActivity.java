@@ -1,8 +1,6 @@
 package com.multiqrscanner.navdrawer;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -16,8 +14,10 @@ import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
+import com.google.gson.reflect.TypeToken;
 import com.multiqrscanner.R;
 import com.multiqrscanner.inbound.GoodsVerificationActivity;
+import com.multiqrscanner.inbound.model.Inbound;
 import com.multiqrscanner.misc.MiscUtil;
 
 import java.util.ArrayList;
@@ -29,21 +29,17 @@ public class NavigationViewActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
 
     String headerInbound = "Inbound";
-    String headerWarehouse = "Warehouse";
+    String headerWarehouse = "Inventory";
     String headerOutbound = "Outbound";
-    String headerRole = "Role : Admin";
-    String headerFromWarehouse = "Warehouse : Main";
 
-    String inboundVerif = ("Inbound Verification");
-    String goodsVerif = ("Goods Verification");
+    String inventoryVerif = ("Inventory Verification");
 
-    String warehouseScan = ("Warehouse Scan");
-    String warehouseMovement = ("Warehouse Movement");
-    String warehouseVerif = ("Warehouse Verification");
+    String putaway = ("Putaway");
+    String replenishment = ("Replenishment");
+    String inventoryMovement = ("Inventory Movement");
 
-    String outboundScan = ("Outbound Scan");
-    String outboundMovement = ("Outbound Movement");
-    String outboundVerification = ("Outbound Verification");
+    String pickingPlan = ("Picking Plan");
+    String outgoingVerify = ("Outgoing Verify");
     ExpandableListAdapter mMenuAdapter;
     ExpandableListView expandableList;
     List<ExpandedMenuModel> listDataHeader;
@@ -53,9 +49,16 @@ public class NavigationViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation_view);
-        final ActionBar ab = getSupportActionBar();
+        // clear all sharedpreference
         MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.ImagePathKey);
         MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.QrCodeGsonKey);
+        MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.InboundListScanned);
+        MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail);
+        MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey);
+        MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey);
+        // done clear
+
+        final ActionBar ab = getSupportActionBar();
         /* to set the menu icon image*/
         ab.setHomeAsUpIndicator(R.drawable.ic_baseline_menu_24);
         ab.setDisplayHomeAsUpEnabled(true);
@@ -77,7 +80,7 @@ public class NavigationViewActivity extends AppCompatActivity {
             ExpandableListAdapter eListAdapter = (ExpandableListAdapter) expandableListView.getExpandableListAdapter();
             String item = (String) eListAdapter.getChild(groupPosition, childPosition);
             Log.d(TAG, item);
-            if (item.equalsIgnoreCase(goodsVerif)) {
+            if (item.equalsIgnoreCase(inventoryVerif)) {
                 Intent intent = new Intent(NavigationViewActivity.this, GoodsVerificationActivity.class);
                 startActivity(intent);
             } else {
@@ -114,30 +117,18 @@ public class NavigationViewActivity extends AppCompatActivity {
         item3.setIconImg(android.R.drawable.ic_delete);
         listDataHeader.add(item3);
 
-        ExpandedMenuModel item4 = new ExpandedMenuModel();
-        item4.setIconName(headerRole);
-        item4.setIconImg(android.R.drawable.ic_delete);
-        listDataHeader.add(item4);
-
-        ExpandedMenuModel item5 = new ExpandedMenuModel();
-        item5.setIconName(headerFromWarehouse);
-        item5.setIconImg(android.R.drawable.ic_delete);
-        listDataHeader.add(item5);
-
         // Adding child data
         List<String> heading1 = new ArrayList<>();
-        heading1.add(inboundVerif);
-        heading1.add(goodsVerif);
+        heading1.add(inventoryVerif);
 
         List<String> heading2 = new ArrayList<>();
-        heading2.add(warehouseScan);
-        heading2.add(warehouseMovement);
-        heading2.add(warehouseVerif);
+        heading2.add(putaway);
+        heading2.add(replenishment);
+        heading2.add(inventoryMovement);
 
         List<String> heading3 = new ArrayList<>();
-        heading3.add(outboundScan);
-        heading3.add(outboundMovement);
-        heading3.add(outboundVerification);
+        heading3.add(pickingPlan);
+        heading3.add(outgoingVerify);
 
         listDataChild.put(listDataHeader.get(0), heading1);// Header, Child data
         listDataChild.put(listDataHeader.get(1), heading2);

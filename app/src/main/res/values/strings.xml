@@ -184,14 +184,14 @@
     <string name="qr_code_scanner">QR CODE SCANNER</string>
 
     <string-array name="dummy_inbound_no">
-        <item>001</item>
-        <item>002</item>
-        <item>003</item>
-        <item>004</item>
-        <item>005</item>
-        <item>006</item>
-        <item>007</item>
-        <item>008</item>
+        <item>WMS.IRC.100011</item>
+        <item>WMS.IRC.100012</item>
+        <item>WMS.IRC.100013</item>
+        <item>WMS.IRC.100014</item>
+        <item>WMS.IRC.100015</item>
+        <item>WMS.IRC.100016</item>
+        <item>WMS.IRC.100017</item>
+        <item>WMS.IRC.100018</item>
     </string-array>
 
     <string name="ok">OK</string>

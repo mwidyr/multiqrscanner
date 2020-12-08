@@ -23,7 +23,9 @@ public class MiscUtil {
     public static final String ListBarcodeKey = "listBarcodes";
 
     public static String InboundNoKey = "inbound_no";
+    public static String InboundListDetail = "inbound_list_detail";
     public static String TotalScanKey = "total_scan";
+    public static String InboundListScanned = "inbound_list_scanned";
     public static String GoodsVerificationValue = "goods_verification";
     public static String FromActivityKey = "from_activity";
 	public static String ImagePathKey = "imagePath";
@@ -64,8 +66,8 @@ public class MiscUtil {
 	public static void clearStringSharedPreferenceAsString(Context mContext, String key) {
 		SharedPreferences mSettings = mContext.getSharedPreferences(mypreference, Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = mSettings.edit();
-		editor.putString(key, "");
-		editor.apply();
+		editor.remove(key);
+		editor.commit();
 	}
 
     public static String getStringSharedPreferenceByKey(Context mContext, String key) {
