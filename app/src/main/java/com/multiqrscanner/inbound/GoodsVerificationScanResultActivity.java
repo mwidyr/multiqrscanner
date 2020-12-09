@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -13,7 +14,7 @@ import android.widget.Toast;
 
 import com.multiqrscanner.R;
 import com.multiqrscanner.ScannerMainActivity;
-import com.multiqrscanner.inbound.model.Inbound;
+import com.multiqrscanner.inbound.model.InboundDetail;
 import com.multiqrscanner.misc.MiscUtil;
 import com.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
 import com.google.gson.Gson;
@@ -39,7 +40,7 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
     private Gson gson = new Gson();
     private String currentSelectedInboundNo;
     private ImageView imageView;
-    private List<Inbound> inboundList;
+    private List<InboundDetail> inboundDetailList;
     private String[][] dataToShow = {};
 
     private static String[] HEADER_TO_SHOW = {"Product", "SN", "Status"};
@@ -73,74 +74,59 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
             onBackPressed();
         }
 
-//        String totalScanExtra = intent.getStringExtra(MiscUtil.TotalScanKey);
-//        if (totalScanExtra != null && !totalScanExtra.trim().equalsIgnoreCase("")) {
-//            Log.d(TAG, "onCreate: totalScan = " + totalScanExtra);
-//            totalScanFromParentAct = Integer.parseInt(totalScanExtra);
-//        } else
-            {
-           String totalScanExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.TotalScanKey);
-            totalScanFromParentAct = Integer.parseInt(totalScanExtra);
-        }
+        String totalScanExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.TotalScanKey);
+        totalScanFromParentAct = Integer.parseInt(totalScanExtra);
 
-//        String imagePathExtra = intent.getStringExtra(MiscUtil.ImagePathKey);
-        String imagePathExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.ImagePathKey);
-        Log.d(TAG, "onCreate: imagePath " + imagePathExtra);
-        if (imagePathExtra != null && !imagePathExtra.trim().equalsIgnoreCase("")) {
+        String bitmapArrayExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.ImagePathKey);
+        if (!bitmapArrayExtra.trim().equalsIgnoreCase("")) {
             imageView = findViewById(R.id.iv_goods_verif_scan_result);
-            Bitmap imageBitmap = readImageFromUri(imagePathExtra);
+            byte[] byteImage = gson.fromJson(bitmapArrayExtra, byte[].class);
+            Bitmap imageBitmap = BitmapFactory.decodeByteArray(byteImage, 0, byteImage.length);;
             if (imageBitmap != null) {
                 imageView.setImageBitmap(imageBitmap);
             }
-            // done set image
         }
 
-//        String qrCodeListExtra = intent.getStringExtra(MiscUtil.QrCodeGsonKey);
         String qrCodeListExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.QrCodeGsonKey);
-        if (qrCodeListExtra != null && !qrCodeListExtra.trim().equalsIgnoreCase("")) {
+        if (!qrCodeListExtra.trim().equalsIgnoreCase("")) {
             List<QrCodeBarcodeSimpleWrapper> qrCodeBarcodeSimpleWrappers = gson.fromJson(qrCodeListExtra, new TypeToken<ArrayList<QrCodeBarcodeSimpleWrapper>>() {
             }.getType());
             if (qrCodeBarcodeSimpleWrappers.size() > 0) {
                 String inboundListString = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundListDetail);
                 if (!inboundListString.trim().equalsIgnoreCase("")) {
-                    HashMap<String, Inbound> inboundMap = gson.fromJson(inboundListString, new TypeToken<HashMap<String, Inbound>>() {
+                    HashMap<String, InboundDetail> inboundMap = gson.fromJson(inboundListString, new TypeToken<HashMap<String, InboundDetail>>() {
                     }.getType());
                     if (inboundMap.size() > 0) {
-                        List<Inbound> inboundDisplay = new ArrayList<>();
+                        List<InboundDetail> inboundDetailDisplay = new ArrayList<>();
                         for (QrCodeBarcodeSimpleWrapper qrCode : qrCodeBarcodeSimpleWrappers) {
-                                if (inboundMap.get(qrCode.getQrValue()) != null) {
-                                    inboundDisplay.add(inboundMap.get(qrCode.getQrValue()));
-                                }
+                            if (inboundMap.get(qrCode.getQrValue()) != null) {
+                                inboundDetailDisplay.add(inboundMap.get(qrCode.getQrValue()));
+                            }
                         }
-                        dataToShow = new String[inboundDisplay.size()][3];
-                        for (int i = 0; i < inboundDisplay.size(); i++) {
-                            dataToShow[i][0] = inboundDisplay.get(i).getProductName();
-                            dataToShow[i][1] = inboundDisplay.get(i).getSerialNo();
-                            dataToShow[i][2] = inboundDisplay.get(i).getStatus();
+                        dataToShow = new String[inboundDetailDisplay.size()][3];
+                        for (int i = 0; i < inboundDetailDisplay.size(); i++) {
+                            dataToShow[i][0] = inboundDetailDisplay.get(i).getProductName();
+                            dataToShow[i][1] = inboundDetailDisplay.get(i).getSerialNo();
+                            dataToShow[i][2] = inboundDetailDisplay.get(i).getStatus();
                         }
-                        this.inboundList = inboundDisplay;
+                        this.inboundDetailList = inboundDetailDisplay;
                         int totalInboundDisplayNotVerified = 0;
-                        for (Inbound inbound : inboundDisplay) {
-                            if (!inbound.getStatus().trim().equalsIgnoreCase(GoodsVerificationActivity.StatusVerified)) {
+                        for (InboundDetail inboundDetail : inboundDetailDisplay) {
+                            if (!inboundDetail.getStatus().trim().equalsIgnoreCase(GoodsVerificationActivity.StatusVerified)) {
                                 totalInboundDisplayNotVerified++;
                             }
                         }
                         totalScanFromChildAct = totalInboundDisplayNotVerified;
                     }
                 }
-//                if (!isInboundListExist) {
-//                    dataToShow = new String[qrCodeBarcodeSimpleWrappers.size()][3];
-//                    for (int i = 0; i < qrCodeBarcodeSimpleWrappers.size(); i++) {
-//                        dataToShow[i][0] = qrCodeBarcodeSimpleWrappers.get(i).getQrValue();
-//                        dataToShow[i][1] = qrCodeBarcodeSimpleWrappers.get(i).getCount();
-//                        dataToShow[i][2] = "Yes";
-//                    }
-//                    totalScanFromChildAct = qrCodeBarcodeSimpleWrappers.size();
-//                }
             }
         }
         initTable();
         initializeBtn();
+        if(totalScanFromChildAct>0){
+            btnSubmit.setVisibility(View.VISIBLE);
+            btnSubmit.setClickable(true);
+        }
     }
 
     public void initTable() {
@@ -177,9 +163,10 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
             intent.putExtra(MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
             MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
             Gson gson = new Gson();
-            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListScanned, gson.toJson(this.inboundList));
+            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListScanned, gson.toJson(this.inboundDetailList));
             startActivity(intent);
             finish();
         });
+        btnSubmit.setVisibility(View.GONE);
     }
 }

@@ -11,13 +11,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
-import com.google.gson.reflect.TypeToken;
+import com.multiqrscanner.LoginActivity;
 import com.multiqrscanner.R;
 import com.multiqrscanner.inbound.GoodsVerificationActivity;
-import com.multiqrscanner.inbound.model.Inbound;
 import com.multiqrscanner.misc.MiscUtil;
 
 import java.util.ArrayList;
@@ -94,6 +94,12 @@ public class NavigationViewActivity extends AppCompatActivity {
                 //Log.d("DEBUG", "heading clicked");
                 return false;
             }
+        });
+        Button btnLogout = findViewById(R.id.btn_logout);
+        btnLogout.setOnClickListener(view -> {
+            Intent intent = new Intent(NavigationViewActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 
