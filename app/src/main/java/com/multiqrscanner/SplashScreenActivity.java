@@ -4,9 +4,6 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.multiqrscanner.barcode.MainBarcodeQRCodeActivity;
-import com.multiqrscanner.navdrawer.NavigationViewActivity;
-
 public class SplashScreenActivity extends AppCompatActivity {
 
     @Override
@@ -14,7 +11,7 @@ public class SplashScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
-        Intent intent = new Intent(this, NavigationViewActivity.class);
+        Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();
     }

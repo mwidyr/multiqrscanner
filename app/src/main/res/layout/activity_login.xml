@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/WhiteSmoke">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:alpha="0.45"/>
+
+    <RelativeLayout
+        android:id="@+id/container_login"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
+        android:padding="24dp">
+
+        <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true">
+            <RelativeLayout
+                android:id="@+id/login_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:focusable="true"
+                android:focusableInTouchMode="true">
+                <requestFocus/>
+
+                <ImageView
+                    android:id="@+id/login_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_logo_aware"
+                    android:layout_centerHorizontal="true"/>
+
+                <TextView
+                    android:id="@+id/login_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/aware_scanner"
+                    android:textSize="18dp"
+                    android:textColor="@color/ForestGreen"
+                    android:gravity="center"
+                    android:layout_marginBottom="10dp"
+                    android:layout_below="@id/login_icon"/>
+
+                <EditText
+                    android:id="@+id/login_username"
+                    android:singleLine="true"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:background="@android:color/transparent"
+                    android:drawableLeft="@drawable/ic_icons8_account"
+                    android:drawablePadding="8dp"
+                    android:gravity="center_vertical"
+                    android:hint="@string/username"
+                    android:inputType="textEmailAddress"
+                    android:padding="12dp"
+                    android:textColor="@color/Black"
+                    android:textColorHint="@color/Black"
+                    android:textSize="16sp"
+                    android:layout_below="@id/login_title"/>
+
+                <View
+                    android:id="@+id/spacing_login_username"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1px"
+                    android:background="@color/LightGrey"
+                    android:layout_below="@id/login_username"/>
+
+                <EditText
+                    android:id="@+id/login_password"
+                    android:singleLine="true"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:drawableLeft="@drawable/ic_lock_outline_48px"
+                    android:drawablePadding="8dp"
+                    android:gravity="center_vertical"
+                    android:hint="@string/password"
+                    android:inputType="textPassword"
+                    android:padding="12dp"
+                    android:textColor="@color/Black"
+                    android:textColorHint="@color/Black"
+                    android:textSize="16sp"
+                    android:layout_below="@id/spacing_login_username"/>
+
+                <LinearLayout
+                    android:id="@+id/login_show_password"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingBottom="4dp"
+                    android:paddingTop="4dp"
+                    android:layout_below="@id/login_password">
+
+                    <CheckBox
+                        android:id="@+id/show_hide_password"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/show_pwd"
+                        android:textColor="@color/Black"
+                        android:textSize="12sp"
+                        android:buttonTint="@color/Black"/>
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/loginBtn"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:padding="4dp"
+                    android:text="@string/login"
+                    android:textColor="@color/White"
+                    android:backgroundTint="@color/ForestGreen"
+                    android:textSize="16sp"
+                    android:layout_below="@id/login_show_password"/>
+            </RelativeLayout>
+
+        </ScrollView>
+    </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/login_progressBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_centerVertical="true"
+        android:indeterminateDrawable="@drawable/progress_bar_rotate"
+        android:indeterminateDuration="700"/>
+</RelativeLayout>
