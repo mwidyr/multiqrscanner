@@ -30,6 +30,7 @@
         <activity android:name=".barcode.MainBarcodeQRCodeActivity"></activity>
         <activity android:name=".inbound.GoodsVerificationScanResultActivity" />
         <activity android:name=".inbound.GoodsVerificationActivity" />
+        <activity android:name=".LoginActivity" />
         <activity
             android:name=".navdrawer.NavigationViewActivity"
             android:theme="@style/AppTheme" />
