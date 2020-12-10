@@ -1,12 +1,12 @@
 package com.multiqrscanner.inbound.model;
 
-public class Inbound {
+public class InboundDetail {
     private String lineNo, sku, serialNo, productName, qty, subkey, status;
 
-    public Inbound() {
+    public InboundDetail() {
     }
 
-    public Inbound(String lineNo, String sku, String serialNo, String productName, String qty, String subkey, String status) {
+    public InboundDetail(String lineNo, String sku, String serialNo, String productName, String qty, String subkey, String status) {
         this.lineNo = lineNo;
         this.sku = sku;
         this.serialNo = serialNo;

@@ -53,25 +53,85 @@
                 android:groupIndicator="@null"
                 android:background="@color/White">
             </ExpandableListView>
-            <TextView
-                android:layout_weight="0.1"
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="100dp">
+
+                <TextView
+                    android:id="@+id/tx_nva_role"
+                    android:layout_width="100sp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Role"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tx_nva_role_divider"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
+                    android:text=":"
+                    app:layout_constraintStart_toEndOf="@+id/tx_nva_role"
+                    app:layout_constraintTop_toTopOf="@+id/tx_nva_role" />
+
+                <TextView
+                    android:id="@+id/tx_nva_role_val"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Static Text Role"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/tx_nva_role_divider"
+                    app:layout_constraintTop_toTopOf="@+id/tx_nva_role" />
+
+                <TextView
+                    android:id="@+id/tx_nva_warehouse"
+                    android:layout_width="100sp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Warehouse"
+                    app:layout_constraintStart_toStartOf="@+id/tx_nva_role"
+                    app:layout_constraintTop_toBottomOf="@+id/tx_nva_role" />
+
+                <TextView
+                    android:id="@+id/tx_nva_warehouse_divider"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
+                    android:text=":"
+                    app:layout_constraintStart_toEndOf="@+id/tx_nva_warehouse"
+                    app:layout_constraintTop_toTopOf="@+id/tx_nva_warehouse" />
+
+                <TextView
+                    android:id="@+id/tx_nva_warehouse_val"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Static Text Warehouse"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/tx_nva_warehouse_divider"
+                    app:layout_constraintTop_toTopOf="@+id/tx_nva_warehouse" />
+            </android.support.constraint.ConstraintLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="5dp"
-                android:text="Role: Admin Inbound"/>
-            <TextView
-                android:layout_weight="0.5"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="5dp"
-                android:text="Warehouse: Warehouse 1"/>
-            <TextView
-                android:layout_weight="1"
-                android:gravity="end"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingEnd="5dp"
-                android:text="Logout"/>
+                android:orientation="horizontal">
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"/>
+                <Button
+                    android:id="@+id/btn_logout"
+                    android:background="@drawable/round_green"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/White"
+                    android:layout_marginEnd="10dp"
+                    android:text="Logout"/>
+            </LinearLayout>
         </LinearLayout>
     </android.support.design.widget.NavigationView>
 </android.support.v4.widget.DrawerLayout>

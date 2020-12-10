@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/WhiteSmoke"
     tools:context=".inbound.GoodsVerificationScanResultActivity">
 
     <TextView
@@ -13,6 +14,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginBottom="8dp"
         android:text="Inbound No."
+        android:textColor="@color/Black"
         android:textSize="15sp"
         app:layout_constraintBottom_toTopOf="@+id/table_view_goods_verif_result"
         app:layout_constraintStart_toStartOf="parent" />
@@ -22,6 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:textColor="@color/Black"
         android:text=":"
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="@+id/tv_goods_verif_result_inbound_no"
@@ -30,27 +33,33 @@
 
     <TextView
         android:id="@+id/tv_goods_verif_result_inbound_no_val"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="inbound no value"
+        android:layout_marginEnd="8dp"
+        android:text=""
+        android:textColor="@color/Black"
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="@+id/tv_goods_verif_result_inbound_no"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/tv_goods_verif_result_inbound_no_div"
         app:layout_constraintTop_toTopOf="@+id/tv_goods_verif_result_inbound_no" />
 
     <TextView
         android:id="@+id/tv_goods_verif_scan_result"
-        android:layout_width="100dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:text="Scan Result"
-        android:textSize="15sp"
+        android:textColor="@color/Black"
+        android:textSize="25sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <de.codecrafters.tableview.TableView
-        app:tableView_headerColor="@color/LightBlue"
+        app:tableView_headerColor="@color/MediumSeaGreen"
         android:divider="@color/Black"
         android:dividerHeight="1dip"
         android:id="@+id/table_view_goods_verif_result"
@@ -72,9 +81,9 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/round_red"
+        android:background="@drawable/round_green_dark"
         android:text="Scan Again"
-        android:textColor="@color/Black"
+        android:textColor="@color/WhiteSmoke"
         app:layout_constraintBottom_toTopOf="@+id/iv_goods_verif_scan_result"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -83,9 +92,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:background="@drawable/round_blue"
+        android:background="@drawable/round_green"
         android:text="Submit"
-        android:textColor="@color/Black"
+        android:textColor="@color/WhiteSmoke"
         app:layout_constraintBottom_toBottomOf="@+id/btn_goods_verif_result_scan"
         app:layout_constraintEnd_toStartOf="@+id/btn_goods_verif_result_scan"
         app:layout_constraintTop_toTopOf="@+id/btn_goods_verif_result_scan" />

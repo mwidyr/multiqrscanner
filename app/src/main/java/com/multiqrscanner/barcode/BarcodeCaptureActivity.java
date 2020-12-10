@@ -215,21 +215,21 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
             @Override
             public void onPictureTaken(byte[] data) {
                 // Do something with the data (this is the JPEG image)
-                try {
-                    FileOutputStream stream = new FileOutputStream(finalFilePath);
-                    stream.write(data);
-                    stream.close();
-                    saveToSharedPrefAndGoToIntent(finalFilePath, mBarcodes);
-                } catch (IOException e) {
-                    Log.d(TAG, "onPictureTaken: error io " + e.getMessage());
-                    e.printStackTrace();
-                }
+//                try {
+//                    FileOutputStream stream = new FileOutputStream(finalFilePath);
+//                    stream.write(data);
+//                    stream.close();
+                    saveToSharedPrefAndGoToIntent(data, mBarcodes);
+//                } catch (IOException e) {
+//                    Log.d(TAG, "onPictureTaken: error io " + e.getMessage());
+//                    e.printStackTrace();
+//                }
             }
         });
         return filePath;
     }
 
-    public void saveToSharedPrefAndGoToIntent(String imagePath, List<String> mBarcodes) {
+    public void saveToSharedPrefAndGoToIntent(byte[] imagePath, List<String> mBarcodes) {
         Gson gson = new Gson();
         String currentActivityFrom = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.FromActivityKey);
         if (!currentActivityFrom.trim().equalsIgnoreCase("")) {
@@ -237,8 +237,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, GoodsVerificationScanResultActivity.class);
                 String currentSelectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundNoKey);
                 intent.putExtra(MiscUtil.InboundNoKey, currentSelectedInboundNo);
-                if (!imagePath.equalsIgnoreCase("")) {
-                    MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.ImagePathKey, imagePath);
+                if (imagePath.length>0) {
+                    MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.ImagePathKey, gson.toJson(imagePath));
                     Log.d(TAG, "onCreate: imagePath " + imagePath);
                 }
                 List<QrCodeBarcodeSimpleWrapper> qrCodeBarcodeSimpleWrapperList = new ArrayList<>();

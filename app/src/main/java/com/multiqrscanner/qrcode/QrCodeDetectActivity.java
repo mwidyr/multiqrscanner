@@ -29,6 +29,7 @@ import com.google.gson.Gson;
 
 import org.ddogleg.struct.FastQueue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -172,16 +173,15 @@ public class QrCodeDetectActivity extends ScannerCamera2Activity {
     }
 
     public void pressedListView(View view) {
-        String imagePath = takeScreenshot();
+        byte[] bitmapAray = takeScreenshotToByteArray();
         if (currentActivityFrom != null && !currentActivityFrom.trim().equalsIgnoreCase("")) {
             if (currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.GoodsVerificationValue)) {
                 Intent intent = new Intent(this, GoodsVerificationScanResultActivity.class);
                 setProcessing(new QrCodeProcessing());
                 intent.putExtra(MiscUtil.InboundNoKey, currentSelectedInboundNo);
-                if (!imagePath.equalsIgnoreCase("")) {
-//                    intent.putExtra(MiscUtil.ImagePathKey, imagePath);
-                    MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.ImagePathKey, imagePath);
-                    Log.d(TAG, "onCreate: imagePath "+imagePath);
+                if (bitmapAray.length>0) {
+                    MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.ImagePathKey, gson.toJson(bitmapAray));
+                    Log.d(TAG, "onCreate: imagePath "+bitmapAray);
                 }
                 List<QrCodeBarcodeSimpleWrapper> qrCodeBarcodeSimpleWrapperList = new ArrayList<>();
                 synchronized (uniqueLock) {
@@ -390,6 +390,29 @@ public class QrCodeDetectActivity extends ScannerCamera2Activity {
             outputStream.flush();
             outputStream.close();
 
+        } catch (Throwable e) {
+            // Several error may come out with file handling or DOM
+            e.printStackTrace();
+        }
+        return filePath;
+    }
+
+    private byte[] takeScreenshotToByteArray() {
+        Date now = new Date();
+        android.text.format.DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
+        byte[] filePath = new byte[0];
+
+        try {
+
+            // create bitmap screen capture
+            View v1 = getWindow().getDecorView().getRootView();
+            v1.setDrawingCacheEnabled(true);
+            Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());
+            v1.setDrawingCacheEnabled(false);
+            ByteArrayOutputStream blob = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 0 /* Ignored for PNGs */, blob);
+            byte[] bitmapdata = blob.toByteArray();
+            return bitmapdata;
         } catch (Throwable e) {
             // Several error may come out with file handling or DOM
             e.printStackTrace();
