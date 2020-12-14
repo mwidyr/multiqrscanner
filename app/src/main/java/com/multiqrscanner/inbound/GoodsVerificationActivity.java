@@ -2,9 +2,10 @@ package com.multiqrscanner.inbound;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,6 +22,10 @@ import com.multiqrscanner.inbound.model.InboundData;
 import com.multiqrscanner.inbound.model.InboundDetail;
 import com.multiqrscanner.misc.MiscUtil;
 import com.multiqrscanner.navdrawer.NavigationViewActivity;
+import com.multiqrscanner.network.RetrofitClientInstance;
+import com.multiqrscanner.network.model.RetroInbounds;
+import com.multiqrscanner.network.model.RetroWarehouse;
+import com.multiqrscanner.network.user.GetInboundsService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +37,9 @@ import de.codecrafters.tableview.model.TableColumnDpWidthModel;
 import de.codecrafters.tableview.toolkit.SimpleTableDataAdapter;
 import de.codecrafters.tableview.toolkit.SimpleTableHeaderAdapter;
 import de.codecrafters.tableview.toolkit.TableDataRowBackgroundProviders;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class GoodsVerificationActivity extends AppCompatActivity {
     private static String TAG = "GVA";
@@ -39,6 +47,8 @@ public class GoodsVerificationActivity extends AppCompatActivity {
     public static Integer totalScanParent = 0;
     public static String StatusVerified = "Yes";
     public static String StatusNotVerified = "No";
+    private static final String ALL_WAREHOUSE = "All Warehouse";
+
     private HashMap<String, InboundDetail> inboundMap;
 
     private TextView inboundDate, inboundCustomer, inboundWarehouse, totalScan, totalSummaryInbound;
@@ -61,47 +71,70 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         totalScan = findViewById(R.id.tv_total_scan_val);
         totalSummaryInbound = findViewById(R.id.tv_total_summary_inbounds_val);
 
-        List<InboundDetail> inboundDetailList = new ArrayList<>();
-        inboundDetailList.add(new InboundDetail("1", "8876", "109", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-        inboundDetailList.add(new InboundDetail("1", "8876", "110", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-        inboundDetailList.add(new InboundDetail("1", "8876", "111", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-        inboundDetailList.add(new InboundDetail("1", "8876", "112", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-        inboundDetailList.add(new InboundDetail("1", "8876", "113", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-        inboundDetailList.add(new InboundDetail("1", "8876", "114", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-        inboundDetailList.add(new InboundDetail("1", "8876", "115", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-
-        List<InboundDetail> inboundDetailList2 = new ArrayList<>();
-        inboundDetailList2.add(new InboundDetail("1", "8876", "119", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-        inboundDetailList2.add(new InboundDetail("1", "8876", "120", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-        inboundDetailList2.add(new InboundDetail("1", "8876", "121", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-        inboundDetailList2.add(new InboundDetail("1", "8876", "122", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-        inboundDetailList2.add(new InboundDetail("1", "8876", "123", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-        inboundDetailList2.add(new InboundDetail("1", "8876", "124", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-        inboundDetailList2.add(new InboundDetail("1", "8876", "125", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-        inboundDetailList2.add(new InboundDetail("1", "8876", "126", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
-
-        InboundData inboundData = new InboundData("WMS.IRC.100011", "15/11/2020", "PT. ZYH", "Warehouse 1", inboundDetailList2);
-        InboundData inboundData2 = new InboundData("WMS.IRC.100012", "5/2/2020", "PT. HYZ", "Warehouse 2", inboundDetailList);
-        InboundData inboundData3 = new InboundData("WMS.IRC.100013", "15/2/2020", "PT. HYZ", "Warehouse 3", inboundDetailList);
-        InboundData inboundData4 = new InboundData("WMS.IRC.100014", "25/2/2020", "PT. HYZ", "Warehouse 4", inboundDetailList);
-        InboundData inboundData5 = new InboundData("WMS.IRC.100015", "7/2/2020", "PT. HYZ", "Warehouse 5", inboundDetailList);
-        InboundData inboundData6 = new InboundData("WMS.IRC.100016", "17/2/2020", "PT. HYZ", "Warehouse 6", inboundDetailList);
-        InboundData inboundData7 = new InboundData("WMS.IRC.100017", "27/2/2020", "PT. HYZ", "Warehouse 7", inboundDetailList);
-        InboundData inboundData8 = new InboundData("WMS.IRC.100018", "10/2/2020", "PT. HYZ", "Warehouse 8", inboundDetailList);
-        this.inboundDatas = new ArrayList<>();
-        this.inboundDatas.add(inboundData);
-        this.inboundDatas.add(inboundData2);
-        this.inboundDatas.add(inboundData3);
-        this.inboundDatas.add(inboundData4);
-        this.inboundDatas.add(inboundData5);
-        this.inboundDatas.add(inboundData6);
-        this.inboundDatas.add(inboundData7);
-        this.inboundDatas.add(inboundData8);
-        List<String> stringDummy = new ArrayList<>();
-        stringDummy.add("");
-        for (InboundData inboundData1 : inboundDatas) {
-            stringDummy.add(inboundData1.getInboundNo());
+        String warehouse = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityWS);
+        if ( warehouse == ALL_WAREHOUSE){
+            warehouse = new String();
         }
+        inboundDatas = new ArrayList<>();
+        List<String> stringDummy = new ArrayList<>();
+
+        GetInboundsService service = RetrofitClientInstance.getRetrofitInstance().create(GetInboundsService.class);
+        Call<RetroInbounds> call = service.getInbounds(new RetroWarehouse(warehouse ));
+        call.enqueue(new Callback<RetroInbounds>() {
+            @Override
+            public void onResponse(Call<RetroInbounds> call, Response<RetroInbounds> response) {
+                if(response.body().getInbounds() != null) {
+                    for (int i = 0; i < response.body().getInbounds().size(); i++) {
+                        inboundDatas.add(response.body().getInbounds().get(i));
+                    }
+                    stringDummy.add("Please Select Inbound");
+                    for (InboundData inboundData1 : inboundDatas) {
+                        stringDummy.add(inboundData1.getInboundNo());
+                    }
+                }
+                Log.d(TAG, "role = " + response.body().getInbounds());
+            }
+
+            @Override
+            public void onFailure(Call<RetroInbounds> call, Throwable t) {
+            }
+        });
+
+//        List<InboundDetail> inboundDetailList = new ArrayList<>();
+//        inboundDetailList.add(new InboundDetail("1", "8876", "109", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//        inboundDetailList.add(new InboundDetail("1", "8876", "110", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//        inboundDetailList.add(new InboundDetail("1", "8876", "111", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//        inboundDetailList.add(new InboundDetail("1", "8876", "112", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//        inboundDetailList.add(new InboundDetail("1", "8876", "113", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//        inboundDetailList.add(new InboundDetail("1", "8876", "114", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//        inboundDetailList.add(new InboundDetail("1", "8876", "115", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//
+//        List<InboundDetail> inboundDetailList2 = new ArrayList<>();
+//        inboundDetailList2.add(new InboundDetail("1", "8876", "119", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//        inboundDetailList2.add(new InboundDetail("1", "8876", "120", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//        inboundDetailList2.add(new InboundDetail("1", "8876", "121", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//        inboundDetailList2.add(new InboundDetail("1", "8876", "122", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//        inboundDetailList2.add(new InboundDetail("1", "8876", "123", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//        inboundDetailList2.add(new InboundDetail("1", "8876", "124", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//        inboundDetailList2.add(new InboundDetail("1", "8876", "125", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+//        inboundDetailList2.add(new InboundDetail("1", "8876", "126", "Susu Bendera", "1", "#LOT32", StatusNotVerified));
+
+//        InboundData inboundData = new InboundData("WMS.IRC.100011", "15/11/2020", "PT. ZYH", "Warehouse 1", inboundDetailList2);
+//        InboundData inboundData2 = new InboundData("WMS.IRC.100012", "5/2/2020", "PT. HYZ", "Warehouse 2", inboundDetailList);
+//        InboundData inboundData3 = new InboundData("WMS.IRC.100013", "15/2/2020", "PT. HYZ", "Warehouse 3", inboundDetailList);
+//        InboundData inboundData4 = new InboundData("WMS.IRC.100014", "25/2/2020", "PT. HYZ", "Warehouse 4", inboundDetailList);
+//        InboundData inboundData5 = new InboundData("WMS.IRC.100015", "7/2/2020", "PT. HYZ", "Warehouse 5", inboundDetailList);
+//        InboundData inboundData6 = new InboundData("WMS.IRC.100016", "17/2/2020", "PT. HYZ", "Warehouse 6", inboundDetailList);
+//        InboundData inboundData7 = new InboundData("WMS.IRC.100017", "27/2/2020", "PT. HYZ", "Warehouse 7", inboundDetailList);
+//        InboundData inboundData8 = new InboundData("WMS.IRC.100018", "10/2/2020", "PT. HYZ", "Warehouse 8", inboundDetailList);
+//        this.inboundDatas.add(inboundData);
+//        this.inboundDatas.add(inboundData2);
+//        this.inboundDatas.add(inboundData3);
+//        this.inboundDatas.add(inboundData4);
+//        this.inboundDatas.add(inboundData5);
+//        this.inboundDatas.add(inboundData6);
+//        this.inboundDatas.add(inboundData7);
+//        this.inboundDatas.add(inboundData8);
         initializeBtn();
         setTableData();
         Spinner spinner = findViewById(R.id.spinner_inbound_no);
@@ -116,6 +149,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
+                Log.d(TAG, "adapter = " + (String) adapterView.getItemAtPosition(pos));
                 String item = (String) adapterView.getItemAtPosition(pos);
                 if (!item.trim().equalsIgnoreCase("")) {
                     currentSelectedInboundNo = item;

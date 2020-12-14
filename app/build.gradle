@@ -88,6 +88,10 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:support-v4:28.0.0'
 
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.squareup.retrofit2:retrofit:2.6.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.6.0'
+
     implementation "ch.acra:acra-http:$acraVersion"
     implementation "ch.acra:acra-toast:$acraVersion"
     implementation "ch.acra:acra-limiter:$acraVersion"

@@ -13,12 +13,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.multiqrscanner.LoginActivity;
 import com.multiqrscanner.R;
 import com.multiqrscanner.inbound.GoodsVerificationActivity;
 import com.multiqrscanner.misc.MiscUtil;
+import com.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,6 +68,11 @@ public class NavigationViewActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         expandableList = (ExpandableListView) findViewById(R.id.navigationmenu);
+        TextView txtRole = (TextView)findViewById(R.id.tx_nva_role_val);
+        TextView txtWarehouse = (TextView)findViewById(R.id.tx_nva_warehouse_val);
+
+        txtRole.setText(MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityRole));
+        txtWarehouse.setText(MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityWS));
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 
         if (navigationView != null) {
@@ -107,38 +116,79 @@ public class NavigationViewActivity extends AppCompatActivity {
         listDataHeader = new ArrayList<>();
         listDataChild = new HashMap<ExpandedMenuModel, List<String>>();
 
+        Gson gson = new Gson();
+        String txtMenu = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityMenu);
+        List<com.multiqrscanner.network.model.Menu> menus = gson.fromJson(txtMenu,
+                new TypeToken<List<com.multiqrscanner.network.model.Menu>>() {}.getType());
+        Log.d(TAG, "txtMenu = " + menus);
+        boolean bInventoryVerif = false;
+        boolean bPutaway = false;
+        boolean bReplenishment = false;
+        boolean bInventoryMovement = false;
+        boolean bPickingPlan = false;
+        boolean bOutgoingVerify = false;
+
+        for (int i = 0; i < menus.size(); i++) {
+            if(menus.get(i).getMenu().equals("Goods Verification")){
+                bInventoryVerif = true;
+            } else if(menus.get(i).getMenu().equals("Putaway")){
+                bPutaway = true;
+            } else if(menus.get(i).getMenu().equals("Replenishment")){
+                bReplenishment = true;
+            } else if(menus.get(i).getMenu().equals("Inventory Movements")){
+                bInventoryMovement = true;
+            } else if(menus.get(i).getMenu().equals("Picking Plan")){
+                bPickingPlan = true;
+            } else if(menus.get(i).getMenu().equals("Goods Shipments")){
+                bOutgoingVerify = true;
+            }
+
+        }
+
         ExpandedMenuModel item1 = new ExpandedMenuModel();
         item1.setIconName(headerInbound);
         item1.setIconImg(android.R.drawable.ic_delete);
         // Adding data header
-        listDataHeader.add(item1);
+        if(bInventoryVerif)
+            listDataHeader.add(item1);
 
         ExpandedMenuModel item2 = new ExpandedMenuModel();
         item2.setIconName(headerWarehouse);
         item2.setIconImg(android.R.drawable.ic_delete);
-        listDataHeader.add(item2);
+        if(bPutaway || bReplenishment || bInventoryMovement)
+            listDataHeader.add(item2);
 
         ExpandedMenuModel item3 = new ExpandedMenuModel();
         item3.setIconName(headerOutbound);
         item3.setIconImg(android.R.drawable.ic_delete);
-        listDataHeader.add(item3);
+        if(bPickingPlan || bOutgoingVerify)
+            listDataHeader.add(item3);
 
         // Adding child data
         List<String> heading1 = new ArrayList<>();
-        heading1.add(inventoryVerif);
+        if(bInventoryVerif)
+            heading1.add(inventoryVerif);
 
         List<String> heading2 = new ArrayList<>();
-        heading2.add(putaway);
-        heading2.add(replenishment);
-        heading2.add(inventoryMovement);
+        if(bPutaway)
+            heading2.add(putaway);
+        if(bReplenishment)
+            heading2.add(replenishment);
+        if(bInventoryMovement)
+            heading2.add(inventoryMovement);
 
         List<String> heading3 = new ArrayList<>();
-        heading3.add(pickingPlan);
-        heading3.add(outgoingVerify);
+        if(bPickingPlan)
+            heading3.add(pickingPlan);
+        if(bOutgoingVerify)
+            heading3.add(outgoingVerify);
 
-        listDataChild.put(listDataHeader.get(0), heading1);// Header, Child data
-        listDataChild.put(listDataHeader.get(1), heading2);
-        listDataChild.put(listDataHeader.get(2), heading3);
+        if(bInventoryVerif)
+            listDataChild.put(listDataHeader.get(0), heading1);// Header, Child data
+        if(bPutaway || bReplenishment || bInventoryMovement)
+            listDataChild.put(listDataHeader.get(1), heading2);
+        if(bPickingPlan || bOutgoingVerify)
+            listDataChild.put(listDataHeader.get(2), heading3);
 
     }
 

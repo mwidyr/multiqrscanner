@@ -1,36 +1,41 @@
 package com.multiqrscanner;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import com.duxina.baranenergy.baranenergyapps.Utils.CustomToast;
+import com.google.gson.Gson;
+import com.multiqrscanner.misc.MiscUtil;
 import com.multiqrscanner.navdrawer.NavigationViewActivity;
+import com.multiqrscanner.network.RetrofitClientInstance;
+import com.multiqrscanner.network.model.RetroLogin;
+import com.multiqrscanner.network.model.RetroUser;
+import com.multiqrscanner.network.user.GetLoginService;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -41,6 +46,9 @@ public class LoginActivity extends AppCompatActivity {
     private static RelativeLayout loginLayout;
     private static Animation shakeAnimation;
     private ProgressBar progressBar;
+
+    private static final String TAG = "LoginActivity";
+    private static final String ALL_WAREHOUSE = "All Warehouse";
 
     public LoginActivity() {
 
@@ -134,50 +142,46 @@ public class LoginActivity extends AppCompatActivity {
             loginProcess();
     }
 
+
+
     //login activity
     private void loginProcess() {
         //set loading bar
         progressBar.setVisibility(View.VISIBLE);
         //get email and password
-        String emailSave = username.getText().toString();
-        String passwordSave = password.getText().toString();
+        String txtUsername = username.getText().toString();
+        String txtPassword = password.getText().toString();
+        GetLoginService service = RetrofitClientInstance.getRetrofitInstance().create(GetLoginService.class);
+        Call<RetroLogin> call = service.loginUser(new RetroUser( txtUsername, txtPassword));
+        call.enqueue(new Callback<RetroLogin>() {
+             @Override
+             public void onResponse(Call<RetroLogin> call, Response<RetroLogin> response) {
+                 if (response.body().getResultCode() == 1) {
+                     Log.d(TAG, "role = " + response.body().getRole());
+                     Log.d(TAG, "warehouse = " + response.body().getWarehouse());
+                     MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityUser, txtUsername);
+                     MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityRole, response.body().getRole());
+                     if(response.body().getWarehouse() != "") {
+                         MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityWS, response.body().getWarehouse());
+                     }
+                     else {
+                         MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityWS, ALL_WAREHOUSE);
+                     }
+                     Gson gson = new Gson();
+                     MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityMenu, gson.toJson(response.body().getMenus()));
+                     progressBar.setVisibility(View.GONE);
+                     Intent userInfo = new Intent(LoginActivity.this, NavigationViewActivity.class);
+                     startActivity(userInfo);
+                 } else {
+                     new CustomToast().Show_Toast(LoginActivity.this,"User or Password is wrong");
+                     progressBar.setVisibility(View.GONE);
+                 }
+             }
 
-        if (false) {
-
-        } else if (true) {
-            progressBar.setVisibility(View.GONE);
-            Intent userInfo = new Intent(this, NavigationViewActivity.class);
-            startActivity(userInfo);
-            if (this != null)
-                this.finish();
-        }
-
-        //sigin user
-//        firebaseAuth.signInWithEmailAndPassword(emailSave, passwordSave).addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
-//            @Override
-//            public void onComplete(@NonNull Task<AuthResult> task) {
-//                if (!task.isSuccessful()) {
-//                    progressBar.setVisibility(View.GONE);
-//                    try {
-//                        throw task.getException();
-//                    } catch (FirebaseAuthInvalidUserException invalidUser) {
-//                        Toast.makeText(getActivity(), "Email does not exist", Toast.LENGTH_SHORT)
-//                                .show();
-//                    } catch (FirebaseAuthInvalidCredentialsException invalidPassword) {
-//                        Toast.makeText(getActivity(), "Password did not match", Toast.LENGTH_SHORT)
-//                                .show();
-//                    } catch (Exception ex) {
-//                        Toast.makeText(getActivity(), "Couldn't Login... please try again", Toast.LENGTH_SHORT)
-//                                .show();
-//                    }
-//                } else if (task.isSuccessful()) {
-//                    progressBar.setVisibility(View.GONE);
-//                    Intent userInfo = new Intent(getActivity(), MainActivity.class);
-//                    startActivity(userInfo);
-//                    if(getActivity() != null)
-//                        getActivity().finish();
-//                }
-//            }
-//        });
+             @Override
+             public void onFailure(Call<RetroLogin> call, Throwable t) {
+             }
+         });
     }
 }
+

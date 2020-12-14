@@ -28,6 +28,10 @@ public class MiscUtil {
     public static String InboundListScanned = "inbound_list_scanned";
     public static String GoodsVerificationValue = "goods_verification";
     public static String FromActivityKey = "from_activity";
+    public static String LoginActivityUser = "login_activity_user";
+    public static String LoginActivityRole = "login_activity_role";
+    public static String LoginActivityMenu = "login_activity_menu";
+    public static String LoginActivityWS = "login_activity_WS";
 	public static String ImagePathKey = "imagePath";
 	public static String QrCodeGsonKey = "qr_code_gson";
 
