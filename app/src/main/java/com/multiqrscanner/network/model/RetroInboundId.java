@@ -9,15 +9,15 @@ public class RetroInboundId {
     public RetroInboundId() {
     }
 
-    public RetroInboundId(String warehouse) {
+    public RetroInboundId(String id) {
         this.id = id;
     }
 
-    public String getWarehouse() {
+    public String getId() {
         return id;
     }
 
-    public void setWarehouse(String id) {
+    public void setId(String id) {
         this.id = id;
     }
 

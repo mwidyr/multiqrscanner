@@ -10,7 +10,11 @@ import com.multiqrscanner.navdrawer.NavigationViewActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.shapes.Polygon2D_F64;
@@ -32,8 +36,12 @@ public class MiscUtil {
     public static String LoginActivityRole = "login_activity_role";
     public static String LoginActivityMenu = "login_activity_menu";
     public static String LoginActivityWS = "login_activity_WS";
+    public static String LoginActivityUserID = "login_activity_user_id";
+    public static String LoginActivityWSID = "login_activity_ws_id";
 	public static String ImagePathKey = "imagePath";
 	public static String QrCodeGsonKey = "qr_code_gson";
+
+
 
 
     public static void renderPolygon(Polygon2D_F64 s, Path path, Canvas canvas, Paint paint) {

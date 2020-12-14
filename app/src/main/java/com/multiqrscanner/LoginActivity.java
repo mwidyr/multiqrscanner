@@ -1,11 +1,6 @@
 package com.multiqrscanner;
 
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
@@ -22,7 +17,6 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -72,8 +66,8 @@ public class LoginActivity extends AppCompatActivity {
         loginLayout = (RelativeLayout) findViewById(R.id.login_layout);
 
         // Load ShakeAnimation
-        shakeAnimation = AnimationUtils.loadAnimation(this ,
-               R.anim.shake);
+        shakeAnimation = AnimationUtils.loadAnimation(this,
+                R.anim.shake);
 
         // loading bar
         progressBar = (ProgressBar) findViewById(R.id.login_progressBar);
@@ -143,7 +137,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-
     //login activity
     private void loginProcess() {
         //set loading bar
@@ -152,36 +145,36 @@ public class LoginActivity extends AppCompatActivity {
         String txtUsername = username.getText().toString();
         String txtPassword = password.getText().toString();
         GetLoginService service = RetrofitClientInstance.getRetrofitInstance().create(GetLoginService.class);
-        Call<RetroLogin> call = service.loginUser(new RetroUser( txtUsername, txtPassword));
+        Call<RetroLogin> call = service.loginUser(new RetroUser(txtUsername, txtPassword));
         call.enqueue(new Callback<RetroLogin>() {
-             @Override
-             public void onResponse(Call<RetroLogin> call, Response<RetroLogin> response) {
-                 if (response.body().getResultCode() == 1) {
-                     Log.d(TAG, "role = " + response.body().getRole());
-                     Log.d(TAG, "warehouse = " + response.body().getWarehouse());
-                     MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityUser, txtUsername);
-                     MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityRole, response.body().getRole());
-                     if(response.body().getWarehouse() != "") {
-                         MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityWS, response.body().getWarehouse());
-                     }
-                     else {
-                         MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityWS, ALL_WAREHOUSE);
-                     }
-                     Gson gson = new Gson();
-                     MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityMenu, gson.toJson(response.body().getMenus()));
-                     progressBar.setVisibility(View.GONE);
-                     Intent userInfo = new Intent(LoginActivity.this, NavigationViewActivity.class);
-                     startActivity(userInfo);
-                 } else {
-                     new CustomToast().Show_Toast(LoginActivity.this,"User or Password is wrong");
-                     progressBar.setVisibility(View.GONE);
-                 }
-             }
+            @Override
+            public void onResponse(Call<RetroLogin> call, Response<RetroLogin> response) {
+                if (response.body().getResultCode() == 1) {
+                    Log.d(TAG, "role = " + response.body().getRole());
+                    Log.d(TAG, "warehouse = " + response.body().getWarehouse());
+                    MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityUser, txtUsername);
+                    MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityRole, response.body().getRole());
+                    MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityUserID, response.body().getUserId());
+                    if (!response.body().getWarehouse().equalsIgnoreCase("")) {
+                        MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityWS, response.body().getWarehouse());
+                    } else {
+                        MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityWS, ALL_WAREHOUSE);
+                    }
+                    Gson gson = new Gson();
+                    MiscUtil.saveStringSharedPreferenceAsString(LoginActivity.this, MiscUtil.LoginActivityMenu, gson.toJson(response.body().getMenus()));
+                    progressBar.setVisibility(View.GONE);
+                    Intent userInfo = new Intent(LoginActivity.this, NavigationViewActivity.class);
+                    startActivity(userInfo);
+                } else {
+                    new CustomToast().Show_Toast(LoginActivity.this, "User or Password is wrong");
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
 
-             @Override
-             public void onFailure(Call<RetroLogin> call, Throwable t) {
-             }
-         });
+            @Override
+            public void onFailure(Call<RetroLogin> call, Throwable t) {
+            }
+        });
     }
 }
 
