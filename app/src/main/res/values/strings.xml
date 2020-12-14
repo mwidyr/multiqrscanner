@@ -187,7 +187,7 @@
     <string name="show_pwd">Show Password</string>
     <string name="hide_pwd">Hide Password</string>
     <string name="login">LOGIN</string>
-    <string name="aware_scanner">AWARE SCANNER</string>
+    <string name="aware_scanner">AWARE WMS MOBILE</string>
 
 
     <string-array name="dummy_inbound_no">

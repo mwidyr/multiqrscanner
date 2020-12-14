@@ -34,7 +34,7 @@ import de.codecrafters.tableview.toolkit.TableDataRowBackgroundProviders;
 public class GoodsVerificationScanResultActivity extends AppCompatActivity {
     private static String TAG = "GVSRA";
     private TextView inboundNoVal;
-    private Button btnScan, btnSubmit;
+    private Button btnScan, btnSubmit, btnCancel;
     private Integer totalScanFromParentAct = 0;
     private Integer totalScanFromChildAct = 0;
     private Gson gson = new Gson();
@@ -146,6 +146,7 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
     public void initializeBtn() {
         btnScan = findViewById(R.id.btn_goods_verif_result_scan);
         btnSubmit = findViewById(R.id.btn_goods_verif_result_confirm);
+        btnCancel = findViewById(R.id.btn_goods_verif_cancel);
         btnScan.setOnClickListener(view -> {
             Intent intent = new Intent(this, ScannerMainActivity.class);
             intent.putExtra(MiscUtil.TotalScanKey, totalScanFromParentAct.toString());
@@ -164,6 +165,11 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
             MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
             Gson gson = new Gson();
             MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListScanned, gson.toJson(this.inboundDetailList));
+            startActivity(intent);
+            finish();
+        });
+        btnSubmit.setOnClickListener(view -> {
+            Intent intent = new Intent(this, GoodsVerificationActivity.class);
             startActivity(intent);
             finish();
         });

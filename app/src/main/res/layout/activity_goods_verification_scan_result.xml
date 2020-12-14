@@ -99,6 +99,18 @@
         app:layout_constraintEnd_toStartOf="@+id/btn_goods_verif_result_scan"
         app:layout_constraintTop_toTopOf="@+id/btn_goods_verif_result_scan" />
 
+    <Button
+        android:id="@+id/btn_goods_verif_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/round_green"
+        android:text="Cancel"
+        android:textColor="@color/WhiteSmoke"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_goods_verif_result_confirm"
+        app:layout_constraintEnd_toStartOf="@+id/btn_goods_verif_result_confirm"
+        app:layout_constraintTop_toTopOf="@+id/btn_goods_verif_result_confirm" />
+
     <ImageView
         android:id="@+id/iv_goods_verif_scan_result"
         android:layout_width="match_parent"
