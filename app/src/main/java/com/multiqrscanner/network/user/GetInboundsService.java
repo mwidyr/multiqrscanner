@@ -11,6 +11,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 
 public interface GetInboundsService {
     @Headers({
@@ -37,6 +38,7 @@ public interface GetInboundsService {
             "Accept:application/json",
             "X-Client-ID:DD2DC0A311F64EF28FD06D4C970581E1",
     })
-    @POST("inbound-item")
+
+    @PUT("inbound-item")
     Call<RetroInboundsVerifyResponse> verifyInboundItemDetail(@Body RetroInboundVerifyRequest id);
 }

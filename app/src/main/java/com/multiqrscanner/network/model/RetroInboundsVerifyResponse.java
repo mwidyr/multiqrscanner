@@ -9,8 +9,6 @@ public class RetroInboundsVerifyResponse {
     private int resultCode;
     @SerializedName("message")
     private String message;
-    @SerializedName("items")
-    private List<InboundVerifySerialNo> items;
 
     public RetroInboundsVerifyResponse() {
     }
@@ -18,7 +16,6 @@ public class RetroInboundsVerifyResponse {
     public RetroInboundsVerifyResponse(int resultCode, String message, List<InboundVerifySerialNo> items) {
         this.resultCode = resultCode;
         this.message = message;
-        this.items = items;
     }
 
     public int getResultCode() {
@@ -37,20 +34,11 @@ public class RetroInboundsVerifyResponse {
         this.message = message;
     }
 
-    public List<InboundVerifySerialNo> getItems() {
-        return items;
-    }
-
-    public void setItems(List<InboundVerifySerialNo> items) {
-        this.items = items;
-    }
-
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("RetroInboundsVerifyResponse{");
         sb.append("resultCode=").append(resultCode);
         sb.append(", message='").append(message).append('\'');
-        sb.append(", items=").append(items);
         sb.append('}');
         return sb.toString();
     }
