@@ -25,6 +25,7 @@ import com.multiqrscanner.misc.MiscUtil;
 import com.multiqrscanner.navdrawer.NavigationViewActivity;
 import com.multiqrscanner.network.RetrofitClientInstance;
 import com.multiqrscanner.network.model.InboundItemDetail;
+import com.multiqrscanner.network.model.InboundVerifySerialNo;
 import com.multiqrscanner.network.model.RetroInboundId;
 import com.multiqrscanner.network.model.RetroInboundVerifyRequest;
 import com.multiqrscanner.network.model.RetroInbounds;
@@ -435,19 +436,19 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         String idWarehouse = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityWSID);
         String userID = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityUserID);
         Log.d(TAG, "verifyInboundDetails: id warehouse " + idWarehouse + " userID = " + userID);
-        List<String> listSerialNo = new ArrayList<>();
+        List<InboundVerifySerialNo> listSerialNo = new ArrayList<>();
         for (InboundDetail inboundDetail : inboundMap.values()) {
             if (inboundDetail.getStatus().trim().equalsIgnoreCase(StatusVerified)) {
-                listSerialNo.add(inboundDetail.getSerialNo());
+                listSerialNo.add(new InboundVerifySerialNo(inboundDetail.getSerialNo()));
             }
         }
-        Call<RetroInboundsVerifyResponse> call = service.verifyInboundItemDetail(new RetroInboundVerifyRequest(idWarehouse, userID, listSerialNo));
+        Call<RetroInboundsVerifyResponse> call = service.verifyInboundItemDetail(new RetroInboundVerifyRequest(idWarehouse, userID, StatusVerified, listSerialNo));
         call.enqueue(new Callback<RetroInboundsVerifyResponse>() {
             @Override
             public void onResponse(Call<RetroInboundsVerifyResponse> call, Response<RetroInboundsVerifyResponse> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.body() != null && response.body().getResultCode() > 0) {
-                    Toast.makeText(GoodsVerificationActivity.this, "Successful verify inbound", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(GoodsVerificationActivity.this, "Success verify inbound", Toast.LENGTH_SHORT).show();
                     clearSharedPreferences();
                     onBackPressed();
                 } else {

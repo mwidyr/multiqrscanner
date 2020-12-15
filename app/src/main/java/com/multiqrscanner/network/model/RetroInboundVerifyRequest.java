@@ -7,17 +7,20 @@ import java.util.List;
 public class RetroInboundVerifyRequest {
     @SerializedName("id")
     private String id;
-    @SerializedName("userid")
+    @SerializedName("ad_user_id")
     private String userID;
-    @SerializedName("serialno")
-    private List<String> serialno;
+    @SerializedName("verif")
+    private String verif;
+    @SerializedName("serialNos")
+    private List<InboundVerifySerialNo> serialno;
 
     public RetroInboundVerifyRequest() {
     }
 
-    public RetroInboundVerifyRequest(String id, String userID, List<String> serialno) {
+    public RetroInboundVerifyRequest(String id, String userID, String verif, List<InboundVerifySerialNo> serialno) {
         this.id = id;
         this.userID = userID;
+        this.verif = verif;
         this.serialno = serialno;
     }
 
@@ -37,11 +40,19 @@ public class RetroInboundVerifyRequest {
         this.userID = userID;
     }
 
-    public List<String> getSerialno() {
+    public String getVerif() {
+        return verif;
+    }
+
+    public void setVerif(String verif) {
+        this.verif = verif;
+    }
+
+    public List<InboundVerifySerialNo> getSerialno() {
         return serialno;
     }
 
-    public void setSerialno(List<String> serialno) {
+    public void setSerialno(List<InboundVerifySerialNo> serialno) {
         this.serialno = serialno;
     }
 
@@ -50,6 +61,7 @@ public class RetroInboundVerifyRequest {
         final StringBuilder sb = new StringBuilder("RetroInboundVerifyRequest{");
         sb.append("id='").append(id).append('\'');
         sb.append(", userID='").append(userID).append('\'');
+        sb.append(", verif='").append(verif).append('\'');
         sb.append(", serialno=").append(serialno);
         sb.append('}');
         return sb.toString();

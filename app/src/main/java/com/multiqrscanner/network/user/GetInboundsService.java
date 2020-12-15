@@ -37,6 +37,6 @@ public interface GetInboundsService {
             "Accept:application/json",
             "X-Client-ID:DD2DC0A311F64EF28FD06D4C970581E1",
     })
-    @POST("verify-inbound-item")
+    @POST("inbound-item")
     Call<RetroInboundsVerifyResponse> verifyInboundItemDetail(@Body RetroInboundVerifyRequest id);
 }
