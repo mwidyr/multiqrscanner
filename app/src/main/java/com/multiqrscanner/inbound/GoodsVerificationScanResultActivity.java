@@ -22,6 +22,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
     private ImageView imageView;
     private List<InboundDetail> inboundDetailList;
     private String[][] dataToShow = {};
-
+    HashMap<String, InboundDetail> inboundMap;
     private static String[] HEADER_TO_SHOW = {"Product", "SN", "Status"};
 
     public Bitmap readImageFromUri(String filePath) {
@@ -81,7 +82,8 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
         if (!bitmapArrayExtra.trim().equalsIgnoreCase("")) {
             imageView = findViewById(R.id.iv_goods_verif_scan_result);
             byte[] byteImage = gson.fromJson(bitmapArrayExtra, byte[].class);
-            Bitmap imageBitmap = BitmapFactory.decodeByteArray(byteImage, 0, byteImage.length);;
+            Bitmap imageBitmap = BitmapFactory.decodeByteArray(byteImage, 0, byteImage.length);
+            ;
             if (imageBitmap != null) {
                 imageView.setImageBitmap(imageBitmap);
             }
@@ -94,15 +96,38 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
             if (qrCodeBarcodeSimpleWrappers.size() > 0) {
                 String inboundListString = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundListDetail);
                 if (!inboundListString.trim().equalsIgnoreCase("")) {
-                    HashMap<String, InboundDetail> inboundMap = gson.fromJson(inboundListString, new TypeToken<HashMap<String, InboundDetail>>() {
+                    HashMap<String, InboundDetail> inboundMapSharedPref = gson.fromJson(inboundListString, new TypeToken<HashMap<String, InboundDetail>>() {
                     }.getType());
-                    if (inboundMap.size() > 0) {
+                    Log.d(TAG, "onCreate: inboundMapSharedPref = " + inboundMapSharedPref);
+                    if (inboundMapSharedPref.size() > 0) {
                         List<InboundDetail> inboundDetailDisplay = new ArrayList<>();
                         for (QrCodeBarcodeSimpleWrapper qrCode : qrCodeBarcodeSimpleWrappers) {
-                            if (inboundMap.get(qrCode.getQrValue()) != null) {
-                                inboundDetailDisplay.add(inboundMap.get(qrCode.getQrValue()));
+                            if (inboundMapSharedPref.get(qrCode.getQrValue()) != null) {
+                                InboundDetail inboundDetail = new InboundDetail(
+                                        inboundMapSharedPref.get(qrCode.getQrValue()).getLineNo(),
+                                        inboundMapSharedPref.get(qrCode.getQrValue()).getSku(),
+                                        inboundMapSharedPref.get(qrCode.getQrValue()).getSerialNo(),
+                                        inboundMapSharedPref.get(qrCode.getQrValue()).getProductName(),
+                                        inboundMapSharedPref.get(qrCode.getQrValue()).getQty(),
+                                        inboundMapSharedPref.get(qrCode.getQrValue()).getSubkey(),
+                                        inboundMapSharedPref.get(qrCode.getQrValue()).getStatus(),
+                                        inboundMapSharedPref.get(qrCode.getQrValue()).getInputDate()
+                                );
+                                if (inboundDetail.getInputDate() == null || inboundDetail.getInputDate() == 0L) {
+                                    inboundDetail.setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
+                                }
+                                inboundDetailDisplay.add(inboundDetail);
+                                if (inboundMapSharedPref.get(qrCode.getQrValue()).getInputDate() == null || inboundMapSharedPref.get(qrCode.getQrValue()).getInputDate() == 0L) {
+                                    inboundMapSharedPref.get(qrCode.getQrValue()).setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
+                                }
+                                if (inboundMapSharedPref.get(qrCode.getQrValue()).getStatus().trim().equalsIgnoreCase(GoodsVerificationActivity.StatusNotVerified)) {
+                                    inboundMapSharedPref.get(qrCode.getQrValue()).setStatus(GoodsVerificationActivity.StatusVerified);
+                                }
                             }
                         }
+                        Log.d(TAG, "onCreate: inboundMapSharedPref edited " + inboundMapSharedPref);
+                        Log.d(TAG, "onCreate: inboundDetailDisplay " + inboundDetailDisplay);
+                        setInboundMap(inboundMapSharedPref);
                         dataToShow = new String[inboundDetailDisplay.size()][3];
                         for (int i = 0; i < inboundDetailDisplay.size(); i++) {
                             dataToShow[i][0] = inboundDetailDisplay.get(i).getProductName();
@@ -123,10 +148,14 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
         }
         initTable();
         initializeBtn();
-        if(totalScanFromChildAct>0){
+        if (totalScanFromChildAct > 0) {
             btnSubmit.setVisibility(View.VISIBLE);
             btnSubmit.setClickable(true);
         }
+    }
+
+    private void setInboundMap(HashMap<String, InboundDetail> inboundMapInput) {
+        this.inboundMap = inboundMapInput;
     }
 
     public void initTable() {
@@ -163,9 +192,10 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
             int totalScanAll = totalScanFromParentAct + totalScanFromChildAct;
             intent.putExtra(MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
             MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
-            Log.d(TAG, "initializeBtn: "+totalScanAll);
+            Log.d(TAG, "initializeBtn: " + totalScanAll);
             Gson gson = new Gson();
             MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListScanned, gson.toJson(this.inboundDetailList));
+            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
             startActivity(intent);
             finish();
         });

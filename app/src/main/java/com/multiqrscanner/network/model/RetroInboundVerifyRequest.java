@@ -11,16 +11,19 @@ public class RetroInboundVerifyRequest {
     private String userID;
     @SerializedName("verif")
     private String verif;
+    @SerializedName("header_date")
+    private Long headerDate;
     @SerializedName("serialNos")
     private List<InboundVerifySerialNo> serialno;
 
     public RetroInboundVerifyRequest() {
     }
 
-    public RetroInboundVerifyRequest(String id, String userID, String verif, List<InboundVerifySerialNo> serialno) {
+    public RetroInboundVerifyRequest(String id, String userID, String verif, Long headerDate, List<InboundVerifySerialNo> serialno) {
         this.id = id;
         this.userID = userID;
         this.verif = verif;
+        this.headerDate = headerDate;
         this.serialno = serialno;
     }
 
@@ -48,6 +51,14 @@ public class RetroInboundVerifyRequest {
         this.verif = verif;
     }
 
+    public Long getHeaderDate() {
+        return headerDate;
+    }
+
+    public void setHeaderDate(Long headerDate) {
+        this.headerDate = headerDate;
+    }
+
     public List<InboundVerifySerialNo> getSerialno() {
         return serialno;
     }
@@ -62,6 +73,7 @@ public class RetroInboundVerifyRequest {
         sb.append("id='").append(id).append('\'');
         sb.append(", userID='").append(userID).append('\'');
         sb.append(", verif='").append(verif).append('\'');
+        sb.append(", headerDate='").append(headerDate).append('\'');
         sb.append(", serialno=").append(serialno);
         sb.append('}');
         return sb.toString();
