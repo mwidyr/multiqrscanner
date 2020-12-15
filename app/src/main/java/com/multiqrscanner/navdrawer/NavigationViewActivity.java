@@ -114,7 +114,7 @@ public class NavigationViewActivity extends AppCompatActivity {
 
     private void prepareListData() {
         listDataHeader = new ArrayList<>();
-        listDataChild = new HashMap<ExpandedMenuModel, List<String>>();
+        listDataChild = new HashMap<>();
 
         Gson gson = new Gson();
         String txtMenu = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityMenu);
@@ -129,18 +129,25 @@ public class NavigationViewActivity extends AppCompatActivity {
         boolean bOutgoingVerify = false;
 
         for (int i = 0; i < menus.size(); i++) {
-            if(menus.get(i).getMenu().equals("Goods Verification")){
-                bInventoryVerif = true;
-            } else if(menus.get(i).getMenu().equals("Putaway")){
-                bPutaway = true;
-            } else if(menus.get(i).getMenu().equals("Replenishment")){
-                bReplenishment = true;
-            } else if(menus.get(i).getMenu().equals("Inventory Movements")){
-                bInventoryMovement = true;
-            } else if(menus.get(i).getMenu().equals("Picking Plan")){
-                bPickingPlan = true;
-            } else if(menus.get(i).getMenu().equals("Goods Shipments")){
-                bOutgoingVerify = true;
+            switch (menus.get(i).getMenu()) {
+                case "Goods Verification":
+                    bInventoryVerif = true;
+                    break;
+                case "Putaway":
+                    bPutaway = true;
+                    break;
+                case "Replenishment":
+                    bReplenishment = true;
+                    break;
+                case "Inventory Movements":
+                    bInventoryMovement = true;
+                    break;
+                case "Picking Plan":
+                    bPickingPlan = true;
+                    break;
+                case "Goods Shipments":
+                    bOutgoingVerify = true;
+                    break;
             }
 
         }

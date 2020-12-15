@@ -163,12 +163,13 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
             int totalScanAll = totalScanFromParentAct + totalScanFromChildAct;
             intent.putExtra(MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
             MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
+            Log.d(TAG, "initializeBtn: "+totalScanAll);
             Gson gson = new Gson();
             MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListScanned, gson.toJson(this.inboundDetailList));
             startActivity(intent);
             finish();
         });
-        btnSubmit.setOnClickListener(view -> {
+        btnCancel.setOnClickListener(view -> {
             Intent intent = new Intent(this, GoodsVerificationActivity.class);
             startActivity(intent);
             finish();

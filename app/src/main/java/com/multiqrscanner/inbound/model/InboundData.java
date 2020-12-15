@@ -3,6 +3,7 @@ package com.multiqrscanner.inbound.model;
 import java.util.List;
 
 public class InboundData {
+    private String id;
     private String inboundno;
     private String inbounddate;
     private String customer;
@@ -12,28 +13,37 @@ public class InboundData {
     public InboundData() {
     }
 
-    public InboundData(String inboundNo, String inboundDate, String customer, String warehouse, List<InboundDetail> items) {
-        this.inboundno = inboundNo;
-        this.inbounddate = inboundDate;
+    public InboundData(String id, String inboundno, String inbounddate, String customer, String warehouse, List<InboundDetail> items) {
+        this.id = id;
+        this.inboundno = inboundno;
+        this.inbounddate = inbounddate;
         this.customer = customer;
         this.warehouse = warehouse;
         this.items = items;
     }
 
-    public String getInboundNo() {
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getInboundno() {
         return inboundno;
     }
 
-    public void setInboundNo(String inboundNo) {
-        this.inboundno = inboundNo;
+    public void setInboundno(String inboundno) {
+        this.inboundno = inboundno;
     }
 
-    public String getInboundDate() {
+    public String getInbounddate() {
         return inbounddate;
     }
 
-    public void setInboundDate(String inboundDate) {
-        this.inbounddate = inboundDate;
+    public void setInbounddate(String inbounddate) {
+        this.inbounddate = inbounddate;
     }
 
     public String getCustomer() {
@@ -52,19 +62,20 @@ public class InboundData {
         this.warehouse = warehouse;
     }
 
-    public List<InboundDetail> getInboundDetailList() {
+    public List<InboundDetail> getItems() {
         return items;
     }
 
-    public void setInboundDetailList(List<InboundDetail> items) {
+    public void setItems(List<InboundDetail> items) {
         this.items = items;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("InboundData{");
-        sb.append("inboundNo='").append(inboundno).append('\'');
-        sb.append(", inboundDate='").append(inbounddate).append('\'');
+        sb.append("id='").append(id).append('\'');
+        sb.append(", inboundno='").append(inboundno).append('\'');
+        sb.append(", inbounddate='").append(inbounddate).append('\'');
         sb.append(", customer='").append(customer).append('\'');
         sb.append(", warehouse='").append(warehouse).append('\'');
         sb.append(", items=").append(items);
