@@ -24,6 +24,7 @@ import com.multiqrscanner.inbound.model.InboundDetail;
 import com.multiqrscanner.misc.MiscUtil;
 import com.multiqrscanner.navdrawer.NavigationViewActivity;
 import com.multiqrscanner.network.RetrofitClientInstance;
+import com.multiqrscanner.network.RetrofitClientInstanceInbound;
 import com.multiqrscanner.network.model.InboundItemDetail;
 import com.multiqrscanner.network.model.InboundVerifySerialNo;
 import com.multiqrscanner.network.model.RetroInboundId;
@@ -432,7 +433,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
 
     public void verifyInboundDetails() {
         progressBar.setVisibility(View.VISIBLE);
-        GetInboundsService service = RetrofitClientInstance.getRetrofitInstance().create(GetInboundsService.class);
+        GetInboundsService service = RetrofitClientInstanceInbound.getRetrofitInstanceInbound().create(GetInboundsService.class);
         String idWarehouse = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityWSID);
         String userID = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityUserID);
         Log.d(TAG, "verifyInboundDetails: id warehouse " + idWarehouse + " userID = " + userID);
@@ -448,7 +449,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
             public void onResponse(Call<RetroInboundsVerifyResponse> call, Response<RetroInboundsVerifyResponse> response) {
                 progressBar.setVisibility(View.GONE);
                 if (response.body() != null && response.body().getResultCode() > 0) {
-                    Toast.makeText(GoodsVerificationActivity.this, "Success verify inbound", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(GoodsVerificationActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
                     clearSharedPreferences();
                     onBackPressed();
                 } else {
@@ -458,6 +459,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<RetroInboundsVerifyResponse> call, Throwable t) {
+                Log.d(TAG, "onFailure: "+t.getMessage());
                 Toast.makeText(GoodsVerificationActivity.this, "Failed to connect to api", Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.GONE);
             }
