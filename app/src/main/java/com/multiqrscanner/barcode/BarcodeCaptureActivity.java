@@ -42,6 +42,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import com.multiqrscanner.inbound.GoodsVerificationScanResultActivity;
@@ -94,7 +95,9 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
     // helper objects for detecting taps and pinches.
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
-
+    // use a compound button so either checkbox or switch widgets work.
+    private CompoundButton autoFocus;
+    private CompoundButton useFlash;
     private Button btnScan;
 
     /**
@@ -108,19 +111,38 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay<BarcodeGraphic>) findViewById(R.id.graphicOverlay);
+        autoFocus = (CompoundButton) findViewById(R.id.auto_focus);
+        useFlash = (CompoundButton) findViewById(R.id.use_flash);
+        autoFocus.setVisibility(View.GONE);
+        useFlash.setVisibility(View.GONE);
 
         // read parameters from the intent used to launch the activity.
-        boolean autoFocus = getIntent().getBooleanExtra(AutoFocus, false);
-        boolean useFlash = getIntent().getBooleanExtra(UseFlash, false);
+        boolean autoFocusExtra = getIntent().getBooleanExtra(AutoFocus, false);
+        boolean useFlashExtra = getIntent().getBooleanExtra(UseFlash, false);
 
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED) {
-            createCameraSource(autoFocus, useFlash);
+            createCameraSource(autoFocusExtra, useFlashExtra);
         } else {
             requestCameraPermission();
         }
+
+        autoFocus.setOnCheckedChangeListener((compoundButton, b) -> {
+            Log.d(TAG, "onCreate: auto focus compoundButton = "+compoundButton.isChecked());
+        });
+        useFlash.setOnCheckedChangeListener((compoundButton, b) -> {
+            Log.d(TAG, "onCreate: use flash compoundButton = "+compoundButton.isChecked());
+            if (rc == PackageManager.PERMISSION_GRANTED) {
+//                if (mPreview != null) {
+//                    mPreview.release();
+//                }
+                createCameraSource(autoFocusExtra, compoundButton.isChecked());
+            } else {
+                requestCameraPermission();
+            }
+        });
 
         gestureDetector = new GestureDetector(this, new CaptureGestureListener());
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
@@ -137,50 +159,50 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
         });
     }
 
-    private void getScreen(String filePath) {
-        Toast.makeText(this, "saved", Toast.LENGTH_SHORT).show();
-        File file = new File(filePath);
-        // be sure to call the createBitmap that returns a mutable Bitmap
-        Bitmap bmp = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        Canvas cvs = new Canvas(bmp);
-        mPreview.draw(cvs);
-        try (FileOutputStream out = new FileOutputStream(file)) {
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, out); // bmp is your Bitmap instance
-            // PNG is a lossless format, the compression factor (100) is ignored
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    private void getScreen(String filePath) {
+//        Toast.makeText(this, "saved", Toast.LENGTH_SHORT).show();
+//        File file = new File(filePath);
+//        // be sure to call the createBitmap that returns a mutable Bitmap
+//        Bitmap bmp = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+//        Canvas cvs = new Canvas(bmp);
+//        mPreview.draw(cvs);
+//        try (FileOutputStream out = new FileOutputStream(file)) {
+//            bmp.compress(Bitmap.CompressFormat.JPEG, 100, out); // bmp is your Bitmap instance
+//            // PNG is a lossless format, the compression factor (100) is ignored
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
-    private String takeImage() {
-        String filePath = "";
-        Date now = new Date();
-        android.text.format.DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
-        filePath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpg";
-        getScreen(filePath);
-        return filePath;
-    }
+//    private String takeImage() {
+//        String filePath = "";
+//        Date now = new Date();
+//        android.text.format.DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
+//        filePath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpg";
+//        getScreen(filePath);
+//        return filePath;
+//    }
 
-    private Bitmap resize(Bitmap image, int maxWidth, int maxHeight) {
-        if (maxHeight > 0 && maxWidth > 0) {
-            int width = image.getWidth();
-            int height = image.getHeight();
-            float ratioBitmap = (float) width / (float) height;
-            float ratioMax = (float) maxWidth / (float) maxHeight;
-
-            int finalWidth = maxWidth;
-            int finalHeight = maxHeight;
-            if (ratioMax > 1) {
-                finalWidth = (int) ((float) maxHeight * ratioBitmap);
-            } else {
-                finalHeight = (int) ((float) maxWidth / ratioBitmap);
-            }
-            image = Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true);
-            return image;
-        } else {
-            return image;
-        }
-    }
+//    private Bitmap resize(Bitmap image, int maxWidth, int maxHeight) {
+//        if (maxHeight > 0 && maxWidth > 0) {
+//            int width = image.getWidth();
+//            int height = image.getHeight();
+//            float ratioBitmap = (float) width / (float) height;
+//            float ratioMax = (float) maxWidth / (float) maxHeight;
+//
+//            int finalWidth = maxWidth;
+//            int finalHeight = maxHeight;
+//            if (ratioMax > 1) {
+//                finalWidth = (int) ((float) maxHeight * ratioBitmap);
+//            } else {
+//                finalHeight = (int) ((float) maxWidth / ratioBitmap);
+//            }
+//            image = Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true);
+//            return image;
+//        } else {
+//            return image;
+//        }
+//    }
 
     private void btnScanClick() {
         BarcodeGraphic graphic = mGraphicOverlay.getFirstGraphic();
