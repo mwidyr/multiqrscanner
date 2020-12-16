@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/WhiteSmoke"
+    android:background="@color/White"
     tools:context=".inbound.GoodsVerificationScanResultActivity">
 
     <TextView
@@ -12,12 +12,13 @@
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
         android:text="Inbound No."
         android:textColor="@color/Black"
+        android:fontFamily="@font/ubuntu_light"
         android:textSize="15sp"
-        app:layout_constraintBottom_toTopOf="@+id/table_view_goods_verif_result"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_goods_verif_scan_result" />
 
     <TextView
         android:id="@+id/tv_goods_verif_result_inbound_no_div"
@@ -35,94 +36,149 @@
         android:id="@+id/tv_goods_verif_result_inbound_no_val"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:layout_marginEnd="8dp"
         android:text=""
         android:textColor="@color/Black"
         android:textSize="15sp"
+        android:fontFamily="@font/ubuntu_light"
         app:layout_constraintBottom_toBottomOf="@+id/tv_goods_verif_result_inbound_no"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/tv_goods_verif_result_inbound_no_div"
         app:layout_constraintTop_toTopOf="@+id/tv_goods_verif_result_inbound_no" />
+
+    <android.support.constraint.ConstraintLayout
+        android:background="@drawable/square_borderline_gray"
+        android:id="@+id/custom_top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/custom_top_bar_back_button"
+            android:layout_width="40dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/ic_baseline_keyboard_backspace_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Goods Verification"
+            android:fontFamily="@font/ubuntu_light"
+            android:textAlignment="textStart"
+            android:textColor="@color/Black"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.constraint.ConstraintLayout>
 
     <TextView
         android:id="@+id/tv_goods_verif_scan_result"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:text="Scan Result"
+        android:fontFamily="@font/ubuntu_light"
         android:textColor="@color/Black"
-        android:textSize="25sp"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/custom_top_bar" />
 
-    <de.codecrafters.tableview.TableView
-        app:tableView_headerColor="@color/MediumSeaGreen"
-        android:divider="@color/Black"
-        android:dividerHeight="1dip"
-        android:id="@+id/table_view_goods_verif_result"
-        android:layout_width="wrap_content"
-        android:layout_height="300dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/btn_goods_verif_result_scan"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_goods_verif_scan_result"
-        app:tableView_columnCount="3" />
 
-    <Button
-        android:id="@+id/btn_goods_verif_result_scan"
-        android:layout_width="102dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/round_green_dark"
-        android:text="Scan Again"
-        android:textColor="@color/WhiteSmoke"
-        app:layout_constraintBottom_toTopOf="@+id/iv_goods_verif_scan_result"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <Button
-        android:id="@+id/btn_goods_verif_result_confirm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/round_green"
-        android:text="Submit"
-        android:textColor="@color/WhiteSmoke"
-        app:layout_constraintBottom_toBottomOf="@+id/btn_goods_verif_result_scan"
-        app:layout_constraintEnd_toStartOf="@+id/btn_goods_verif_result_scan"
-        app:layout_constraintTop_toTopOf="@+id/btn_goods_verif_result_scan" />
-
-    <Button
-        android:id="@+id/btn_goods_verif_cancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/round_green"
-        android:text="Cancel"
-        android:textColor="@color/WhiteSmoke"
-        app:layout_constraintBottom_toBottomOf="@+id/btn_goods_verif_result_confirm"
-        app:layout_constraintEnd_toStartOf="@+id/btn_goods_verif_result_confirm"
-        app:layout_constraintTop_toTopOf="@+id/btn_goods_verif_result_confirm" />
-
-    <ImageView
-        android:id="@+id/iv_goods_verif_scan_result"
+    <LinearLayout
+        android:id="@+id/linear_layout_rv"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:layout_weight="10"
-        android:background="#FFCCCCCC"
-        android:textColor="#FF000000"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/round_borderline_black"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_goods_verif_result_inbound_no_val">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/goods_verif_result_detail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/parent" />
+
+    </LinearLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/constraintLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/round_borderline_gray"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.993" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/tv_rescan"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/ubuntu_light"
+            android:gravity="bottom|center"
+            android:text="Rescan"
+            android:textColor="@color/Black"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_submit"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:fontFamily="@font/ubuntu_light"
+            android:gravity="bottom|center"
+            android:text="Submit"
+            android:textColor="@color/Black"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_cancel"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/ubuntu_light"
+            android:gravity="bottom|center"
+            android:text="Cancel"
+            android:textColor="@color/Black"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

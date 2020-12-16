@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -14,6 +16,11 @@ import android.widget.Toast;
 
 import com.multiqrscanner.R;
 import com.multiqrscanner.ScannerMainActivity;
+import com.multiqrscanner.barcode.BarcodeCaptureActivity;
+import com.multiqrscanner.barcode.MainBarcodeQRCodeActivity;
+import com.multiqrscanner.inbound.adapter.ILoadMore;
+import com.multiqrscanner.inbound.adapter.MyAdapter;
+import com.multiqrscanner.inbound.adapter.ScanResultAdapter;
 import com.multiqrscanner.inbound.model.InboundDetail;
 import com.multiqrscanner.misc.MiscUtil;
 import com.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
@@ -35,24 +42,17 @@ import de.codecrafters.tableview.toolkit.TableDataRowBackgroundProviders;
 public class GoodsVerificationScanResultActivity extends AppCompatActivity {
     private static String TAG = "GVSRA";
     private TextView inboundNoVal;
-    private Button btnScan, btnSubmit, btnCancel;
+    private TextView btnScan, btnSubmit, btnCancel;
+    private ImageView btnBack;
     private Integer totalScanFromParentAct = 0;
     private Integer totalScanFromChildAct = 0;
     private Gson gson = new Gson();
     private String currentSelectedInboundNo;
-    private ImageView imageView;
     private List<InboundDetail> inboundDetailList;
-    private String[][] dataToShow = {};
     HashMap<String, InboundDetail> inboundMap;
-    private static String[] HEADER_TO_SHOW = {"Product", "SN", "Status"};
 
-    public Bitmap readImageFromUri(String filePath) {
-        File imgFile = new File(filePath);
-        if (imgFile.exists()) {
-            return BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-        }
-        return null;
-    }
+    RecyclerView recyclerView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,16 +78,16 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
         String totalScanExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.TotalScanKey);
         totalScanFromParentAct = Integer.parseInt(totalScanExtra);
 
-        String bitmapArrayExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.ImagePathKey);
-        if (!bitmapArrayExtra.trim().equalsIgnoreCase("")) {
-            imageView = findViewById(R.id.iv_goods_verif_scan_result);
-            byte[] byteImage = gson.fromJson(bitmapArrayExtra, byte[].class);
-            Bitmap imageBitmap = BitmapFactory.decodeByteArray(byteImage, 0, byteImage.length);
-            ;
-            if (imageBitmap != null) {
-                imageView.setImageBitmap(imageBitmap);
-            }
-        }
+//        String bitmapArrayExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.ImagePathKey);
+//        if (!bitmapArrayExtra.trim().equalsIgnoreCase("")) {
+//            imageView = findViewById(R.id.iv_goods_verif_scan_result);
+//            byte[] byteImage = gson.fromJson(bitmapArrayExtra, byte[].class);
+//            Bitmap imageBitmap = BitmapFactory.decodeByteArray(byteImage, 0, byteImage.length);
+//            ;
+//            if (imageBitmap != null) {
+//                imageView.setImageBitmap(imageBitmap);
+//            }
+//        }
 
         String qrCodeListExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.QrCodeGsonKey);
         if (!qrCodeListExtra.trim().equalsIgnoreCase("")) {
@@ -128,12 +128,6 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
                         Log.d(TAG, "onCreate: inboundMapSharedPref edited " + inboundMapSharedPref);
                         Log.d(TAG, "onCreate: inboundDetailDisplay " + inboundDetailDisplay);
                         setInboundMap(inboundMapSharedPref);
-                        dataToShow = new String[inboundDetailDisplay.size()][3];
-                        for (int i = 0; i < inboundDetailDisplay.size(); i++) {
-                            dataToShow[i][0] = inboundDetailDisplay.get(i).getProductName();
-                            dataToShow[i][1] = inboundDetailDisplay.get(i).getSerialNo();
-                            dataToShow[i][2] = inboundDetailDisplay.get(i).getStatus();
-                        }
                         this.inboundDetailList = inboundDetailDisplay;
                         int totalInboundDisplayNotVerified = 0;
                         for (InboundDetail inboundDetail : inboundDetailDisplay) {
@@ -146,7 +140,10 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
                 }
             }
         }
-        initTable();
+        recyclerView = findViewById(R.id.goods_verif_result_detail);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        setAdapterData();
+//        initTable();
         initializeBtn();
         if (totalScanFromChildAct > 0) {
             btnSubmit.setVisibility(View.VISIBLE);
@@ -154,37 +151,38 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
         }
     }
 
+    public void setAdapterData() {
+        ScanResultAdapter adapter;
+        adapter = new ScanResultAdapter(recyclerView, this, inboundDetailList);
+        recyclerView.setAdapter(adapter);
+        adapter.setLoadMore(new ILoadMore() {
+            @Override
+            public void onLoadMore() {
+
+            }
+        });
+    }
+
     private void setInboundMap(HashMap<String, InboundDetail> inboundMapInput) {
         this.inboundMap = inboundMapInput;
     }
 
-    public void initTable() {
-        TableView<String[]> tableView = findViewById(R.id.table_view_goods_verif_result);
-        tableView.setHeaderAdapter(new SimpleTableHeaderAdapter(this, HEADER_TO_SHOW));
-        TableColumnDpWidthModel columnModel = new TableColumnDpWidthModel(this, 3, 150);
-        columnModel.setColumnWidth(0, 150);
-        columnModel.setColumnWidth(1, 80);
-        columnModel.setColumnWidth(2, 80);
-        tableView.setColumnModel(columnModel);
-        tableView.setDataAdapter(new SimpleTableDataAdapter(this, dataToShow));
-        int colorEvenRows = getResources().getColor(R.color.LightSlateGray);
-        int colorOddRows = getResources().getColor(R.color.Gray);
-        tableView.setDataRowBackgroundProvider(TableDataRowBackgroundProviders.alternatingRowColors(colorEvenRows, colorOddRows));
-    }
-
     public void initializeBtn() {
-        btnScan = findViewById(R.id.btn_goods_verif_result_scan);
-        btnSubmit = findViewById(R.id.btn_goods_verif_result_confirm);
-        btnCancel = findViewById(R.id.btn_goods_verif_cancel);
+        btnScan = findViewById(R.id.tv_rescan);
+        btnSubmit = findViewById(R.id.tv_submit);
+        btnCancel = findViewById(R.id.tv_cancel);
+        btnBack = findViewById(R.id.custom_top_bar_back_button);
+        btnBack.setOnClickListener(view -> {
+            onBackPressed();
+        });
         btnScan.setOnClickListener(view -> {
-            Intent intent = new Intent(this, ScannerMainActivity.class);
-            intent.putExtra(MiscUtil.TotalScanKey, totalScanFromParentAct.toString());
-            intent.putExtra(MiscUtil.FromActivityKey, MiscUtil.GoodsVerificationValue);
-            intent.putExtra(MiscUtil.InboundNoKey, currentSelectedInboundNo);
-            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.FromActivityKey, MiscUtil.GoodsVerificationValue);
-            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanFromParentAct.toString());
-            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
-            startActivity(intent);
+            finish();
+            // launch barcode activity.RC_BARCODE_CAPTURE
+            Intent intent = new Intent(this, BarcodeCaptureActivity.class);
+            intent.putExtra(BarcodeCaptureActivity.AutoFocus, true);
+            intent.putExtra(BarcodeCaptureActivity.UseFlash, false);
+            MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.ListBarcodeKey);
+            startActivityForResult(intent, MainBarcodeQRCodeActivity.RC_BARCODE_CAPTURE);
             finish();
         });
         btnSubmit.setOnClickListener(view -> {
