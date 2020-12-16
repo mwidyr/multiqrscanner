@@ -6,15 +6,10 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 
-import com.multiqrscanner.navdrawer.NavigationViewActivity;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import com.google.gson.Gson;
+
+import java.util.Calendar;
 
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.shapes.Polygon2D_F64;
@@ -38,11 +33,15 @@ public class MiscUtil {
     public static String LoginActivityWS = "login_activity_WS";
     public static String LoginActivityUserID = "login_activity_user_id";
     public static String LoginActivityWSID = "login_activity_ws_id";
-	public static String ImagePathKey = "imagePath";
-	public static String QrCodeGsonKey = "qr_code_gson";
+    public static String ImagePathKey = "imagePath";
+    public static String QrCodeGsonKey = "qr_code_gson";
 
-
-
+    public static Long getCurrentTimeInMilis(Calendar inputCalendar) {
+        if (inputCalendar == null) {
+            inputCalendar = Calendar.getInstance();
+        }
+        return inputCalendar.getTimeInMillis();
+    }
 
     public static void renderPolygon(Polygon2D_F64 s, Path path, Canvas canvas, Paint paint) {
         path.reset();
@@ -75,12 +74,12 @@ public class MiscUtil {
         editor.apply();
     }
 
-	public static void clearStringSharedPreferenceAsString(Context mContext, String key) {
-		SharedPreferences mSettings = mContext.getSharedPreferences(mypreference, Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = mSettings.edit();
-		editor.remove(key);
-		editor.commit();
-	}
+    public static void clearStringSharedPreferenceAsString(Context mContext, String key) {
+        SharedPreferences mSettings = mContext.getSharedPreferences(mypreference, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.remove(key);
+        editor.commit();
+    }
 
     public static String getStringSharedPreferenceByKey(Context mContext, String key) {
         SharedPreferences mSettings = mContext.getSharedPreferences(mypreference, Context.MODE_PRIVATE);

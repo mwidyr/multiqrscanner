@@ -2,11 +2,12 @@ package com.multiqrscanner.inbound.model;
 
 public class InboundDetail {
     private String lineNo, sku, serialNo, productName, qty, subkey, status;
+    private Long inputDate;
 
     public InboundDetail() {
     }
 
-    public InboundDetail(String lineNo, String sku, String serialNo, String productName, String qty, String subkey, String status) {
+    public InboundDetail(String lineNo, String sku, String serialNo, String productName, String qty, String subkey, String status, Long inputDate) {
         this.lineNo = lineNo;
         this.sku = sku;
         this.serialNo = serialNo;
@@ -14,14 +15,7 @@ public class InboundDetail {
         this.qty = qty;
         this.subkey = subkey;
         this.status = status;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
+        this.inputDate = inputDate;
     }
 
     public String getLineNo() {
@@ -72,9 +66,25 @@ public class InboundDetail {
         this.subkey = subkey;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Long getInputDate() {
+        return inputDate;
+    }
+
+    public void setInputDate(Long inputDate) {
+        this.inputDate = inputDate;
+    }
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Inbound{");
+        final StringBuilder sb = new StringBuilder("InboundDetail{");
         sb.append("lineNo='").append(lineNo).append('\'');
         sb.append(", sku='").append(sku).append('\'');
         sb.append(", serialNo='").append(serialNo).append('\'');
@@ -82,6 +92,7 @@ public class InboundDetail {
         sb.append(", qty='").append(qty).append('\'');
         sb.append(", subkey='").append(subkey).append('\'');
         sb.append(", status='").append(status).append('\'');
+        sb.append(", inputDate='").append(inputDate).append('\'');
         sb.append('}');
         return sb.toString();
     }

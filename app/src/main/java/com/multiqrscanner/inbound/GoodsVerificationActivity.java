@@ -38,6 +38,8 @@ import com.multiqrscanner.network.user.GetInboundsService;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +58,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
     private static String TAG = "GVA";
     private String currentSelectedInboundNo = "";
     public static Integer totalScanParent = 0;
+    public static Integer totalScanVerified = 0;
     public static String StatusVerified = "Y";
     public static String StatusNotVerified = "N";
     private static final String ALL_WAREHOUSE = "All Warehouse";
@@ -237,7 +240,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                                 inboundItemDetail.getSku(), inboundItemDetail.getSerialno() == null ? "" : inboundItemDetail.getSerialno(),
                                 inboundItemDetail.getProductname(), inboundItemDetail.getQty() + "",
                                 inboundItemDetail.getSubkey() == null ? "" : inboundItemDetail.getSubkey(),
-                                inboundItemDetail.getVerif()));
+                                inboundItemDetail.getVerif(), 0L));
                     }
                     HashMap<String, InboundDetail> inboundMap = new HashMap<>();
                     for (InboundDetail data : inboundList) {
@@ -247,25 +250,50 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                         }
                         inboundMap.put(data.getSerialNo(), new InboundDetail(data.getLineNo(), data.getSku(),
                                 data.getSerialNo(), data.getProductName(), data.getQty(),
-                                data.getSubkey(), defaultStatus));
+                                data.getSubkey(), defaultStatus, data.getInputDate()));
                     }
-                    dataToShow = new String[inboundMap.size()][6];
+                    String[][] dataToShowTemp = new String[inboundMap.size()][6];
+                    Log.d(TAG, "onResponse:setDataToVerifiedAndSavedPref before verif");
+
+                    Gson gson = new Gson();
+                    String inboundMapString = MiscUtil.getStringSharedPreferenceByKey(GoodsVerificationActivity.this, MiscUtil.InboundListDetail);
+                    Log.d(TAG, "onResponse: sharedPref " + inboundMapString);
+                    Log.d(TAG, "onResponse: savedMap " + inboundMap);
+                    if (!inboundMapString.trim().equalsIgnoreCase("")) {
+                        HashMap<String, InboundDetail> inboundDetailListScanned = gson.fromJson(inboundMapString, new TypeToken<HashMap<String, InboundDetail>>() {
+                        }.getType());
+                        Log.d(TAG, "onResponse: inboundDetailListScanned " + inboundDetailListScanned);
+                        inboundMap = inboundDetailListScanned;
+                    }
+                    setInboundMap(inboundMap);
+                    Log.d(TAG, "onResponse: after edit savedMap " + inboundMap);
+
                     // Iterating over keys only
                     int idx = 0;
                     for (String key : inboundMap.keySet()) {
                         InboundDetail inboundDetailData = inboundMap.get(key);
-                        if (inboundDetailData != null) {
-                            int lineNumber = idx + 1;
-                            dataToShow[idx][0] = inboundDetailData.getLineNo();
-                            dataToShow[idx][1] = inboundDetailData.getSku();
-                            dataToShow[idx][2] = inboundDetailData.getSerialNo();
-                            dataToShow[idx][3] = inboundDetailData.getProductName();
-                            dataToShow[idx][4] = inboundDetailData.getQty();
-                            dataToShow[idx][5] = inboundDetailData.getSubkey();
+                        if (inboundDetailData != null && inboundDetailData.getStatus().equalsIgnoreCase(StatusVerified)) {
+                            dataToShowTemp[idx][0] = inboundDetailData.getLineNo();
+                            dataToShowTemp[idx][1] = inboundDetailData.getSku();
+                            dataToShowTemp[idx][2] = inboundDetailData.getSerialNo();
+                            dataToShowTemp[idx][3] = inboundDetailData.getProductName();
+                            dataToShowTemp[idx][4] = inboundDetailData.getQty();
+                            dataToShowTemp[idx][5] = inboundDetailData.getSubkey();
                             idx++;
                         }
                     }
-                    setInboundMap(inboundMap);
+                    totalScanVerified = idx;
+                    dataToShow = new String[idx][6];
+                    for (int i = 0; i<idx;i++) {
+                        Log.d(TAG, "onResponse: "+ Arrays.toString(dataToShowTemp[i]));
+                            dataToShow[i][0] = dataToShowTemp[i][0];
+                            dataToShow[i][1] = dataToShowTemp[i][1];
+                            dataToShow[i][2] = dataToShowTemp[i][2];
+                            dataToShow[i][3] = dataToShowTemp[i][3];
+                            dataToShow[i][4] = dataToShowTemp[i][4];
+                            dataToShow[i][5] = dataToShowTemp[i][5];
+                        Log.d(TAG, "onResponse: "+ Arrays.toString(dataToShow[i]));
+                    }
                     setTableData();
                     setInboundDetailValue(false, currentSelectedInboundNo, data);
                 }
@@ -333,18 +361,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.FromActivityKey, MiscUtil.GoodsVerificationValue);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanParent.toString());
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
-                // use getter and setter to set inboundlist in shared preference
                 Gson gson = new Gson();
-                String inboundListScannedString = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundListScanned);
-                if (!inboundListScannedString.trim().equalsIgnoreCase("")) {
-                    List<InboundDetail> inboundDetailListScanned = gson.fromJson(inboundListScannedString, new TypeToken<ArrayList<InboundDetail>>() {
-                    }.getType());
-                    for (InboundDetail inboundDetail2 : inboundDetailListScanned) {
-                        if (inboundMap.get(inboundDetail2.getSerialNo()) != null) {
-                            Objects.requireNonNull(inboundMap.get(inboundDetail2.getSerialNo())).setStatus(StatusVerified);
-                        }
-                    }
-                }
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
                 startActivity(intent);
             }
@@ -352,6 +369,10 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         verifConfirm.setVisibility(View.GONE);
         verifCancel.setVisibility(View.GONE);
         verifScan.setVisibility(View.GONE);
+    }
+
+    public void setDataToVerifiedAndSavedPref(Long dateInMilis) {
+
     }
 
     public void clearSharedPreferences() {
@@ -420,8 +441,8 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                 inboundDate.setText(convertAPIDateToUIDate(inboundData.getInbounddate()));
                 inboundCustomer.setText(inboundData.getCustomer());
                 inboundWarehouse.setText(inboundData.getWarehouse());
-                if (totalScanParent > 0) {
-                    totalScan.setText(totalScanParent.toString());
+                if (totalScanVerified > 0) {
+                    totalScan.setText(totalScanVerified.toString());
                 } else {
                     totalScan.setText("0");
                 }
@@ -440,10 +461,12 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         List<InboundVerifySerialNo> listSerialNo = new ArrayList<>();
         for (InboundDetail inboundDetail : inboundMap.values()) {
             if (inboundDetail.getStatus().trim().equalsIgnoreCase(StatusVerified)) {
-                listSerialNo.add(new InboundVerifySerialNo(inboundDetail.getSerialNo()));
+                listSerialNo.add(new InboundVerifySerialNo(inboundDetail.getSerialNo(), inboundDetail.getInputDate()));
             }
         }
-        Call<RetroInboundsVerifyResponse> call = service.verifyInboundItemDetail(new RetroInboundVerifyRequest(idWarehouse, userID, StatusVerified, listSerialNo));
+        Log.d(TAG, "verifyInboundDetails: listSerialNo " + listSerialNo.toString());
+        Call<RetroInboundsVerifyResponse> call = service.verifyInboundItemDetail(new RetroInboundVerifyRequest(idWarehouse, userID,
+                StatusVerified, MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()), listSerialNo));
         call.enqueue(new Callback<RetroInboundsVerifyResponse>() {
             @Override
             public void onResponse(Call<RetroInboundsVerifyResponse> call, Response<RetroInboundsVerifyResponse> response) {
@@ -459,7 +482,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<RetroInboundsVerifyResponse> call, Throwable t) {
-                Log.d(TAG, "onFailure: "+t.getMessage());
+                Log.d(TAG, "onFailure: " + t.getMessage());
                 Toast.makeText(GoodsVerificationActivity.this, "Failed to connect to api", Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.GONE);
             }
