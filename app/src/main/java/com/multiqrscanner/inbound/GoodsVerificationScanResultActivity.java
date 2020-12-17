@@ -1,25 +1,20 @@
 package com.multiqrscanner.inbound;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.multiqrscanner.R;
-import com.multiqrscanner.ScannerMainActivity;
 import com.multiqrscanner.barcode.BarcodeCaptureActivity;
 import com.multiqrscanner.barcode.MainBarcodeQRCodeActivity;
 import com.multiqrscanner.inbound.adapter.ILoadMore;
-import com.multiqrscanner.inbound.adapter.MyAdapter;
 import com.multiqrscanner.inbound.adapter.ScanResultAdapter;
 import com.multiqrscanner.inbound.model.InboundDetail;
 import com.multiqrscanner.misc.MiscUtil;
@@ -27,17 +22,10 @@ import com.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-
-import de.codecrafters.tableview.TableView;
-import de.codecrafters.tableview.model.TableColumnDpWidthModel;
-import de.codecrafters.tableview.toolkit.SimpleTableDataAdapter;
-import de.codecrafters.tableview.toolkit.SimpleTableHeaderAdapter;
-import de.codecrafters.tableview.toolkit.TableDataRowBackgroundProviders;
 
 public class GoodsVerificationScanResultActivity extends AppCompatActivity {
     private static String TAG = "GVSRA";
