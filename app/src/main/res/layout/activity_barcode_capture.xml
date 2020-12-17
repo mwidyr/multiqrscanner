@@ -7,7 +7,42 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/White">
+
+    <android.support.constraint.ConstraintLayout
+        android:background="@drawable/square_borderline_gray"
+        android:id="@+id/custom_top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/custom_top_bar_back_button"
+            android:layout_width="40dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/ic_baseline_keyboard_backspace_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Goods Verification"
+            android:textAlignment="textStart"
+            android:textColor="@color/Black"
+            android:textSize="18sp"
+            android:fontFamily="@font/ubuntu_light"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.constraint.ConstraintLayout>
 
     <com.multiqrscanner.barcode.camera.CameraSourcePreview
         android:id="@+id/preview"
@@ -26,36 +61,72 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-      <CheckBox
-          android:id="@+id/auto_focus"
-          android:layout_width="120dp"
-          android:layout_height="wrap_content"
-          android:layout_marginStart="8dp"
-          android:background="@drawable/round_green"
-          android:checked="false"
-          android:text="@string/auto_focus"
-          android:textColor="@color/Black"
-          app:layout_constraintBottom_toBottomOf="parent"
-          app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintTop_toTopOf="parent" />
+        <View
+            android:id="@+id/divider"
+            android:layout_width="10dp"
+            android:layout_height="1dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-      <CheckBox
-          android:id="@+id/use_flash"
-          android:layout_width="120dp"
-          android:layout_height="wrap_content"
-          android:layout_marginEnd="8dp"
-          android:background="@drawable/round_green"
-          android:checked="false"
-          android:text="@string/use_flash"
-          android:textColor="@color/Black"
-          app:layout_constraintBottom_toBottomOf="parent"
-          app:layout_constraintEnd_toEndOf="parent"
-          app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/auto_focus"
+            android:fontFamily="@font/ubuntu_light"
+            android:background="@drawable/round_borderline_gray"
+            android:layout_width="90dp"
+            android:layout_height="30dp"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:text="@string/auto_focus"
+            android:textColor="@color/Black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/divider"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/use_flash"
+            android:fontFamily="@font/ubuntu_light"
+            android:background="@drawable/round_borderline_gray"
+            android:layout_width="90dp"
+            android:layout_height="30dp"
+            android:text="@string/use_flash"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textColor="@color/Black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/divider"
+            app:layout_constraintTop_toTopOf="parent" />
     </android.support.constraint.ConstraintLayout>
 
-    <Button
-        android:id="@+id/btn_scan"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Scan" />
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/constraintLayout_qr_barcode_scan"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/circle_green"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/btn_scan"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/round_white"
+                android:src="@drawable/scan_qr_code_icon"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>
+
+
 </LinearLayout>

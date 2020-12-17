@@ -25,7 +25,7 @@ public class MainBarcodeQRCodeActivity extends Activity implements View.OnClickL
     private TextView statusMessage;
     private TextView barcodeValue;
 
-    private static final int RC_BARCODE_CAPTURE = 9001;
+    public static final int RC_BARCODE_CAPTURE = 9001;
     private static final String TAG = "BarcodeMain";
 
     @Override

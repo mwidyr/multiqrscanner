@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +44,8 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.multiqrscanner.inbound.GoodsVerificationScanResultActivity;
@@ -96,9 +99,11 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
     // use a compound button so either checkbox or switch widgets work.
-    private CompoundButton autoFocus;
-    private CompoundButton useFlash;
-    private Button btnScan;
+    private TextView autoFocus;
+    private TextView useFlash;
+    private ConstraintLayout btnScan;
+    private ImageView verifCancel;
+
 
     /**
      * Initializes the UI and creates the detector pipeline.
@@ -107,14 +112,18 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.activity_barcode_capture);
-        btnScan = (Button) findViewById(R.id.btn_scan);
+        btnScan = findViewById(R.id.constraintLayout_qr_barcode_scan);
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay<BarcodeGraphic>) findViewById(R.id.graphicOverlay);
-        autoFocus = (CompoundButton) findViewById(R.id.auto_focus);
-        useFlash = (CompoundButton) findViewById(R.id.use_flash);
-        autoFocus.setVisibility(View.GONE);
-        useFlash.setVisibility(View.GONE);
+        autoFocus = findViewById(R.id.auto_focus);
+        useFlash = findViewById(R.id.use_flash);
+        verifCancel = findViewById(R.id.custom_top_bar_back_button);
+        verifCancel.setOnClickListener(view -> {
+            onBackPressed();
+        });
+//        autoFocus.setVisibility(View.GONE);
+//        useFlash.setVisibility(View.GONE);
 
         // read parameters from the intent used to launch the activity.
         boolean autoFocusExtra = getIntent().getBooleanExtra(AutoFocus, false);
@@ -129,19 +138,11 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
             requestCameraPermission();
         }
 
-        autoFocus.setOnCheckedChangeListener((compoundButton, b) -> {
-            Log.d(TAG, "onCreate: auto focus compoundButton = "+compoundButton.isChecked());
+        autoFocus.setOnClickListener(view -> {
+            Toast.makeText(this, "Auto Focus clicked", Toast.LENGTH_SHORT).show();
         });
-        useFlash.setOnCheckedChangeListener((compoundButton, b) -> {
-            Log.d(TAG, "onCreate: use flash compoundButton = "+compoundButton.isChecked());
-            if (rc == PackageManager.PERMISSION_GRANTED) {
-//                if (mPreview != null) {
-//                    mPreview.release();
-//                }
-                createCameraSource(autoFocusExtra, compoundButton.isChecked());
-            } else {
-                requestCameraPermission();
-            }
+        useFlash.setOnClickListener(view -> {
+            Toast.makeText(this, "Use Flash clicked", Toast.LENGTH_SHORT).show();
         });
 
         gestureDetector = new GestureDetector(this, new CaptureGestureListener());
@@ -241,7 +242,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
 //                    FileOutputStream stream = new FileOutputStream(finalFilePath);
 //                    stream.write(data);
 //                    stream.close();
-                    saveToSharedPrefAndGoToIntent(data, mBarcodes);
+                saveToSharedPrefAndGoToIntent(data, mBarcodes);
 //                } catch (IOException e) {
 //                    Log.d(TAG, "onPictureTaken: error io " + e.getMessage());
 //                    e.printStackTrace();
@@ -259,7 +260,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, GoodsVerificationScanResultActivity.class);
                 String currentSelectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundNoKey);
                 intent.putExtra(MiscUtil.InboundNoKey, currentSelectedInboundNo);
-                if (imagePath.length>0) {
+                if (imagePath.length > 0) {
                     MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.ImagePathKey, gson.toJson(imagePath));
                     Log.d(TAG, "onCreate: imagePath " + imagePath);
                 }
