@@ -220,9 +220,10 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:background="@drawable/circle_green">
+
                 <View
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_width="36dp"
+                    android:layout_height="33dp"
                     android:layout_gravity="center"
                     android:background="@drawable/new_qr_code_scan"
                     app:layout_constraintBottom_toBottomOf="parent"

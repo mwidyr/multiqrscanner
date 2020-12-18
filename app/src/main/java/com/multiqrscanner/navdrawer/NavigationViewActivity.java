@@ -1,18 +1,25 @@
 package com.multiqrscanner.navdrawer;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +37,7 @@ import java.util.List;
 
 public class NavigationViewActivity extends AppCompatActivity {
     private String TAG = "NVA";
-    private DrawerLayout mDrawerLayout;
+    private LinearLayout btnGoodsVerif, btnPutaway, btnReplenishment, btnMove, btnPickingPlan, btnGoodsShipment;
 
     String headerInbound = "Inbound";
     String headerWarehouse = "Inventory";
@@ -44,10 +51,6 @@ public class NavigationViewActivity extends AppCompatActivity {
 
     String pickingPlan = ("Picking Plan");
     String outgoingVerify = ("Outgoing Verify");
-    ExpandableListAdapter mMenuAdapter;
-    ExpandableListView expandableList;
-    List<ExpandedMenuModel> listDataHeader;
-    HashMap<ExpandedMenuModel, List<String>> listDataChild;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,49 +65,35 @@ public class NavigationViewActivity extends AppCompatActivity {
         MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey);
         // done clear
 
-        final ActionBar ab = getSupportActionBar();
-        /* to set the menu icon image*/
-        ab.setHomeAsUpIndicator(R.drawable.ic_baseline_menu_24);
-        ab.setDisplayHomeAsUpEnabled(true);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        expandableList = (ExpandableListView) findViewById(R.id.navigationmenu);
-        TextView txtRole = (TextView)findViewById(R.id.tx_nva_role_val);
-        TextView txtWarehouse = (TextView)findViewById(R.id.tx_nva_warehouse_val);
+        TextView txtRole = (TextView)findViewById(R.id.tx_role_val);
+        TextView txtWarehouse = (TextView)findViewById(R.id.tx_warehouse_val);
+        TextView txtUsername = (TextView)findViewById(R.id.tx_username);
+
+        btnGoodsVerif = findViewById(R.id.btn_goods_verif);
+        btnPutaway = findViewById(R.id.btn_putaway);
+        btnReplenishment = findViewById(R.id.btn_replenishment);
+        btnMove = findViewById(R.id.btn_move);
+        btnPickingPlan = findViewById(R.id.btn_picking_plan);
+        btnGoodsShipment = findViewById(R.id.btn_goods_shipment);
+
 
         txtRole.setText(MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityRole));
         txtWarehouse.setText(MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityWS));
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-
-        if (navigationView != null) {
-            setupDrawerContent(navigationView);
-        }
+        txtUsername.setText(MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityUser));
 
         prepareListData();
-        mMenuAdapter = new ExpandableListAdapter(this, listDataHeader, listDataChild, expandableList);
 
         // setting list adapter
-        expandableList.setAdapter(mMenuAdapter);
 
-        expandableList.setOnChildClickListener((expandableListView, view, groupPosition, childPosition, id) -> {
-            ExpandableListAdapter eListAdapter = (ExpandableListAdapter) expandableListView.getExpandableListAdapter();
-            String item = (String) eListAdapter.getChild(groupPosition, childPosition);
-            Log.d(TAG, item);
-            if (item.equalsIgnoreCase(inventoryVerif)) {
-                Intent intent = new Intent(NavigationViewActivity.this, GoodsVerificationActivity.class);
-                startActivity(intent);
-            } else {
-                Toast.makeText(NavigationViewActivity.this, item, Toast.LENGTH_SHORT).show();
-            }
-            return false;
-        });
-        expandableList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+        btnGoodsVerif.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onGroupClick(ExpandableListView expandableListView, View view, int i, long l) {
-                //Log.d("DEBUG", "heading clicked");
-                return false;
+            public void onClick(View view) {
+                Intent userInfo = new Intent(NavigationViewActivity.this, GoodsVerificationActivity.class);
+                startActivity(userInfo);
             }
         });
-        Button btnLogout = findViewById(R.id.btn_logout);
+
+        ImageButton btnLogout = findViewById(R.id.btn_logout_main_menu);
         btnLogout.setOnClickListener(view -> {
             Intent intent = new Intent(NavigationViewActivity.this, LoginActivity.class);
             startActivity(intent);
@@ -113,14 +102,11 @@ public class NavigationViewActivity extends AppCompatActivity {
     }
 
     private void prepareListData() {
-        listDataHeader = new ArrayList<>();
-        listDataChild = new HashMap<>();
 
         Gson gson = new Gson();
         String txtMenu = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityMenu);
         List<com.multiqrscanner.network.model.Menu> menus = gson.fromJson(txtMenu,
                 new TypeToken<List<com.multiqrscanner.network.model.Menu>>() {}.getType());
-        Log.d(TAG, "txtMenu = " + menus);
         boolean bInventoryVerif = false;
         boolean bPutaway = false;
         boolean bReplenishment = false;
@@ -151,52 +137,6 @@ public class NavigationViewActivity extends AppCompatActivity {
             }
 
         }
-
-        ExpandedMenuModel item1 = new ExpandedMenuModel();
-        item1.setIconName(headerInbound);
-        item1.setIconImg(android.R.drawable.ic_delete);
-        // Adding data header
-        if(bInventoryVerif)
-            listDataHeader.add(item1);
-
-        ExpandedMenuModel item2 = new ExpandedMenuModel();
-        item2.setIconName(headerWarehouse);
-        item2.setIconImg(android.R.drawable.ic_delete);
-        if(bPutaway || bReplenishment || bInventoryMovement)
-            listDataHeader.add(item2);
-
-        ExpandedMenuModel item3 = new ExpandedMenuModel();
-        item3.setIconName(headerOutbound);
-        item3.setIconImg(android.R.drawable.ic_delete);
-        if(bPickingPlan || bOutgoingVerify)
-            listDataHeader.add(item3);
-
-        // Adding child data
-        List<String> heading1 = new ArrayList<>();
-        if(bInventoryVerif)
-            heading1.add(inventoryVerif);
-
-        List<String> heading2 = new ArrayList<>();
-        if(bPutaway)
-            heading2.add(putaway);
-        if(bReplenishment)
-            heading2.add(replenishment);
-        if(bInventoryMovement)
-            heading2.add(inventoryMovement);
-
-        List<String> heading3 = new ArrayList<>();
-        if(bPickingPlan)
-            heading3.add(pickingPlan);
-        if(bOutgoingVerify)
-            heading3.add(outgoingVerify);
-
-        if(bInventoryVerif)
-            listDataChild.put(listDataHeader.get(0), heading1);// Header, Child data
-        if(bPutaway || bReplenishment || bInventoryMovement)
-            listDataChild.put(listDataHeader.get(1), heading2);
-        if(bPickingPlan || bOutgoingVerify)
-            listDataChild.put(listDataHeader.get(2), heading3);
-
     }
 
     @Override
@@ -204,27 +144,5 @@ public class NavigationViewActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                mDrawerLayout.openDrawer(GravityCompat.START);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void setupDrawerContent(NavigationView navigationView) {
-        //revision: this don't works, use setOnChildClickListener() and setOnGroupClickListener() above instead
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        menuItem.setChecked(true);
-                        mDrawerLayout.closeDrawers();
-                        return true;
-                    }
-                });
-    }
 
 }
