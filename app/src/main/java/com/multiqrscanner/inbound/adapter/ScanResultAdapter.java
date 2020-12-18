@@ -1,6 +1,7 @@
 package com.multiqrscanner.inbound.adapter;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,17 +12,19 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.multiqrscanner.R;
+import com.multiqrscanner.inbound.GoodsVerificationScanResultActivity;
 import com.multiqrscanner.inbound.model.InboundDetail;
+import com.multiqrscanner.qrcode.QrCodeProductValue;
 
 import java.util.List;
 
 class ScanResultItemViewHolder extends RecyclerView.ViewHolder {
-    public TextView serialNo, product, status;
+    public TextView serialNo, sku, status;
 
     public ScanResultItemViewHolder(View itemView) {
         super(itemView);
         serialNo = itemView.findViewById(R.id.serial_no_val);
-        product = itemView.findViewById(R.id.product_val);
+        sku = itemView.findViewById(R.id.sku_val);
         status = itemView.findViewById(R.id.status_val);
     }
 
@@ -32,11 +35,11 @@ public class ScanResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     ILoadMore loadMore;
     boolean isLoading;
     Activity activity;
-    List<InboundDetail> items;
+    List<QrCodeProductValue> items;
     int visibleThreshold = 5;
     int lastVisibleItem, totalItemCount;
 
-    public ScanResultAdapter(RecyclerView recyclerView, Activity activity, List<InboundDetail> items) {
+    public ScanResultAdapter(RecyclerView recyclerView, Activity activity, List<QrCodeProductValue> items) {
         this.activity = activity;
         this.items = items;
 
@@ -82,11 +85,16 @@ public class ScanResultAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
         if (viewHolder instanceof ScanResultItemViewHolder) {
-            InboundDetail item = items.get(position);
+            QrCodeProductValue item = items.get(position);
             ScanResultItemViewHolder itemViewHolder = (ScanResultItemViewHolder) viewHolder;
-            itemViewHolder.serialNo.setText(item.getSerialNo());
-            itemViewHolder.product.setText(item.getProductName());
-            itemViewHolder.status.setText(item.getStatus());
+            String serialNo = item.getSerialNo()+"";
+            itemViewHolder.serialNo.setText(serialNo);
+            itemViewHolder.sku.setText(item.getSku());
+            itemViewHolder.status.setText(item.getValid());
+            itemViewHolder.status.setTextColor(Color.parseColor("#1E90FF"));
+            if(item.getValid().trim().equalsIgnoreCase(GoodsVerificationScanResultActivity.InvalidInbound)){
+                itemViewHolder.status.setTextColor(Color.parseColor("#FF0000"));
+            }
         } else if (viewHolder instanceof LoadingViewHolder) {
             LoadingViewHolder loadingViewHolder = (LoadingViewHolder) viewHolder;
             loadingViewHolder.progressBar.setIndeterminate(true);
