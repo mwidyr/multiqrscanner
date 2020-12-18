@@ -153,11 +153,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="Scan Result"
-        android:textStyle="bold"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/ubuntu_light"
+        android:text="Scan Result"
         android:textColor="@color/Black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/custom_top_bar" />
@@ -239,6 +240,29 @@
                 android:fontFamily="@font/ubuntu_light"/>
         </LinearLayout>
 
+        <View
+            android:id="@+id/view4"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@color/Gray"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/tv_submit"
+            app:layout_constraintStart_toEndOf="@+id/tv_rescan"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/view3"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@color/Gray"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/tv_cancel"
+            app:layout_constraintStart_toEndOf="@+id/tv_submit"
+            app:layout_constraintTop_toTopOf="@+id/tv_submit" />
         <LinearLayout
             android:id="@+id/tv_submit"
             android:layout_width="100dp"
