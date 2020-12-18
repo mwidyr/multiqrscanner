@@ -15,122 +15,120 @@
         android:id="@+id/container_login"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
         android:layout_centerInParent="true"
-        android:layout_centerVertical="true"
+        android:gravity="center"
         android:padding="24dp">
 
-        <ScrollView
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:id="@+id/login_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true">
-            <RelativeLayout
-                android:id="@+id/login_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:orientation="vertical"
-                android:focusable="true"
-                android:focusableInTouchMode="true">
-                <requestFocus/>
+            android:layout_centerInParent="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical">
+            <requestFocus />
 
-                <ImageView
-                    android:id="@+id/login_icon"
+
+            <ImageView
+                android:id="@+id/login_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:padding="100dp"
+                android:src="@drawable/ic_logo_aware_login"
+                android:layout_alignParentTop="true"/>
+
+            <TextView
+                android:id="@+id/login_text_welcome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/login_icon"
+                android:background="@android:color/transparent"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:text="@string/welcome"
+                android:singleLine="true"
+                android:textColor="@color/Black"
+                android:textSize="10sp"
+                android:fontFamily="@font/ubuntu_regular"
+                />
+
+            <EditText
+                android:id="@+id/login_username"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/login_text_welcome"
+                android:background="@drawable/underlines"
+                android:drawableRight="@drawable/ic_icons8_account"
+                android:width="8dp"
+                android:height="8dp"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:padding="12dp"
+                android:singleLine="true"
+                android:textColor="@color/Black"
+                android:textColorHint="@color/Black"
+                android:textSize="16sp" />
+
+            <View
+                android:id="@+id/spacing_login_username"
+                android:layout_width="fill_parent"
+                android:layout_height="1px"
+                android:layout_below="@id/login_username"
+                android:background="@color/LightGrey" />
+
+            <EditText
+                android:id="@+id/login_password"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/spacing_login_username"
+                android:background="@drawable/underlines"
+                android:drawableRight="@drawable/ic_eye_off"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                android:inputType="textPassword"
+                android:padding="12dp"
+                android:singleLine="true"
+                android:textColor="@color/Black"
+                android:textColorHint="@color/Black"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:id="@+id/login_show_password"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/login_password"
+                android:orientation="horizontal"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
+
+                <CheckBox
+                    android:id="@+id/show_hide_password"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_logo_aware"
-                    android:layout_centerHorizontal="true"/>
-
-                <TextView
-                    android:id="@+id/login_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/aware_scanner"
-                    android:textSize="18dp"
-                    android:textColor="@color/ForestGreen"
-                    android:gravity="center"
-                    android:layout_marginBottom="10dp"
-                    android:layout_below="@id/login_icon"/>
-
-                <EditText
-                    android:id="@+id/login_username"
-                    android:singleLine="true"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:background="@android:color/transparent"
-                    android:drawableLeft="@drawable/ic_icons8_account"
-                    android:drawablePadding="8dp"
-                    android:gravity="center_vertical"
-                    android:hint="@string/username"
-                    android:inputType="textEmailAddress"
-                    android:padding="12dp"
+                    android:layout_weight="1"
+                    android:buttonTint="@color/Black"
+                    android:text="@string/show_pwd"
                     android:textColor="@color/Black"
-                    android:textColorHint="@color/Black"
-                    android:textSize="16sp"
-                    android:layout_below="@id/login_title"/>
+                    android:textSize="12sp" />
 
-                <View
-                    android:id="@+id/spacing_login_username"
-                    android:layout_width="fill_parent"
-                    android:layout_height="1px"
-                    android:background="@color/LightGrey"
-                    android:layout_below="@id/login_username"/>
+            </LinearLayout>
 
-                <EditText
-                    android:id="@+id/login_password"
-                    android:singleLine="true"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:drawableLeft="@drawable/ic_lock_outline_48px"
-                    android:drawablePadding="8dp"
-                    android:gravity="center_vertical"
-                    android:hint="@string/password"
-                    android:inputType="textPassword"
-                    android:padding="12dp"
-                    android:textColor="@color/Black"
-                    android:textColorHint="@color/Black"
-                    android:textSize="16sp"
-                    android:layout_below="@id/spacing_login_username"/>
+            <Button
+                android:id="@+id/loginBtn"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/login_show_password"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/rounded_corners"
+                android:padding="4dp"
+                android:text="@string/login"
+                android:textColor="@color/White"
+                android:textSize="16sp" />
+        </RelativeLayout>
 
-                <LinearLayout
-                    android:id="@+id/login_show_password"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingBottom="4dp"
-                    android:paddingTop="4dp"
-                    android:layout_below="@id/login_password">
-
-                    <CheckBox
-                        android:id="@+id/show_hide_password"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/show_pwd"
-                        android:textColor="@color/Black"
-                        android:textSize="12sp"
-                        android:buttonTint="@color/Black"/>
-
-                </LinearLayout>
-
-                <Button
-                    android:id="@+id/loginBtn"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:padding="4dp"
-                    android:text="@string/login"
-                    android:textColor="@color/White"
-                    android:backgroundTint="@color/ForestGreen"
-                    android:textSize="16sp"
-                    android:layout_below="@id/login_show_password"/>
-            </RelativeLayout>
-
-        </ScrollView>
     </RelativeLayout>
 
     <ProgressBar

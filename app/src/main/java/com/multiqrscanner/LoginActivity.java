@@ -18,10 +18,6 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 import com.duxina.baranenergy.baranenergyapps.Utils.CustomToast;
 import com.google.gson.Gson;
 import com.multiqrscanner.misc.MiscUtil;
@@ -30,6 +26,10 @@ import com.multiqrscanner.network.RetrofitClientInstance;
 import com.multiqrscanner.network.model.RetroLogin;
 import com.multiqrscanner.network.model.RetroUser;
 import com.multiqrscanner.network.user.GetLoginService;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -109,6 +109,7 @@ public class LoginActivity extends AppCompatActivity {
                             password.setInputType(InputType.TYPE_CLASS_TEXT);
                             password.setTextAppearance(LoginActivity.this, R.style.fontForShowPassword);
                             password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());// show password
+                            password.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0,R.drawable.ic_eye,0);
                         } else {
                             show_hide_password.setText(R.string.show_pwd);// change
                             // checkbox
@@ -116,6 +117,7 @@ public class LoginActivity extends AppCompatActivity {
                             password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                             password.setTextAppearance(LoginActivity.this, R.style.fontForShowPassword);
                             password.setTransformationMethod(PasswordTransformationMethod.getInstance());// hide password
+                            password.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0,R.drawable.ic_eye_off,0);
                         }
                     }
                 });
