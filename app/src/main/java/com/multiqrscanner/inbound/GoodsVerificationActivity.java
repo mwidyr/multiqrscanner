@@ -11,6 +11,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -80,6 +81,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
     private View view;
     private String[][] dataToShow = {};
 
+    List<String> listInboundNos = new ArrayList<>();
 
     private List<InboundData> inboundDatas;
     RecyclerView recyclerView;
@@ -120,7 +122,6 @@ public class GoodsVerificationActivity extends AppCompatActivity {
             warehouse = "";
         }
         inboundDatas = new ArrayList<>();
-        List<String> listInboundNos = new ArrayList<>();
         GetInboundsService service = RetrofitClientInstance.getRetrofitInstance().create(GetInboundsService.class);
         Call<RetroInbounds> call = service.getInbounds(new RetroWarehouse(warehouse));
         progressBar.setVisibility(View.VISIBLE);
@@ -211,7 +212,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                             setSearchButtonInbound();
                             verifScanTv.setText("Rescan");
                         }
-                    }else{
+                    } else {
                         verifScanTv.setText("Scan");
                     }
                 }
@@ -305,7 +306,6 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                         Log.d(TAG, "onResponse: " + Arrays.toString(dataToShow[i]));
                     }
                     setInboundDetailValue(false, currentSelectedInboundNo, data);
-                    setSearchButtonInbound();
                 }
             }
 
@@ -321,14 +321,19 @@ public class GoodsVerificationActivity extends AppCompatActivity {
     }
 
     public void setSearchButtonInbound() {
+        View viewCoverAutoComplete = findViewById(R.id.layout_to_cover_auto_complete);
         if (inboundNoTextView.getText().toString().trim().equalsIgnoreCase("")) {
             inboundNoTextView.setThreshold(1);
             inboundNoTextView.setClickable(true);
             searchButton.setBackground(getResources().getDrawable(R.drawable.round_green_borderless));
+            viewCoverAutoComplete.setVisibility(View.GONE);
+            inboundNoTextView.setEnabled(true);
         } else {
-            inboundNoTextView.setThreshold(1000);
+            inboundNoTextView.setThreshold(1);
             inboundNoTextView.setClickable(false);
-            searchButton.setBackground(getResources().getDrawable(R.drawable.round_green_borderless));
+            searchButton.setBackground(getResources().getDrawable(R.drawable.round_gray_borderless));
+            viewCoverAutoComplete.setVisibility(View.VISIBLE);
+            inboundNoTextView.setEnabled(false);
         }
     }
 
@@ -355,7 +360,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         });
         verifConfirm.setOnClickListener(view -> {
             LayoutInflater factory = LayoutInflater.from(this);
-            final View dialogView = factory.inflate(R.layout.custom_dialog,null);
+            final View dialogView = factory.inflate(R.layout.custom_dialog, null);
             final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
             alertDialog.setView(dialogView);
             alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -374,7 +379,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         });
         verifClear.setOnClickListener(view -> {
             LayoutInflater factory = LayoutInflater.from(this);
-            final View dialogView = factory.inflate(R.layout.custom_dialog,null);
+            final View dialogView = factory.inflate(R.layout.custom_dialog, null);
             final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
             alertDialog.setView(dialogView);
             alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -393,7 +398,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         });
         verifCancel.setOnClickListener(view -> {
             LayoutInflater factory = LayoutInflater.from(this);
-            final View dialogView = factory.inflate(R.layout.custom_dialog,null);
+            final View dialogView = factory.inflate(R.layout.custom_dialog, null);
             final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
             alertDialog.setView(dialogView);
             TextView titleTv = dialogView.findViewById(R.id.txt_dia_title);
@@ -437,7 +442,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         totalScanConstrainLayout.setVisibility(View.GONE);
     }
 
-    public void clearAllData(){
+    public void clearAllData() {
         clearSharedPreferences();
         inboundNoTextView.setText("");
         inboundDate.setText("");
@@ -535,7 +540,12 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                 view.setVisibility(View.GONE);
                 if (response.body() != null && response.body().getResultCode() > 0) {
                     Toast.makeText(GoodsVerificationActivity.this, "Success Confirm Inbound", Toast.LENGTH_SHORT).show();
+                    String selectedInbound = inboundNoTextView.getText().toString();
                     clearAllData();
+                    listInboundNos.remove(selectedInbound);
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(GoodsVerificationActivity.this,
+                            R.layout.spinner_item_inbound, listInboundNos);
+                    inboundNoTextView.setAdapter(adapter);
                 } else {
                     Toast.makeText(GoodsVerificationActivity.this, "Failed verify inbound", Toast.LENGTH_SHORT).show();
                 }
