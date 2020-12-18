@@ -160,51 +160,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
         });
     }
 
-//    private void getScreen(String filePath) {
-//        Toast.makeText(this, "saved", Toast.LENGTH_SHORT).show();
-//        File file = new File(filePath);
-//        // be sure to call the createBitmap that returns a mutable Bitmap
-//        Bitmap bmp = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-//        Canvas cvs = new Canvas(bmp);
-//        mPreview.draw(cvs);
-//        try (FileOutputStream out = new FileOutputStream(file)) {
-//            bmp.compress(Bitmap.CompressFormat.JPEG, 100, out); // bmp is your Bitmap instance
-//            // PNG is a lossless format, the compression factor (100) is ignored
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    private String takeImage() {
-//        String filePath = "";
-//        Date now = new Date();
-//        android.text.format.DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
-//        filePath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpg";
-//        getScreen(filePath);
-//        return filePath;
-//    }
-
-//    private Bitmap resize(Bitmap image, int maxWidth, int maxHeight) {
-//        if (maxHeight > 0 && maxWidth > 0) {
-//            int width = image.getWidth();
-//            int height = image.getHeight();
-//            float ratioBitmap = (float) width / (float) height;
-//            float ratioMax = (float) maxWidth / (float) maxHeight;
-//
-//            int finalWidth = maxWidth;
-//            int finalHeight = maxHeight;
-//            if (ratioMax > 1) {
-//                finalWidth = (int) ((float) maxHeight * ratioBitmap);
-//            } else {
-//                finalHeight = (int) ((float) maxWidth / ratioBitmap);
-//            }
-//            image = Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true);
-//            return image;
-//        } else {
-//            return image;
-//        }
-//    }
-
     private void btnScanClick() {
         BarcodeGraphic graphic = mGraphicOverlay.getFirstGraphic();
         List<String> mBarcodes = new ArrayList<>();
@@ -215,11 +170,11 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
             }.getType());
             String imagePath = takeScreenshot(mBarcodes);
         }
-        if (graphic != null) {
-            Toast.makeText(this, mBarcodes.toString(), Toast.LENGTH_LONG).show();
-        } else {
-            Log.d(TAG, "no barcode detected");
-        }
+//        if (graphic != null) {
+//            Toast.makeText(this, "No Barcode detected", Toast.LENGTH_LONG).show();
+//            Log.d(TAG, "no barcode detected");
+//        } else {
+//        }
     }
 
     @Override

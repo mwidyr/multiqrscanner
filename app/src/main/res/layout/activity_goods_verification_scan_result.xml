@@ -48,6 +48,72 @@
         app:layout_constraintTop_toTopOf="@+id/tv_goods_verif_result_inbound_no" />
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/detail_scan_layout"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_goods_verif_result_inbound_no_val">
+
+        <TextView
+            android:id="@+id/total_scan_result"
+            android:layout_width="100dp"
+            android:layout_height="25dp"
+            android:background="@drawable/round_green_borderless"
+            android:fontFamily="@font/ubuntu_light"
+            android:gravity="center"
+            android:text="Total Scan: 7"
+            android:textSize="11sp"
+            android:textStyle="italic|bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/total_valid_inbound"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/total_valid_inbound"
+            android:layout_width="100dp"
+            android:layout_height="25dp"
+            android:background="@drawable/round_dark_blue"
+            android:fontFamily="@font/ubuntu_light"
+            android:gravity="center"
+            android:text="Status Valid: 4"
+            android:textSize="11sp"
+            android:textStyle="italic|bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/total_invalid_inbound"
+            android:layout_width="100dp"
+            android:layout_height="25dp"
+            android:background="@drawable/round_red_borderless"
+            android:fontFamily="@font/ubuntu_light"
+            android:gravity="center"
+            android:text="Status Invalid: 3"
+            android:textSize="11sp"
+            android:textStyle="italic|bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/total_valid_inbound"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@color/Gray"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
         android:background="@drawable/square_borderline_gray"
         android:id="@+id/custom_top_bar"
         android:layout_width="match_parent"
@@ -72,6 +138,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:text="Goods Verification"
+            android:textStyle="bold"
             android:fontFamily="@font/ubuntu_light"
             android:textAlignment="textStart"
             android:textColor="@color/Black"
@@ -87,6 +154,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="Scan Result"
+        android:textStyle="bold"
         android:fontFamily="@font/ubuntu_light"
         android:textColor="@color/Black"
         android:textSize="16sp"
@@ -108,7 +176,7 @@
         app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_goods_verif_result_inbound_no_val">
+        app:layout_constraintTop_toBottomOf="@+id/detail_scan_layout">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/goods_verif_result_detail"
@@ -137,47 +205,87 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <TextView
+        <LinearLayout
             android:id="@+id/tv_rescan"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginStart="8dp"
-            android:fontFamily="@font/ubuntu_light"
             android:gravity="bottom|center"
-            android:text="Rescan"
-            android:textColor="@color/Black"
-            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:orientation="vertical">
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/circle_green">
+                <View
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/new_qr_code_scan"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </android.support.constraint.ConstraintLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Rescan"
+                android:gravity="center"
+                android:textColor="@color/Black"
+                android:textSize="20sp"
+                android:fontFamily="@font/ubuntu_light"/>
+        </LinearLayout>
 
-        <TextView
+        <LinearLayout
             android:id="@+id/tv_submit"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:fontFamily="@font/ubuntu_light"
             android:gravity="bottom|center"
-            android:text="Submit"
-            android:textColor="@color/Black"
-            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:orientation="vertical">
+            <View
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/check_icon"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Submit"
+                android:gravity="center"
+                android:textColor="@color/Black"
+                android:textSize="20sp"
+                android:fontFamily="@font/ubuntu_light"/>
+        </LinearLayout>
 
-        <TextView
+        <LinearLayout
             android:id="@+id/tv_cancel"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginEnd="8dp"
-            android:fontFamily="@font/ubuntu_light"
             android:gravity="bottom|center"
-            android:text="Cancel"
-            android:textColor="@color/Black"
-            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:orientation="vertical">
+            <View
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/remove_icon"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cancel"
+                android:gravity="center"
+                android:textColor="@color/Black"
+                android:textSize="20sp"
+                android:fontFamily="@font/ubuntu_light"/>
+        </LinearLayout>
 
     </android.support.constraint.ConstraintLayout>
 

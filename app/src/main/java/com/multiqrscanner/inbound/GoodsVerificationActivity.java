@@ -2,6 +2,9 @@ package com.multiqrscanner.inbound;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
@@ -9,11 +12,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +32,7 @@ import com.multiqrscanner.inbound.adapter.ILoadMore;
 import com.multiqrscanner.inbound.adapter.MyAdapter;
 import com.multiqrscanner.inbound.model.InboundData;
 import com.multiqrscanner.inbound.model.InboundDetail;
+import com.multiqrscanner.misc.CustomDialogClass;
 import com.multiqrscanner.misc.MiscUtil;
 import com.multiqrscanner.navdrawer.NavigationViewActivity;
 import com.multiqrscanner.network.RetrofitClientInstance;
@@ -65,21 +71,21 @@ public class GoodsVerificationActivity extends AppCompatActivity {
 
     private HashMap<String, InboundDetail> inboundMap;
 
-    private TextView inboundDate, inboundCustomer, inboundWarehouse, totalScan, totalSummaryInbound;
-    private TextView verifConfirm, verifViewDetail, verifScan;
+    private TextView inboundDate, inboundCustomer, inboundWarehouse, totalScan, totalSummaryInbound, searchButton, verifViewDetailTv, verifScanTv;
+    private LinearLayout verifConfirm, verifViewDetail, verifScan, verifClear;
     private ConstraintLayout totalScanConstrainLayout;
     private ImageView verifCancel;
     private ProgressBar progressBar;
-
+    private AutoCompleteTextView inboundNoTextView;
+    private View view;
     private String[][] dataToShow = {};
 
-    private static String[] HEADER_TO_SHOW = {"Line No", "SKU", "Serial No", "Product", "QTY", "SUBKEY"};
 
     private List<InboundData> inboundDatas;
     RecyclerView recyclerView;
     List<InboundDetail> items = new ArrayList<>();
 
-    public void setAdapterData(){
+    public void setAdapterData() {
         MyAdapter adapter;
         adapter = new MyAdapter(recyclerView, this, items);
         recyclerView.setAdapter(adapter);
@@ -95,6 +101,8 @@ public class GoodsVerificationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_goods_verification);
+        view = findViewById(R.id.background_loading);
+        view.setVisibility(View.GONE);
         progressBar = (ProgressBar) findViewById(R.id.login_progressBar);
         progressBar.setVisibility(View.GONE);
         inboundDate = findViewById(R.id.tv_inbound_date_val);
@@ -102,10 +110,6 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         inboundWarehouse = findViewById(R.id.tv_inbound_warehouse_val);
         totalScan = findViewById(R.id.tv_total_scan_val);
         totalSummaryInbound = findViewById(R.id.tv_total_summary_inbounds_val);
-//        //randomize data
-//        for (int i = 0; i < 50; i++) {
-//            items.add(new InboundDetail("", "", "0" + i, "product " + i, "", "", "", (long) i));
-//        }
         recyclerView = findViewById(R.id.goods_verif_detail);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         setAdapterData();
@@ -117,7 +121,6 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         }
         inboundDatas = new ArrayList<>();
         List<String> listInboundNos = new ArrayList<>();
-//        listInboundNos.add("Please Select Inbound");
         GetInboundsService service = RetrofitClientInstance.getRetrofitInstance().create(GetInboundsService.class);
         Call<RetroInbounds> call = service.getInbounds(new RetroWarehouse(warehouse));
         progressBar.setVisibility(View.VISIBLE);
@@ -132,8 +135,6 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                         listInboundNos.add(inboundData1.getInboundno());
                     }
                     initializeBtn();
-//                    setTableData();
-                    AutoCompleteTextView inboundNoTextView = findViewById(R.id.spinner_inbound_no);
                     // Create an ArrayAdapter using the string array and a default spinner layout
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(GoodsVerificationActivity.this,
                             R.layout.spinner_item_inbound, listInboundNos);
@@ -183,7 +184,6 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                                         MiscUtil.saveStringSharedPreferenceAsString(GoodsVerificationActivity.this,
                                                 MiscUtil.LoginActivityWSID, data.getId());
                                         injectData(currentSelectedInboundNo, data);
-//                            setInboundDetailValue(false, currentSelectedInboundNo, data);
                                         verifScan.setVisibility(View.VISIBLE);
                                         verifScan.setClickable(true);
                                         break;
@@ -205,8 +205,14 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                             verifViewDetail.setClickable(true);
                             verifScan.setVisibility(View.VISIBLE);
                             verifScan.setClickable(true);
+                            verifClear.setVisibility(View.VISIBLE);
+                            verifClear.setClickable(true);
                             totalScanConstrainLayout.setVisibility(View.VISIBLE);
+                            setSearchButtonInbound();
+                            verifScanTv.setText("Rescan");
                         }
+                    }else{
+                        verifScanTv.setText("Scan");
                     }
                 }
             }
@@ -220,37 +226,13 @@ public class GoodsVerificationActivity extends AppCompatActivity {
 
     }
 
-//    public void setTableData() {
-//        TableView<String[]> tableView = findViewById(R.id.table_view_goods_verif_page);
-//        SimpleTableHeaderAdapter simpleHeader = new SimpleTableHeaderAdapter(this, HEADER_TO_SHOW);
-//        simpleHeader.setTextSize(12);
-//        tableView.setHeaderAdapter(simpleHeader);
-//        TableColumnDpWidthModel columnModel = new TableColumnDpWidthModel(this, 6, 200);
-//        columnModel.setColumnWidth(0, 70);
-//        columnModel.setColumnWidth(1, 60);
-//        columnModel.setColumnWidth(2, 70);
-//        columnModel.setColumnWidth(3, 100);
-//        columnModel.setColumnWidth(4, 50);
-//        columnModel.setColumnWidth(5, 80);
-//        tableView.setColumnModel(columnModel);
-//        SimpleTableDataAdapter simpleTableData = new SimpleTableDataAdapter(this, dataToShow);
-//        simpleTableData.setTextSize(10);
-//        tableView.setDataAdapter(simpleTableData);
-//        int colorEvenRows = getResources().getColor(R.color.WhiteSmoke);
-//        int colorOddRows = getResources().getColor(R.color.White);
-//        tableView.setDataRowBackgroundProvider(TableDataRowBackgroundProviders.alternatingRowColors(colorEvenRows, colorOddRows));
-//        tableView.setVisibility(View.GONE);
-//    }
 
     public void injectData(String inboundNo, InboundData data) {
         GetInboundsService service = RetrofitClientInstance.getRetrofitInstance().create(GetInboundsService.class);
         Call<RetroInboundsDetail> call = service.getInboundItemDetail(new RetroInboundId(inboundNo));
-        //set loading bar
-//        progressBar.setVisibility(View.VISIBLE);
         call.enqueue(new Callback<RetroInboundsDetail>() {
             @Override
             public void onResponse(Call<RetroInboundsDetail> call, Response<RetroInboundsDetail> response) {
-//                progressBar.setVisibility(View.GONE);
                 if (response.body() != null && response.body().getItems() != null && response.body().getItems().size() > 0) {
                     Log.d(TAG, "role = " + response.body().getItems());
                     List<InboundDetail> inboundList = new ArrayList<>();
@@ -322,14 +304,13 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                         dataToShow[i][5] = dataToShowTemp[i][5];
                         Log.d(TAG, "onResponse: " + Arrays.toString(dataToShow[i]));
                     }
-//                    setTableData();
                     setInboundDetailValue(false, currentSelectedInboundNo, data);
+                    setSearchButtonInbound();
                 }
             }
 
             @Override
             public void onFailure(Call<RetroInboundsDetail> call, Throwable t) {
-//                progressBar.setVisibility(View.GONE);
                 Toast.makeText(GoodsVerificationActivity.this, "Failed Retrieve Inbound Detail", Toast.LENGTH_SHORT).show();
             }
         });
@@ -339,84 +320,143 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         this.inboundMap = inboundMap;
     }
 
+    public void setSearchButtonInbound() {
+        if (inboundNoTextView.getText().toString().trim().equalsIgnoreCase("")) {
+            inboundNoTextView.setThreshold(1);
+            inboundNoTextView.setClickable(true);
+            searchButton.setBackground(getResources().getDrawable(R.drawable.round_green_borderless));
+        } else {
+            inboundNoTextView.setThreshold(1000);
+            inboundNoTextView.setClickable(false);
+            searchButton.setBackground(getResources().getDrawable(R.drawable.round_green_borderless));
+        }
+    }
+
     public void initializeBtn() {
         verifConfirm = findViewById(R.id.btn_goods_verif_confirm);
         verifViewDetail = findViewById(R.id.btn_goods_verif_view_detail);
         verifCancel = findViewById(R.id.custom_top_bar_back_button);
         verifScan = findViewById(R.id.btn_goods_verif_scan);
+        verifClear = findViewById(R.id.btn_goods_verif_clear);
+        verifViewDetailTv = findViewById(R.id.verif_view_detail_text);
+        verifScanTv = findViewById(R.id.verif_btn_scan_tv);
         totalScanConstrainLayout = findViewById(R.id.constraintLayout_total_scan);
+        searchButton = findViewById(R.id.btn_search_inbound);
+        inboundNoTextView = findViewById(R.id.spinner_inbound_no);
+        setSearchButtonInbound();
         verifViewDetail.setOnClickListener(view -> {
             if (recyclerView.getVisibility() == View.GONE) {
                 recyclerView.setVisibility(View.VISIBLE);
+                verifViewDetailTv.setText("Hide");
             } else {
                 recyclerView.setVisibility(View.GONE);
+                verifViewDetailTv.setText("Show");
             }
         });
         verifConfirm.setOnClickListener(view -> {
-            if (Integer.valueOf(String.valueOf(totalScan.getText())).equals(Integer.valueOf(String.valueOf(totalSummaryInbound.getText())))) {
-                new AlertDialog.Builder(this)
-                        .setTitle("")
-                        .setMessage("Are you sure you want to Confirm this Scan?")
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                verifyInboundDetails();
-                            }
-                        })
-                        // A null listener allows the button to dismiss the dialog and take no further action.
-                        .setNegativeButton(android.R.string.no, null)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .show();
-            } else {
-                Toast.makeText(this, "Jumlah Scan tidak sama dengan jumlah summary inbounds", Toast.LENGTH_SHORT).show();
-            }
-
+            LayoutInflater factory = LayoutInflater.from(this);
+            final View dialogView = factory.inflate(R.layout.custom_dialog,null);
+            final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+            alertDialog.setView(dialogView);
+            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            TextView titleTv = dialogView.findViewById(R.id.txt_dia_title);
+            titleTv.setText("Confirm?");
+            TextView descTv = dialogView.findViewById(R.id.txt_dia_desc);
+            descTv.setText("Will confirm the data that you have scanned");
+            dialogView.findViewById(R.id.btn_yes).setOnClickListener(view1 -> {
+                verifyInboundDetails();
+                alertDialog.dismiss();
+            });
+            dialogView.findViewById(R.id.btn_no).setOnClickListener(view1 -> {
+                alertDialog.dismiss();
+            });
+            alertDialog.show();
+        });
+        verifClear.setOnClickListener(view -> {
+            LayoutInflater factory = LayoutInflater.from(this);
+            final View dialogView = factory.inflate(R.layout.custom_dialog,null);
+            final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+            alertDialog.setView(dialogView);
+            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            TextView titleTv = dialogView.findViewById(R.id.txt_dia_title);
+            titleTv.setText("Cancel?");
+            TextView descTv = dialogView.findViewById(R.id.txt_dia_desc);
+            descTv.setText("After you cancel, the data is lost and cannot be canceled");
+            dialogView.findViewById(R.id.btn_yes).setOnClickListener(view1 -> {
+                clearAllData();
+                alertDialog.dismiss();
+            });
+            dialogView.findViewById(R.id.btn_no).setOnClickListener(view1 -> {
+                alertDialog.dismiss();
+            });
+            alertDialog.show();
         });
         verifCancel.setOnClickListener(view -> {
-            new AlertDialog.Builder(this)
-                    .setTitle("")
-                    .setMessage("Are you sure you want to Cancel this Scan?")
-                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            // Continue with delete operation
-                            clearSharedPreferences();
-                            onBackPressed();
-                        }
-                    })
-                    .setNegativeButton(android.R.string.no, null)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .show();
-
+            LayoutInflater factory = LayoutInflater.from(this);
+            final View dialogView = factory.inflate(R.layout.custom_dialog,null);
+            final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+            alertDialog.setView(dialogView);
+            TextView titleTv = dialogView.findViewById(R.id.txt_dia_title);
+            titleTv.setText("Return to home?");
+            TextView descTv = dialogView.findViewById(R.id.txt_dia_desc);
+            descTv.setText("After you return to home, the data is lost and cannot be canceled");
+            dialogView.findViewById(R.id.btn_yes).setOnClickListener(view1 -> {
+                clearAllData();
+                alertDialog.dismiss();
+                onBackPressed();
+            });
+            dialogView.findViewById(R.id.btn_no).setOnClickListener(view1 -> {
+                alertDialog.dismiss();
+            });
+            alertDialog.show();
+            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         });
         verifScan.setOnClickListener(view -> {
             if (currentSelectedInboundNo.trim().equalsIgnoreCase("")) {
                 Toast.makeText(this, "Please choose inbound no first", Toast.LENGTH_SHORT).show();
             } else {
-//                Intent intent = new Intent(this, ScannerMainActivity.class);
-//                intent.putExtra(MiscUtil.TotalScanKey, totalScanParent.toString());
-//                intent.putExtra(MiscUtil.FromActivityKey, MiscUtil.GoodsVerificationValue);
-//                intent.putExtra(MiscUtil.InboundNoKey, currentSelectedInboundNo);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.FromActivityKey, MiscUtil.GoodsVerificationValue);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanParent.toString());
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
                 Gson gson = new Gson();
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
-//                startActivity(intent);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.FromActivityKey, MiscUtil.GoodsVerificationValue);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanParent.toString());
-                // launch barcode activity.RC_BARCODE_CAPTURE
                 Intent intent = new Intent(this, BarcodeCaptureActivity.class);
                 intent.putExtra(BarcodeCaptureActivity.AutoFocus, true);
                 intent.putExtra(BarcodeCaptureActivity.UseFlash, false);
                 MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.ListBarcodeKey);
                 startActivityForResult(intent, MainBarcodeQRCodeActivity.RC_BARCODE_CAPTURE);
-//                finish();
             }
         });
         verifConfirm.setVisibility(View.GONE);
         verifViewDetail.setVisibility(View.GONE);
         verifScan.setVisibility(View.GONE);
+        verifClear.setVisibility(View.GONE);
         totalScanConstrainLayout.setVisibility(View.GONE);
+    }
+
+    public void clearAllData(){
+        clearSharedPreferences();
+        inboundNoTextView.setText("");
+        inboundDate.setText("");
+        inboundCustomer.setText("");
+        inboundWarehouse.setText("");
+        totalScanConstrainLayout.setVisibility(View.GONE);
+        totalScan.setText("");
+        totalSummaryInbound.setText("");
+        verifScanTv.setText("Scan");
+        verifViewDetailTv.setText("Show");
+        totalScanParent = 0;
+        verifConfirm.setVisibility(View.GONE);
+        verifViewDetail.setVisibility(View.GONE);
+        verifClear.setVisibility(View.GONE);
+        verifScan.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.GONE);
+        inboundMap = new HashMap<>();
+        setAdapterData();
+        setSearchButtonInbound();
     }
 
     public void clearSharedPreferences() {
@@ -473,7 +513,8 @@ public class GoodsVerificationActivity extends AppCompatActivity {
     }
 
     public void verifyInboundDetails() {
-//        progressBar.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+        view.setVisibility(View.VISIBLE);
         GetInboundsService service = RetrofitClientInstanceInbound.getRetrofitInstanceInbound().create(GetInboundsService.class);
         String idWarehouse = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityWSID);
         String userID = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityUserID);
@@ -490,11 +531,11 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         call.enqueue(new Callback<RetroInboundsVerifyResponse>() {
             @Override
             public void onResponse(Call<RetroInboundsVerifyResponse> call, Response<RetroInboundsVerifyResponse> response) {
-//                progressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
+                view.setVisibility(View.GONE);
                 if (response.body() != null && response.body().getResultCode() > 0) {
-                    Toast.makeText(GoodsVerificationActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
-                    clearSharedPreferences();
-                    onBackPressed();
+                    Toast.makeText(GoodsVerificationActivity.this, "Success Confirm Inbound", Toast.LENGTH_SHORT).show();
+                    clearAllData();
                 } else {
                     Toast.makeText(GoodsVerificationActivity.this, "Failed verify inbound", Toast.LENGTH_SHORT).show();
                 }
@@ -504,7 +545,8 @@ public class GoodsVerificationActivity extends AppCompatActivity {
             public void onFailure(Call<RetroInboundsVerifyResponse> call, Throwable t) {
                 Log.d(TAG, "onFailure: " + t.getMessage());
                 Toast.makeText(GoodsVerificationActivity.this, "Failed to connect to api", Toast.LENGTH_SHORT).show();
-//                progressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
+                view.setVisibility(View.GONE);
             }
         });
     }
