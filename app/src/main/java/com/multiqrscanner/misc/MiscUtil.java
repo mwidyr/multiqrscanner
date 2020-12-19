@@ -3,11 +3,18 @@ package com.multiqrscanner.misc;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.drawable.ColorDrawable;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
 
 
 import com.google.gson.Gson;
+import com.multiqrscanner.R;
 
 import java.util.Calendar;
 
@@ -40,6 +47,43 @@ public class MiscUtil {
     public static String LoginActivityWSID = "login_activity_ws_id";
     public static String ImagePathKey = "imagePath";
     public static String QrCodeGsonKey = "qr_code_gson";
+
+    public static class CustomDialogClass{
+        View dialogView;
+        AlertDialog alertDialog;
+
+        public CustomDialogClass(View dialogView, AlertDialog alertDialog) {
+            this.dialogView = dialogView;
+            this.alertDialog = alertDialog;
+        }
+
+        public View getDialogView() {
+            return dialogView;
+        }
+
+        public AlertDialog getAlertDialog() {
+            return alertDialog;
+        }
+    }
+
+    public static CustomDialogClass customAlertDialog(Context context, String title, String desc) {
+        LayoutInflater factory = LayoutInflater.from(context);
+        final View dialogView = factory.inflate(R.layout.custom_dialog, null);
+        final AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+        alertDialog.setView(dialogView);
+        TextView titleTv = dialogView.findViewById(R.id.txt_dia_title);
+        titleTv.setText(title);
+        TextView descTv = dialogView.findViewById(R.id.txt_dia_desc);
+        descTv.setText(desc);
+        return new CustomDialogClass(dialogView,alertDialog);
+    }
+
+    public static void setDialogOnClickListenerAndShow(AlertDialog alertDialog, View dialogView,  View.OnClickListener confirmListener, View.OnClickListener cancelListener){
+        dialogView.findViewById(R.id.btn_yes).setOnClickListener(confirmListener);
+        dialogView.findViewById(R.id.btn_no).setOnClickListener(cancelListener);
+        alertDialog.show();
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+    }
 
     public static Long getCurrentTimeInMilis(Calendar inputCalendar) {
         if (inputCalendar == null) {

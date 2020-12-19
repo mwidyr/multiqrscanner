@@ -1,16 +1,12 @@
 package com.multiqrscanner.outbound;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -353,62 +349,48 @@ public class GoodsShipmentActivity extends AppCompatActivity {
             }
         });
         verifConfirm.setOnClickListener(view -> {
-            LayoutInflater factory = LayoutInflater.from(this);
-            final View dialogView = factory.inflate(R.layout.custom_dialog, null);
-            final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-            alertDialog.setView(dialogView);
-            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            TextView titleTv = dialogView.findViewById(R.id.txt_dia_title);
-            titleTv.setText("Confirm?");
-            TextView descTv = dialogView.findViewById(R.id.txt_dia_desc);
-            descTv.setText("Will confirm the data that you have scanned");
-            dialogView.findViewById(R.id.btn_yes).setOnClickListener(view1 -> {
+            MiscUtil.CustomDialogClass cdc = MiscUtil.customAlertDialog(this, "Confirm?", "This action will confirm the data that you have scanned");
+            View.OnClickListener confirmListener = viewA -> {
                 verifyInboundDetails();
-                alertDialog.dismiss();
-            });
-            dialogView.findViewById(R.id.btn_no).setOnClickListener(view1 -> {
-                alertDialog.dismiss();
-            });
-            alertDialog.show();
+                cdc.getAlertDialog().dismiss();
+            };
+            View.OnClickListener cancelListener = viewB -> {
+                cdc.getAlertDialog().dismiss();
+            };
+            MiscUtil.setDialogOnClickListenerAndShow(cdc.getAlertDialog(), cdc.getDialogView(), confirmListener, cancelListener);
         });
         verifClear.setOnClickListener(view -> {
-            LayoutInflater factory = LayoutInflater.from(this);
-            final View dialogView = factory.inflate(R.layout.custom_dialog, null);
-            final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-            alertDialog.setView(dialogView);
-            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            TextView titleTv = dialogView.findViewById(R.id.txt_dia_title);
-            titleTv.setText("Cancel?");
-            TextView descTv = dialogView.findViewById(R.id.txt_dia_desc);
-            descTv.setText("After you cancel, the data is lost and cannot be canceled");
-            dialogView.findViewById(R.id.btn_yes).setOnClickListener(view1 -> {
+            MiscUtil.CustomDialogClass cdc = MiscUtil.customAlertDialog(this, "Cancel?", "After you cancel, the data is lost and cannot be canceled");
+            View.OnClickListener confirmListener = viewA -> {
                 clearAllData();
-                alertDialog.dismiss();
-            });
-            dialogView.findViewById(R.id.btn_no).setOnClickListener(view1 -> {
-                alertDialog.dismiss();
-            });
-            alertDialog.show();
+                cdc.getAlertDialog().dismiss();
+            };
+            View.OnClickListener cancelListener = viewB -> {
+                cdc.getAlertDialog().dismiss();
+            };
+            MiscUtil.setDialogOnClickListenerAndShow(cdc.getAlertDialog(), cdc.getDialogView(), confirmListener, cancelListener);
         });
         verifCancel.setOnClickListener(view -> {
-            LayoutInflater factory = LayoutInflater.from(this);
-            final View dialogView = factory.inflate(R.layout.custom_dialog, null);
-            final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-            alertDialog.setView(dialogView);
-            TextView titleTv = dialogView.findViewById(R.id.txt_dia_title);
-            titleTv.setText("Return to home?");
-            TextView descTv = dialogView.findViewById(R.id.txt_dia_desc);
-            descTv.setText("After you return to home, the data is lost and cannot be canceled");
-            dialogView.findViewById(R.id.btn_yes).setOnClickListener(view1 -> {
+            Intent intent = new Intent(this, NavigationViewActivity.class);
+
+            if(inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
                 clearAllData();
-                alertDialog.dismiss();
-                onBackPressed();
-            });
-            dialogView.findViewById(R.id.btn_no).setOnClickListener(view1 -> {
-                alertDialog.dismiss();
-            });
-            alertDialog.show();
-            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                startActivity(intent);
+                finish();
+            }else{
+                MiscUtil.CustomDialogClass cdc = MiscUtil.customAlertDialog(this, "Return to home?", "After you return to home, the data is lost and cannot be canceled");
+                View.OnClickListener confirmListener = viewA -> {
+                    clearAllData();
+                    cdc.getAlertDialog().dismiss();
+                    startActivity(intent);
+                    finish();
+                };
+                View.OnClickListener cancelListener = viewB -> {
+                    cdc.getAlertDialog().dismiss();
+                };
+                MiscUtil.setDialogOnClickListenerAndShow(cdc.getAlertDialog(), cdc.getDialogView(), confirmListener, cancelListener);
+            }
+
         });
         verifScan.setOnClickListener(view -> {
             if (currentSelectedInboundNo.trim().equalsIgnoreCase("")) {
@@ -467,11 +449,25 @@ public class GoodsShipmentActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        clearSharedPreferences();
         Intent intent = new Intent(this, NavigationViewActivity.class);
-        startActivity(intent);
-        finish();
+
+        if(inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
+            clearAllData();
+            startActivity(intent);
+            finish();
+        }else{
+            MiscUtil.CustomDialogClass cdc = MiscUtil.customAlertDialog(this, "Return to home?", "After you return to home, the data is lost and cannot be canceled");
+            View.OnClickListener confirmListener = viewA -> {
+                clearAllData();
+                cdc.getAlertDialog().dismiss();
+                startActivity(intent);
+                finish();
+            };
+            View.OnClickListener cancelListener = viewB -> {
+                cdc.getAlertDialog().dismiss();
+            };
+            MiscUtil.setDialogOnClickListenerAndShow(cdc.getAlertDialog(), cdc.getDialogView(), confirmListener, cancelListener);
+        }
     }
 
 

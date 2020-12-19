@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Multi QR Scanner</string>
+    <string name="app_name">Aware Mobile</string>
     <string name="acra_toast">Reporting Crash. This will get fixed!</string>
     <string name="Open">Open</string>
     <string name="Close">Close</string>

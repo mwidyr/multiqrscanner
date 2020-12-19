@@ -48,6 +48,8 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,17 +74,6 @@ public class LoginActivity extends AppCompatActivity {
         // loading bar
         progressBar = (ProgressBar) findViewById(R.id.login_progressBar);
         progressBar.setVisibility(View.GONE);
-
-        // Setting text selector over textviews
-/*        XmlResourceParser xrp = getResources().getXml(R.drawable.text_selector);
-        try {
-            ColorStateList csl = ColorStateList.createFromXml(getResources(), xrp);
-
-//            forgotPassword.setTextColor(csl);
-            show_hide_password.setTextColor(csl);
-            signUp.setTextColor(csl);
-        } catch (Exception e) {
-        }*/
     }
 
     // Set Listeners
@@ -109,7 +100,7 @@ public class LoginActivity extends AppCompatActivity {
                             password.setInputType(InputType.TYPE_CLASS_TEXT);
                             password.setTextAppearance(LoginActivity.this, R.style.fontForShowPassword);
                             password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());// show password
-                            password.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0,R.drawable.ic_eye,0);
+                            password.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_eye, 0);
                         } else {
                             show_hide_password.setText(R.string.show_pwd);// change
                             // checkbox
@@ -117,7 +108,7 @@ public class LoginActivity extends AppCompatActivity {
                             password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                             password.setTextAppearance(LoginActivity.this, R.style.fontForShowPassword);
                             password.setTransformationMethod(PasswordTransformationMethod.getInstance());// hide password
-                            password.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0,R.drawable.ic_eye_off,0);
+                            password.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_eye_off, 0);
                         }
                     }
                 });
@@ -167,6 +158,7 @@ public class LoginActivity extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                     Intent userInfo = new Intent(LoginActivity.this, NavigationViewActivity.class);
                     startActivity(userInfo);
+                    finish();
                 } else {
                     new CustomToast().Show_Toast(LoginActivity.this, "User or Password is wrong");
                     progressBar.setVisibility(View.GONE);
