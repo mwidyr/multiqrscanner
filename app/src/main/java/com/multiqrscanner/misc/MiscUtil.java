@@ -3,11 +3,18 @@ package com.multiqrscanner.misc;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.drawable.ColorDrawable;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
 
 
 import com.google.gson.Gson;
+import com.multiqrscanner.R;
 
 import java.util.Calendar;
 
@@ -22,10 +29,20 @@ public class MiscUtil {
     public static final String ListBarcodeKey = "listBarcodes";
 
     public static String InboundNoKey = "inbound_no";
+    public static String CurrentPalletKey = "current_pallet";
     public static String InboundListDetail = "inbound_list_detail";
+    public static String ScanProductListDetail = "scan_product_list_detail";
     public static String TotalScanKey = "total_scan";
     public static String InboundListScanned = "inbound_list_scanned";
+    public static String PalletListDetail = "pallet_list_detail";
     public static String GoodsVerificationValue = "goods_verification";
+    public static String GoodsShipmentValue = "goods_shipment";
+    public static String PickingPlanValue = "picking_plan";
+    public static String PickingPlanPalletValue = "picking_plan_pallet";
+    public static String PutawayValue = "putaway";
+    public static String PutawayPalletValue = "putaway_pallet";
+    public static String ReplenishmentValue = "replenishment";
+    public static String InventoryMgmtValue = "inventory_mgmt";
     public static String FromActivityKey = "from_activity";
     public static String LoginActivityUser = "login_activity_user";
     public static String LoginActivityRole = "login_activity_role";
@@ -35,6 +52,43 @@ public class MiscUtil {
     public static String LoginActivityWSID = "login_activity_ws_id";
     public static String ImagePathKey = "imagePath";
     public static String QrCodeGsonKey = "qr_code_gson";
+
+    public static class CustomDialogClass{
+        View dialogView;
+        AlertDialog alertDialog;
+
+        public CustomDialogClass(View dialogView, AlertDialog alertDialog) {
+            this.dialogView = dialogView;
+            this.alertDialog = alertDialog;
+        }
+
+        public View getDialogView() {
+            return dialogView;
+        }
+
+        public AlertDialog getAlertDialog() {
+            return alertDialog;
+        }
+    }
+
+    public static CustomDialogClass customAlertDialog(Context context, String title, String desc) {
+        LayoutInflater factory = LayoutInflater.from(context);
+        final View dialogView = factory.inflate(R.layout.custom_dialog, null);
+        final AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+        alertDialog.setView(dialogView);
+        TextView titleTv = dialogView.findViewById(R.id.txt_dia_title);
+        titleTv.setText(title);
+        TextView descTv = dialogView.findViewById(R.id.txt_dia_desc);
+        descTv.setText(desc);
+        return new CustomDialogClass(dialogView,alertDialog);
+    }
+
+    public static void setDialogOnClickListenerAndShow(AlertDialog alertDialog, View dialogView,  View.OnClickListener confirmListener, View.OnClickListener cancelListener){
+        dialogView.findViewById(R.id.btn_yes).setOnClickListener(confirmListener);
+        dialogView.findViewById(R.id.btn_no).setOnClickListener(cancelListener);
+        alertDialog.show();
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+    }
 
     public static Long getCurrentTimeInMilis(Calendar inputCalendar) {
         if (inputCalendar == null) {

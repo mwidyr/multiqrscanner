@@ -19,6 +19,13 @@ import com.multiqrscanner.inbound.adapter.ILoadMore;
 import com.multiqrscanner.inbound.adapter.ScanResultAdapter;
 import com.multiqrscanner.inbound.model.InboundDetail;
 import com.multiqrscanner.misc.MiscUtil;
+import com.multiqrscanner.network.RetrofitClientInstance;
+import com.multiqrscanner.network.RetrofitClientInstanceInbound;
+import com.multiqrscanner.network.model.GetTimeResponse;
+import com.multiqrscanner.network.model.RetroInventory;
+import com.multiqrscanner.network.model.RetroWarehouse;
+import com.multiqrscanner.network.user.GetInventoryService;
+import com.multiqrscanner.network.user.GetLoginService;
 import com.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -28,6 +35,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class GoodsVerificationScanResultActivity extends AppCompatActivity {
     private static String TAG = "GVSRA";
@@ -43,7 +55,7 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
     private Gson gson = new Gson();
     private String currentSelectedInboundNo;
     private List<InboundDetail> inboundDetailList;
-    private List<QrCodeProductValue> qrCodeProductValues;
+    private List<QrCodeProductValue> qrCodeProductValues = new ArrayList<>();
     HashMap<String, InboundDetail> inboundMap;
     private Integer totalIntInvalidInbound = 0;
     private Integer totalIntValidInbound = 0;
@@ -107,7 +119,11 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
                                 Log.e(TAG, "onCreate: " + ex.getMessage(), ex);
                                 continue;
                             }
-                            String serialNoScan = qrCodeProductValue.getSerialNo().toString();
+                            Long serialNoScanLong = qrCodeProductValue.getSerialNo();
+                            if(serialNoScanLong == null){
+                                continue;
+                            }
+                            String serialNoScan = serialNoScanLong.toString();
                             if (inboundMapSharedPref.get(serialNoScan) != null) {
                                 InboundDetail inboundDetail = new InboundDetail(
                                         inboundMapSharedPref.get(serialNoScan).getLineNo(),
@@ -125,19 +141,36 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
                                     inboundDetail.setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
                                 }
                                 inboundDetailDisplay.add(inboundDetail);
-                                if (inboundMapSharedPref.get(serialNoScan).getInputDate() == null || inboundMapSharedPref.get(serialNoScan).getInputDate() == 0L) {
-                                    inboundMapSharedPref.get(serialNoScan).setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
-                                }
                                 if (inboundMapSharedPref.get(serialNoScan).getStatus().trim().equalsIgnoreCase(GoodsVerificationActivity.StatusNotVerified)) {
                                     inboundMapSharedPref.get(serialNoScan).setStatus(GoodsVerificationActivity.StatusVerified);
                                 }
+                                if (inboundMapSharedPref.get(serialNoScan).getInputDate() == null || inboundMapSharedPref.get(serialNoScan).getInputDate() == 0L) {
+                                    inboundMapSharedPref.get(serialNoScan).setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
+                                    GetLoginService service = RetrofitClientInstance.getRetrofitInstance().create(GetLoginService.class);
+                                    Call<GetTimeResponse> callSync = service.getServerTimeInMilis();
+                                    callSync.enqueue(new Callback<GetTimeResponse>() {
+                                        @Override
+                                        public void onResponse(Call<GetTimeResponse> call, Response<GetTimeResponse> response) {
+                                            GetTimeResponse apiResponse = response.body();
+                                            if (apiResponse != null) {
+                                                Objects.requireNonNull(inboundMapSharedPref.get(serialNoScan)).setInputDate(Long.parseLong(apiResponse.getDate()));
+                                                setInboundMap(inboundMapSharedPref);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<GetTimeResponse> call, Throwable t) {
+                                            Log.e(TAG, "onFailure: " + t.getMessage(), t);
+                                        }
+                                    });
+                                }
+
                             } else {
                                 qrCodeProductValue.setValid(InvalidInbound);
                                 totalIntInvalidInbound++;
                             }
                             qrCodeProductValuesDisplay.add(qrCodeProductValue);
                         }
-                        setInboundMap(inboundMapSharedPref);
                         this.inboundDetailList = inboundDetailDisplay;
                         this.qrCodeProductValues = qrCodeProductValuesDisplay;
                         Log.d(TAG, "onCreate: qrCodeProductValuesDisplay " + qrCodeProductValuesDisplay);
@@ -204,22 +237,27 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
             finish();
         });
         btnSubmit.setOnClickListener(view -> {
-            Intent intent = new Intent(this, GoodsVerificationActivity.class);
-            int totalScanAll = totalScanFromParentAct + totalScanFromChildAct;
-            intent.putExtra(MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
-            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
-            Log.d(TAG, "initializeBtn: " + totalScanAll);
-            Gson gson = new Gson();
-            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListScanned, gson.toJson(this.inboundDetailList));
-            MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
-            startActivity(intent);
-            finish();
+            if (totalScanFromChildAct > 0) {
+                Intent intent = new Intent(this, GoodsVerificationActivity.class);
+                int totalScanAll = totalScanFromParentAct + totalScanFromChildAct;
+                intent.putExtra(MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
+                Log.d(TAG, "initializeBtn: " + totalScanAll);
+                Gson gson = new Gson();
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListScanned, gson.toJson(this.inboundDetailList));
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
+                startActivity(intent);
+                finish();
+            } else {
+                onBackPressed();
+
+            }
         });
         btnCancel.setOnClickListener(view -> {
             Intent intent = new Intent(this, GoodsVerificationActivity.class);
             startActivity(intent);
             finish();
         });
-        btnSubmit.setVisibility(View.GONE);
+//        btnSubmit.setVisibility(View.GONE);
     }
 }

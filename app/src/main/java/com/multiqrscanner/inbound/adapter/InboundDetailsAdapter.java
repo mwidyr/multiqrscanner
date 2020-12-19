@@ -40,7 +40,7 @@ class ItemViewHolder extends RecyclerView.ViewHolder {
 
 }
 
-public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class InboundDetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final int VIEW_TYPE_ITEM = 0, VIEW_TYPE_LOADING = 1;
     ILoadMore loadMore;
     boolean isLoading;
@@ -49,7 +49,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     int visibleThreshold = 5;
     int lastVisibleItem, totalItemCount;
 
-    public MyAdapter(RecyclerView recyclerView, Activity activity, List<InboundDetail> items) {
+    public InboundDetailsAdapter(RecyclerView recyclerView, Activity activity, List<InboundDetail> items) {
         this.activity = activity;
         this.items = items;
 

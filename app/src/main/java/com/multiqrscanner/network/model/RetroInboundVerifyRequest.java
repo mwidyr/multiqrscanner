@@ -15,16 +15,19 @@ public class RetroInboundVerifyRequest {
     private Long headerDate;
     @SerializedName("serialNos")
     private List<InboundVerifySerialNo> serialno;
+    @SerializedName("skus")
+    private List<InboundVerifySKU> skus;
 
     public RetroInboundVerifyRequest() {
     }
 
-    public RetroInboundVerifyRequest(String id, String userID, String verif, Long headerDate, List<InboundVerifySerialNo> serialno) {
+    public RetroInboundVerifyRequest(String id, String userID, String verif, Long headerDate, List<InboundVerifySerialNo> serialno, List<InboundVerifySKU> skus) {
         this.id = id;
         this.userID = userID;
         this.verif = verif;
         this.headerDate = headerDate;
         this.serialno = serialno;
+        this.skus = skus;
     }
 
     public String getId() {
@@ -67,14 +70,23 @@ public class RetroInboundVerifyRequest {
         this.serialno = serialno;
     }
 
+    public List<InboundVerifySKU> getSkus() {
+        return skus;
+    }
+
+    public void setSkus(List<InboundVerifySKU> skus) {
+        this.skus = skus;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("RetroInboundVerifyRequest{");
         sb.append("id='").append(id).append('\'');
         sb.append(", userID='").append(userID).append('\'');
         sb.append(", verif='").append(verif).append('\'');
-        sb.append(", headerDate='").append(headerDate).append('\'');
+        sb.append(", headerDate=").append(headerDate);
         sb.append(", serialno=").append(serialno);
+        sb.append(", skus=").append(skus);
         sb.append('}');
         return sb.toString();
     }

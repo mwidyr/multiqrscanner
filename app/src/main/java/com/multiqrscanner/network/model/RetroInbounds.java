@@ -2,7 +2,6 @@ package com.multiqrscanner.network.model;
 
 import com.google.gson.annotations.SerializedName;
 import com.multiqrscanner.inbound.model.InboundData;
-import com.multiqrscanner.inbound.model.InboundDetail;
 
 import java.util.List;
 

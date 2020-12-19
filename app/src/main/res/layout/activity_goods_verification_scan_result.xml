@@ -260,10 +260,10 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:background="@color/Gray"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_cancel"
             app:layout_constraintEnd_toStartOf="@+id/tv_cancel"
             app:layout_constraintStart_toEndOf="@+id/tv_submit"
-            app:layout_constraintTop_toTopOf="@+id/tv_submit" />
+            app:layout_constraintTop_toTopOf="@+id/tv_cancel" />
         <LinearLayout
             android:id="@+id/tv_submit"
             android:layout_width="100dp"
