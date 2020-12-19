@@ -5,7 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClientInstance {
     private static Retrofit retrofit;
-    private static final String BASE_URL = "https://centralnode.pancaran-group.co.id:8245/awareuser/";
+    private static final String BASE_URL = "https://centralnode.pancaran-group.co.id:8245/aware-user/";
 
     public static Retrofit getRetrofitInstance() {
         if (retrofit == null) {

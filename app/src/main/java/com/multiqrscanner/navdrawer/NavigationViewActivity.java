@@ -3,7 +3,9 @@ package com.multiqrscanner.navdrawer;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -38,6 +40,7 @@ import java.util.List;
 public class NavigationViewActivity extends AppCompatActivity {
     private String TAG = "NVA";
     private LinearLayout btnGoodsVerif, btnPutaway, btnReplenishment, btnMove, btnPickingPlan, btnGoodsShipment;
+    private ConstraintLayout circleGoodsVerif, circlePutaway, circleReplenishment, circleMove, circlePickingPlan, circleGoodsShipment;
 
     String headerInbound = "Inbound";
     String headerWarehouse = "Inventory";
@@ -76,6 +79,13 @@ public class NavigationViewActivity extends AppCompatActivity {
         btnPickingPlan = findViewById(R.id.btn_picking_plan);
         btnGoodsShipment = findViewById(R.id.btn_goods_shipment);
 
+        circleGoodsVerif = findViewById(R.id.circle_goods_verif);
+        circlePutaway = findViewById(R.id.circle_putaway);
+        circleReplenishment = findViewById(R.id.circle_replenishment);
+        circleMove = findViewById(R.id.circle_move);
+        circlePickingPlan = findViewById(R.id.circle_picking_plan);
+        circleGoodsShipment = findViewById(R.id.circle_goods_shipment);
+
 
         txtRole.setText(MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityRole));
         txtWarehouse.setText(MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityWS));
@@ -107,17 +117,17 @@ public class NavigationViewActivity extends AppCompatActivity {
         String txtMenu = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityMenu);
         List<com.multiqrscanner.network.model.Menu> menus = gson.fromJson(txtMenu,
                 new TypeToken<List<com.multiqrscanner.network.model.Menu>>() {}.getType());
-        boolean bInventoryVerif = false;
+        boolean bGoodsVerif = false;
         boolean bPutaway = false;
         boolean bReplenishment = false;
         boolean bInventoryMovement = false;
         boolean bPickingPlan = false;
-        boolean bOutgoingVerify = false;
+        boolean bGoodsShipment = false;
 
         for (int i = 0; i < menus.size(); i++) {
             switch (menus.get(i).getMenu()) {
                 case "Goods Verification":
-                    bInventoryVerif = true;
+                    bGoodsVerif = true;
                     break;
                 case "Putaway":
                     bPutaway = true;
@@ -132,10 +142,29 @@ public class NavigationViewActivity extends AppCompatActivity {
                     bPickingPlan = true;
                     break;
                 case "Goods Shipments":
-                    bOutgoingVerify = true;
+                    bGoodsShipment = true;
                     break;
             }
+        }
 
+        if(!bGoodsVerif){
+            circleGoodsVerif.setBackground(ContextCompat.getDrawable(this, R.drawable.circle_grey));
+            circleGoodsVerif.setClickable(false);
+        } else if(!bPutaway){
+            circlePutaway.setBackground(ContextCompat.getDrawable(this, R.drawable.circle_grey));
+            circlePutaway.setClickable(false);
+        } else if(!bReplenishment){
+            circleReplenishment.setBackground(ContextCompat.getDrawable(this, R.drawable.circle_grey));
+            circleReplenishment.setClickable(false);
+        } else if(!bInventoryMovement){
+            circleMove.setBackground(ContextCompat.getDrawable(this, R.drawable.circle_grey));
+            circleMove.setClickable(false);
+        } else if(!bPickingPlan){
+            circlePickingPlan.setBackground(ContextCompat.getDrawable(this, R.drawable.circle_grey));
+            circlePickingPlan.setClickable(false);
+        } else if(!bGoodsShipment){
+            circleGoodsShipment.setBackground(ContextCompat.getDrawable(this, R.drawable.circle_grey));
+            circleGoodsShipment.setClickable(false);
         }
     }
 
