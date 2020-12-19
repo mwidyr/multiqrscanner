@@ -26,6 +26,11 @@ public class MiscUtil {
     public static String TotalScanKey = "total_scan";
     public static String InboundListScanned = "inbound_list_scanned";
     public static String GoodsVerificationValue = "goods_verification";
+    public static String GoodsShipmentValue = "goods_shipment";
+    public static String PickingPlanValue = "picking_plan";
+    public static String PutawayValue = "putaway_value";
+    public static String ReplenishmentValue = "replenishment";
+    public static String InventoryMgmtValue = "inventory_mgmt";
     public static String FromActivityKey = "from_activity";
     public static String LoginActivityUser = "login_activity_user";
     public static String LoginActivityRole = "login_activity_role";

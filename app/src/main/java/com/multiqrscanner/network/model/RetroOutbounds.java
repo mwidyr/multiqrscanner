@@ -1,20 +1,20 @@
 package com.multiqrscanner.network.model;
 
 import com.google.gson.annotations.SerializedName;
-import com.multiqrscanner.inbound.model.InboundData;
+import com.multiqrscanner.outbound.model.OutboundData;
 
 import java.util.List;
 
-public class RetroInbounds {
+public class RetroOutbounds {
     @SerializedName("resultCode")
     private int resultCode;
     @SerializedName("items")
-    private List<InboundData> items;
+    private List<OutboundData> items;
 
-    public RetroInbounds() {
+    public RetroOutbounds() {
     }
 
-    public RetroInbounds(int resultCode, List<InboundData> items) {
+    public RetroOutbounds(int resultCode, List<OutboundData> items) {
         this.resultCode = resultCode;
         this.items = items;
     }
@@ -27,11 +27,11 @@ public class RetroInbounds {
         this.resultCode = resultCode;
     }
 
-    public List<InboundData> getInbounds() {
+    public List<OutboundData> getInbounds() {
         return items;
     }
 
-    public void setInbounds(List<InboundData> items) {
+    public void setInbounds(List<OutboundData> items) {
         this.items = items;
     }
 

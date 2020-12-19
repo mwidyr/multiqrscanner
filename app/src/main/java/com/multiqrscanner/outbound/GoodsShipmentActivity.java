@@ -1,4 +1,4 @@
-package com.multiqrscanner.inbound;
+package com.multiqrscanner.outbound;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -26,10 +26,6 @@ import com.google.gson.reflect.TypeToken;
 import com.multiqrscanner.R;
 import com.multiqrscanner.barcode.BarcodeCaptureActivity;
 import com.multiqrscanner.barcode.MainBarcodeQRCodeActivity;
-import com.multiqrscanner.inbound.adapter.ILoadMore;
-import com.multiqrscanner.inbound.adapter.InboundDetailsAdapter;
-import com.multiqrscanner.inbound.model.InboundData;
-import com.multiqrscanner.inbound.model.InboundDetail;
 import com.multiqrscanner.misc.MiscUtil;
 import com.multiqrscanner.navdrawer.NavigationViewActivity;
 import com.multiqrscanner.network.RetrofitClientInstance;
@@ -38,11 +34,16 @@ import com.multiqrscanner.network.model.InboundItemDetail;
 import com.multiqrscanner.network.model.InboundVerifySerialNo;
 import com.multiqrscanner.network.model.RetroInboundId;
 import com.multiqrscanner.network.model.RetroInboundVerifyRequest;
-import com.multiqrscanner.network.model.RetroInbounds;
 import com.multiqrscanner.network.model.RetroInboundsDetail;
 import com.multiqrscanner.network.model.RetroInboundsVerifyResponse;
+import com.multiqrscanner.network.model.RetroOutbounds;
 import com.multiqrscanner.network.model.RetroWarehouse;
 import com.multiqrscanner.network.user.GetInboundsService;
+import com.multiqrscanner.network.user.GetOutboundsService;
+import com.multiqrscanner.outbound.adapter.ILoadMore;
+import com.multiqrscanner.outbound.adapter.OutboundsDetailsAdapter;
+import com.multiqrscanner.outbound.model.OutboundData;
+import com.multiqrscanner.outbound.model.OutboundDetail;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -57,8 +58,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class GoodsVerificationActivity extends AppCompatActivity {
-    private static String TAG = "GVA";
+public class GoodsShipmentActivity extends AppCompatActivity {
+    private static String TAG = "GSA";
     private String currentSelectedInboundNo = "";
     public static Integer totalScanParent = 0;
     public static Integer totalScanVerified = 0;
@@ -66,7 +67,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
     public static String StatusNotVerified = "N";
     private static final String ALL_WAREHOUSE = "All Warehouse";
 
-    private HashMap<String, InboundDetail> inboundMap;
+    private HashMap<String, OutboundDetail> inboundMap;
 
     private TextView inboundDate, inboundCustomer, inboundWarehouse, totalScan, totalSummaryInbound, searchButton, verifViewDetailTv, verifScanTv;
     private LinearLayout verifConfirm, verifViewDetail, verifScan, verifClear;
@@ -79,13 +80,13 @@ public class GoodsVerificationActivity extends AppCompatActivity {
 
     List<String> listInboundNos = new ArrayList<>();
 
-    private List<InboundData> inboundDatas;
+    private List<OutboundData> outboundData;
     RecyclerView recyclerView;
-    List<InboundDetail> items = new ArrayList<>();
+    List<OutboundDetail> items = new ArrayList<>();
 
     public void setAdapterData() {
-        InboundDetailsAdapter adapter;
-        adapter = new InboundDetailsAdapter(recyclerView, this, items);
+        OutboundsDetailsAdapter adapter;
+        adapter = new OutboundsDetailsAdapter(recyclerView, this, items);
         recyclerView.setAdapter(adapter);
         adapter.setLoadMore(new ILoadMore() {
             @Override
@@ -98,7 +99,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_goods_verification);
+        setContentView(R.layout.activity_goods_shipment);
         view = findViewById(R.id.background_loading);
         view.setVisibility(View.GONE);
         progressBar = (ProgressBar) findViewById(R.id.login_progressBar);
@@ -117,29 +118,29 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         if (warehouse.equalsIgnoreCase(ALL_WAREHOUSE)) {
             warehouse = "";
         }
-        inboundDatas = new ArrayList<>();
-        GetInboundsService service = RetrofitClientInstance.getRetrofitInstance().create(GetInboundsService.class);
-        Call<RetroInbounds> call = service.getInbounds(new RetroWarehouse(warehouse));
+        outboundData = new ArrayList<>();
+        GetOutboundsService service = RetrofitClientInstance.getRetrofitInstance().create(GetOutboundsService.class);
+        Call<RetroOutbounds> call = service.getOutbounds(new RetroWarehouse(warehouse));
         progressBar.setVisibility(View.VISIBLE);
-        call.enqueue(new Callback<RetroInbounds>() {
+        call.enqueue(new Callback<RetroOutbounds>() {
             @Override
-            public void onResponse(Call<RetroInbounds> call, Response<RetroInbounds> response) {
+            public void onResponse(Call<RetroOutbounds> call, Response<RetroOutbounds> response) {
                 if (response.body() != null && response.body().getInbounds() != null) {
                     progressBar.setVisibility(View.GONE);
                     Log.d(TAG, "getInbounds = " + response.body().getInbounds());
-                    inboundDatas.addAll(response.body().getInbounds());
-                    for (InboundData inboundData1 : inboundDatas) {
-                        listInboundNos.add(inboundData1.getInboundno());
+                    outboundData.addAll(response.body().getInbounds());
+                    for (OutboundData outboundData1 : outboundData) {
+                        listInboundNos.add(outboundData1.getInboundno());
                     }
                     initializeBtn();
                     // Create an ArrayAdapter using the string array and a default spinner layout
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(GoodsVerificationActivity.this,
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(GoodsShipmentActivity.this,
                             R.layout.spinner_item_inbound, listInboundNos);
 //                    // Specify the layout to use when the list of choices appears
 //                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     // Apply the adapter to the spinner
                     inboundNoTextView.setAdapter(adapter);
-                    String selectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(GoodsVerificationActivity.this, MiscUtil.InboundNoKey);
+                    String selectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(GoodsShipmentActivity.this, MiscUtil.InboundNoKey);
                     inboundNoTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
@@ -147,15 +148,15 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                             String item = (String) adapterView.getItemAtPosition(pos);
                             if (!item.trim().equalsIgnoreCase("")) {
                                 currentSelectedInboundNo = item;
-                                for (InboundData data : inboundDatas) {
+                                for (OutboundData data : outboundData) {
                                     if (data.getInboundno().trim().equalsIgnoreCase(item)) {
                                         if (!currentSelectedInboundNo.trim().equalsIgnoreCase(selectedInboundNo)) {
                                             clearSharedPreferences();
-                                            MiscUtil.getStringSharedPreferenceByKey(GoodsVerificationActivity.this, MiscUtil.TotalScanKey);
+                                            MiscUtil.getStringSharedPreferenceByKey(GoodsShipmentActivity.this, MiscUtil.TotalScanKey);
                                             totalScanParent = 0;
                                             totalScan.setText("0");
                                         }
-                                        MiscUtil.saveStringSharedPreferenceAsString(GoodsVerificationActivity.this,
+                                        MiscUtil.saveStringSharedPreferenceAsString(GoodsShipmentActivity.this,
                                                 MiscUtil.LoginActivityWSID, data.getId());
                                         injectData(currentSelectedInboundNo, data);
                                         verifScan.setVisibility(View.VISIBLE);
@@ -164,7 +165,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                                     }
                                 }
                             } else {
-                                setInboundDetailValue(false, currentSelectedInboundNo, new InboundData("", "", "", "", "", new ArrayList<>()));
+                                setInboundDetailValue(false, currentSelectedInboundNo, new OutboundData("", "", "", "", "", new ArrayList<>()));
                                 verifScan.setVisibility(View.GONE);
 //                    setTableData();
                             }
@@ -176,9 +177,9 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                         for (int i = 0; i < listInboundNos.size(); i++) {
                             if (currentSelectedInboundNo.trim().equalsIgnoreCase(listInboundNos.get(i))) {
                                 inboundNoTextView.setText(currentSelectedInboundNo);
-                                for (InboundData data : inboundDatas) {
+                                for (OutboundData data : outboundData) {
                                     if (data.getInboundno().trim().equalsIgnoreCase(currentSelectedInboundNo)) {
-                                        MiscUtil.saveStringSharedPreferenceAsString(GoodsVerificationActivity.this,
+                                        MiscUtil.saveStringSharedPreferenceAsString(GoodsShipmentActivity.this,
                                                 MiscUtil.LoginActivityWSID, data.getId());
                                         injectData(currentSelectedInboundNo, data);
                                         verifScan.setVisibility(View.VISIBLE);
@@ -190,7 +191,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                             }
                         }
                     }
-                    String totalScanExtra = MiscUtil.getStringSharedPreferenceByKey(GoodsVerificationActivity.this, MiscUtil.TotalScanKey);
+                    String totalScanExtra = MiscUtil.getStringSharedPreferenceByKey(GoodsShipmentActivity.this, MiscUtil.TotalScanKey);
                     Log.d(TAG, "onResponse: " + totalScanExtra);
                     if (!totalScanExtra.trim().equalsIgnoreCase("")) {
                         totalScanParent = Integer.parseInt(totalScanExtra);
@@ -215,8 +216,8 @@ public class GoodsVerificationActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<RetroInbounds> call, Throwable t) {
-                Toast.makeText(GoodsVerificationActivity.this, "Failed retrieve data", Toast.LENGTH_SHORT).show();
+            public void onFailure(Call<RetroOutbounds> call, Throwable t) {
+                Toast.makeText(GoodsShipmentActivity.this, "Failed retrieve data", Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.GONE);
             }
         });
@@ -224,7 +225,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
     }
 
 
-    public void injectData(String inboundNo, InboundData data) {
+    public void injectData(String inboundNo, OutboundData data) {
         GetInboundsService service = RetrofitClientInstance.getRetrofitInstance().create(GetInboundsService.class);
         Call<RetroInboundsDetail> call = service.getInboundItemDetail(new RetroInboundId(inboundNo));
         call.enqueue(new Callback<RetroInboundsDetail>() {
@@ -232,24 +233,24 @@ public class GoodsVerificationActivity extends AppCompatActivity {
             public void onResponse(Call<RetroInboundsDetail> call, Response<RetroInboundsDetail> response) {
                 if (response.body() != null && response.body().getItems() != null && response.body().getItems().size() > 0) {
                     Log.d(TAG, "role = " + response.body().getItems());
-                    List<InboundDetail> inboundList = new ArrayList<>();
+                    List<OutboundDetail> inboundList = new ArrayList<>();
                     for (InboundItemDetail inboundItemDetail : response.body().getItems()) {
                         if (inboundItemDetail.getSerialno() == null || inboundItemDetail.getSerialno().trim().equalsIgnoreCase("")) {
                             continue;
                         }
-                        inboundList.add(new InboundDetail(inboundItemDetail.getLine() + "",
+                        inboundList.add(new OutboundDetail(inboundItemDetail.getLine() + "",
                                 inboundItemDetail.getSku(), inboundItemDetail.getSerialno() == null ? "" : inboundItemDetail.getSerialno(),
                                 inboundItemDetail.getProductname(), inboundItemDetail.getQty() + "",
                                 inboundItemDetail.getSubkey() == null ? "" : inboundItemDetail.getSubkey(),
                                 inboundItemDetail.getVerif(), 0L));
                     }
-                    HashMap<String, InboundDetail> inboundMap = new HashMap<>();
-                    for (InboundDetail data : inboundList) {
+                    HashMap<String, OutboundDetail> inboundMap = new HashMap<>();
+                    for (OutboundDetail data : inboundList) {
                         String defaultStatus = StatusNotVerified;
                         if (data.getSerialNo() == null) {
                             defaultStatus = StatusVerified;
                         }
-                        inboundMap.put(data.getSerialNo(), new InboundDetail(data.getLineNo(), data.getSku(),
+                        inboundMap.put(data.getSerialNo(), new OutboundDetail(data.getLineNo(), data.getSku(),
                                 data.getSerialNo(), data.getProductName(), data.getQty(),
                                 data.getSubkey(), defaultStatus, data.getInputDate()));
                     }
@@ -258,11 +259,11 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                     Log.d(TAG, "onResponse:setDataToVerifiedAndSavedPref before verif");
 
                     Gson gson = new Gson();
-                    String inboundMapString = MiscUtil.getStringSharedPreferenceByKey(GoodsVerificationActivity.this, MiscUtil.InboundListDetail);
+                    String inboundMapString = MiscUtil.getStringSharedPreferenceByKey(GoodsShipmentActivity.this, MiscUtil.InboundListDetail);
                     Log.d(TAG, "onResponse: sharedPref " + inboundMapString);
                     Log.d(TAG, "onResponse: savedMap " + inboundMap);
                     if (!inboundMapString.trim().equalsIgnoreCase("")) {
-                        HashMap<String, InboundDetail> inboundDetailListScanned = gson.fromJson(inboundMapString, new TypeToken<HashMap<String, InboundDetail>>() {
+                        HashMap<String, OutboundDetail> inboundDetailListScanned = gson.fromJson(inboundMapString, new TypeToken<HashMap<String, OutboundDetail>>() {
                         }.getType());
                         Log.d(TAG, "onResponse: inboundDetailListScanned " + inboundDetailListScanned);
                         inboundMap = inboundDetailListScanned;
@@ -270,23 +271,23 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                     setInboundMap(inboundMap);
                     Log.d(TAG, "onResponse: after edit savedMap " + inboundMap);
 
-                    List<InboundDetail> itemInboundDetail = new ArrayList<>();
+                    List<OutboundDetail> itemOutboundDetail = new ArrayList<>();
                     // Iterating over keys only
                     int idx = 0;
                     for (String key : inboundMap.keySet()) {
-                        InboundDetail inboundDetailData = inboundMap.get(key);
-                        if (inboundDetailData != null && inboundDetailData.getStatus().equalsIgnoreCase(StatusVerified)) {
-                            dataToShowTemp[idx][0] = inboundDetailData.getLineNo();
-                            dataToShowTemp[idx][1] = inboundDetailData.getSku();
-                            dataToShowTemp[idx][2] = inboundDetailData.getSerialNo();
-                            dataToShowTemp[idx][3] = inboundDetailData.getProductName();
-                            dataToShowTemp[idx][4] = inboundDetailData.getQty();
-                            dataToShowTemp[idx][5] = inboundDetailData.getSubkey();
-                            itemInboundDetail.add(inboundDetailData);
+                        OutboundDetail outboundDetailData = inboundMap.get(key);
+                        if (outboundDetailData != null && outboundDetailData.getStatus().equalsIgnoreCase(StatusVerified)) {
+                            dataToShowTemp[idx][0] = outboundDetailData.getLineNo();
+                            dataToShowTemp[idx][1] = outboundDetailData.getSku();
+                            dataToShowTemp[idx][2] = outboundDetailData.getSerialNo();
+                            dataToShowTemp[idx][3] = outboundDetailData.getProductName();
+                            dataToShowTemp[idx][4] = outboundDetailData.getQty();
+                            dataToShowTemp[idx][5] = outboundDetailData.getSubkey();
+                            itemOutboundDetail.add(outboundDetailData);
                             idx++;
                         }
                     }
-                    items = itemInboundDetail;
+                    items = itemOutboundDetail;
                     setAdapterData();
 
                     totalScanVerified = idx;
@@ -307,12 +308,12 @@ public class GoodsVerificationActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<RetroInboundsDetail> call, Throwable t) {
-                Toast.makeText(GoodsVerificationActivity.this, "Failed Retrieve Inbound Detail", Toast.LENGTH_SHORT).show();
+                Toast.makeText(GoodsShipmentActivity.this, "Failed Retrieve Inbound Detail", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    public void setInboundMap(HashMap<String, InboundDetail> inboundMap) {
+    public void setInboundMap(HashMap<String, OutboundDetail> inboundMap) {
         this.inboundMap = inboundMap;
     }
 
@@ -413,14 +414,12 @@ public class GoodsVerificationActivity extends AppCompatActivity {
             if (currentSelectedInboundNo.trim().equalsIgnoreCase("")) {
                 Toast.makeText(this, "Please choose inbound no first", Toast.LENGTH_SHORT).show();
             } else {
-                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.FromActivityKey, MiscUtil.GoodsVerificationValue);
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.FromActivityKey, MiscUtil.GoodsShipmentValue);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanParent.toString());
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
                 Gson gson = new Gson();
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
-                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.FromActivityKey, MiscUtil.GoodsVerificationValue);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
-                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanParent.toString());
                 Intent intent = new Intent(this, BarcodeCaptureActivity.class);
                 intent.putExtra(BarcodeCaptureActivity.AutoFocus, true);
                 intent.putExtra(BarcodeCaptureActivity.UseFlash, false);
@@ -494,12 +493,12 @@ public class GoodsVerificationActivity extends AppCompatActivity {
     }
 
 
-    public void setInboundDetailValue(Boolean dummy, String inboundNo, InboundData inboundData) {
+    public void setInboundDetailValue(Boolean dummy, String inboundNo, OutboundData outboundData) {
         if (!inboundNo.trim().equalsIgnoreCase("")) {
             //real value
-            inboundDate.setText(convertAPIDateToUIDate(inboundData.getInbounddate()));
-            inboundCustomer.setText(inboundData.getCustomer());
-            inboundWarehouse.setText(inboundData.getWarehouse());
+            inboundDate.setText(convertAPIDateToUIDate(outboundData.getInbounddate()));
+            inboundCustomer.setText(outboundData.getCustomer());
+            inboundWarehouse.setText(outboundData.getWarehouse());
             if (totalScanVerified > 0) {
                 totalScan.setText(totalScanVerified.toString());
             } else {
@@ -518,9 +517,9 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         String userID = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityUserID);
         Log.d(TAG, "verifyInboundDetails: id warehouse " + idWarehouse + " userID = " + userID);
         List<InboundVerifySerialNo> listSerialNo = new ArrayList<>();
-        for (InboundDetail inboundDetail : inboundMap.values()) {
-            if (inboundDetail.getStatus().trim().equalsIgnoreCase(StatusVerified)) {
-                listSerialNo.add(new InboundVerifySerialNo(inboundDetail.getSerialNo(), inboundDetail.getInputDate()));
+        for (OutboundDetail outboundDetail : inboundMap.values()) {
+            if (outboundDetail.getStatus().trim().equalsIgnoreCase(StatusVerified)) {
+                listSerialNo.add(new InboundVerifySerialNo(outboundDetail.getSerialNo(), outboundDetail.getInputDate()));
             }
         }
         Log.d(TAG, "verifyInboundDetails: listSerialNo " + listSerialNo.toString());
@@ -532,22 +531,22 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 view.setVisibility(View.GONE);
                 if (response.body() != null && response.body().getResultCode() > 0) {
-                    Toast.makeText(GoodsVerificationActivity.this, "Success Confirm Inbound", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(GoodsShipmentActivity.this, "Success Confirm Inbound", Toast.LENGTH_SHORT).show();
                     String selectedInbound = inboundNoTextView.getText().toString();
                     clearAllData();
                     listInboundNos.remove(selectedInbound);
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(GoodsVerificationActivity.this,
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(GoodsShipmentActivity.this,
                             R.layout.spinner_item_inbound, listInboundNos);
                     inboundNoTextView.setAdapter(adapter);
                 } else {
-                    Toast.makeText(GoodsVerificationActivity.this, "Failed verify inbound", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(GoodsShipmentActivity.this, "Failed verify inbound", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<RetroInboundsVerifyResponse> call, Throwable t) {
                 Log.d(TAG, "onFailure: " + t.getMessage());
-                Toast.makeText(GoodsVerificationActivity.this, "Failed to connect to api", Toast.LENGTH_SHORT).show();
+                Toast.makeText(GoodsShipmentActivity.this, "Failed to connect to api", Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.GONE);
                 view.setVisibility(View.GONE);
             }
