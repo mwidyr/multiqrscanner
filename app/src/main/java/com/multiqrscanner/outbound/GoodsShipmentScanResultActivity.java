@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class GoodsShipmentScanResultActivity extends AppCompatActivity {
     private static String TAG = "GVSSRA";
@@ -107,33 +108,42 @@ public class GoodsShipmentScanResultActivity extends AppCompatActivity {
                                 Log.e(TAG, "onCreate: " + ex.getMessage(), ex);
                                 continue;
                             }
-                            String serialNoScan = qrCodeProductValue.getSerialNo().toString();
-                            if (inboundMapSharedPref.get(serialNoScan) != null) {
-                                OutboundDetail outboundDetail = new OutboundDetail(
-                                        inboundMapSharedPref.get(serialNoScan).getLineNo(),
-                                        inboundMapSharedPref.get(serialNoScan).getSku(),
-                                        inboundMapSharedPref.get(serialNoScan).getSerialNo(),
-                                        inboundMapSharedPref.get(serialNoScan).getProductName(),
-                                        inboundMapSharedPref.get(serialNoScan).getQty(),
-                                        inboundMapSharedPref.get(serialNoScan).getSubkey(),
-                                        inboundMapSharedPref.get(serialNoScan).getStatus(),
-                                        inboundMapSharedPref.get(serialNoScan).getInputDate()
-                                );
-                                qrCodeProductValue.setValid(ValidInbound);
-                                totalIntValidInbound++;
-                                if (outboundDetail.getInputDate() == null || outboundDetail.getInputDate() == 0L) {
-                                    outboundDetail.setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
+                            Long serialNoScanLong = qrCodeProductValue.getSerialNo();
+                            if(serialNoScanLong == null){
+                                continue;
+                            }
+                            String serialNoScan = serialNoScanLong.toString();
+                            qrCodeProductValue.setValid(InvalidInbound);
+                            totalIntInvalidInbound++;
+                            for (OutboundDetail detail : inboundMapSharedPref.values()) {
+                                //temporary validation by qty and sku
+                                if (!detail.getSku().trim().equalsIgnoreCase("") &&
+                                        !qrCodeProductValue.getSku().trim().equalsIgnoreCase("") && detail.getSku().trim().equalsIgnoreCase(qrCodeProductValue.getSku().trim())) {
+                                    Log.d(TAG, "onCreate: "+detail);
+                                    OutboundDetail outboundDetail = new OutboundDetail(
+                                            Objects.requireNonNull(detail).getLineNo(),
+                                            Objects.requireNonNull(detail).getSku(),
+                                            Objects.requireNonNull(detail).getSerialNo(),
+                                            Objects.requireNonNull(detail).getProductName(),
+                                            Objects.requireNonNull(detail).getQty(),
+                                            Objects.requireNonNull(detail).getSubkey(),
+                                            Objects.requireNonNull(detail).getStatus(),
+                                            Objects.requireNonNull(detail).getInputDate()
+                                    );
+                                    qrCodeProductValue.setValid(ValidInbound);
+                                    totalIntValidInbound++;
+                                    totalIntInvalidInbound--;
+                                    if (outboundDetail.getInputDate() == null || outboundDetail.getInputDate() == 0L) {
+                                        outboundDetail.setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
+                                    }
+                                    outboundDetailDisplay.add(outboundDetail);
+                                    if (Objects.requireNonNull(detail).getInputDate() == null || Objects.requireNonNull(detail).getInputDate() == 0L) {
+                                        Objects.requireNonNull(detail).setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
+                                    }
+                                    if (Objects.requireNonNull(detail).getStatus().trim().equalsIgnoreCase(GoodsShipmentActivity.StatusNotVerified)) {
+                                        Objects.requireNonNull(detail).setStatus(GoodsShipmentActivity.StatusVerified);
+                                    }
                                 }
-                                outboundDetailDisplay.add(outboundDetail);
-                                if (inboundMapSharedPref.get(serialNoScan).getInputDate() == null || inboundMapSharedPref.get(serialNoScan).getInputDate() == 0L) {
-                                    inboundMapSharedPref.get(serialNoScan).setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
-                                }
-                                if (inboundMapSharedPref.get(serialNoScan).getStatus().trim().equalsIgnoreCase(GoodsShipmentActivity.StatusNotVerified)) {
-                                    inboundMapSharedPref.get(serialNoScan).setStatus(GoodsShipmentActivity.StatusVerified);
-                                }
-                            } else {
-                                qrCodeProductValue.setValid(InvalidInbound);
-                                totalIntInvalidInbound++;
                             }
                             qrCodeProductValuesDisplay.add(qrCodeProductValue);
                         }
@@ -141,6 +151,7 @@ public class GoodsShipmentScanResultActivity extends AppCompatActivity {
                         this.outboundDetailList = outboundDetailDisplay;
                         this.qrCodeProductValues = qrCodeProductValuesDisplay;
                         Log.d(TAG, "onCreate: qrCodeProductValuesDisplay " + qrCodeProductValuesDisplay);
+                        Log.d(TAG, "onCreate: inboundMapSharedPref " + inboundMap);
                         int totalInboundDisplayNotVerified = 0;
                         for (OutboundDetail outboundDetail : outboundDetailDisplay) {
                             if (!outboundDetail.getStatus().trim().equalsIgnoreCase(GoodsShipmentActivity.StatusVerified)) {
@@ -211,11 +222,12 @@ public class GoodsShipmentScanResultActivity extends AppCompatActivity {
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
                 Log.d(TAG, "initializeBtn: " + totalScanAll);
                 Gson gson = new Gson();
+                Log.d(TAG, "initializeBtn: "+inboundMap);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListScanned, gson.toJson(this.outboundDetailList));
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
                 startActivity(intent);
                 finish();
-            }else{
+            } else {
                 onBackPressed();
             }
         });

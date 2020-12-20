@@ -850,7 +850,7 @@ public class PutawayActivity extends AppCompatActivity {
         }
         Log.d(TAG, "verifyInboundDetails: listSerialNo " + listSerialNo.toString());
         Call<RetroInboundsVerifyResponse> call = service.verifyInventoryItemDetail(new RetroInboundVerifyRequest(idWarehouse, userID,
-                StatusVerified, MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()), listSerialNo));
+                StatusVerified, MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()), listSerialNo,null));
         call.enqueue(new Callback<RetroInboundsVerifyResponse>() {
             @Override
             public void onResponse(Call<RetroInboundsVerifyResponse> call, Response<RetroInboundsVerifyResponse> response) {

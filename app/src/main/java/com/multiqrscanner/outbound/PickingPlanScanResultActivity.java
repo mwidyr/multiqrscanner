@@ -107,7 +107,11 @@ public class PickingPlanScanResultActivity extends AppCompatActivity {
                                 Log.e(TAG, "onCreate: " + ex.getMessage(), ex);
                                 continue;
                             }
-                            String serialNoScan = qrCodeProductValue.getSerialNo().toString();
+                            Long serialNoScanLong = qrCodeProductValue.getSerialNo();
+                            if(serialNoScanLong == null){
+                                continue;
+                            }
+                            String serialNoScan = serialNoScanLong.toString();
                             if (inboundMapSharedPref.get(serialNoScan) != null) {
                                 OutboundDetail outboundDetail = new OutboundDetail(
                                         inboundMapSharedPref.get(serialNoScan).getLineNo(),

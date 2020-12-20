@@ -119,7 +119,11 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
                                 Log.e(TAG, "onCreate: " + ex.getMessage(), ex);
                                 continue;
                             }
-                            String serialNoScan = qrCodeProductValue.getSerialNo().toString();
+                            Long serialNoScanLong = qrCodeProductValue.getSerialNo();
+                            if(serialNoScanLong == null){
+                                continue;
+                            }
+                            String serialNoScan = serialNoScanLong.toString();
                             if (inboundMapSharedPref.get(serialNoScan) != null) {
                                 InboundDetail inboundDetail = new InboundDetail(
                                         inboundMapSharedPref.get(serialNoScan).getLineNo(),

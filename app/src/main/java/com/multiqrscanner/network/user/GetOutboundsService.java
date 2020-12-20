@@ -40,6 +40,6 @@ public interface GetOutboundsService {
             "X-Client-ID:DD2DC0A311F64EF28FD06D4C970581E1",
     })
 
-    @PUT("goods-shipments")
+    @PUT("goods-shipments-item")
     Call<RetroInboundsVerifyResponse> verifyOutboundItemDetail(@Body RetroInboundVerifyRequest id);
 }

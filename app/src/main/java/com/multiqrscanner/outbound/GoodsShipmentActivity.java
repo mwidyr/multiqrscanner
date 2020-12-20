@@ -28,6 +28,7 @@ import com.multiqrscanner.network.RetrofitClientInstance;
 import com.multiqrscanner.network.RetrofitClientInstanceInbound;
 import com.multiqrscanner.network.RetrofitClientInstanceOutbound;
 import com.multiqrscanner.network.model.InboundItemDetail;
+import com.multiqrscanner.network.model.InboundVerifySKU;
 import com.multiqrscanner.network.model.InboundVerifySerialNo;
 import com.multiqrscanner.network.model.RetroInboundId;
 import com.multiqrscanner.network.model.RetroInboundVerifyRequest;
@@ -234,24 +235,30 @@ public class GoodsShipmentActivity extends AppCompatActivity {
                     Log.d(TAG, "role = " + response.body().getItems());
                     List<OutboundDetail> inboundList = new ArrayList<>();
                     for (InboundItemDetail inboundItemDetail : response.body().getItems()) {
-                        if (inboundItemDetail.getSerialno() == null || inboundItemDetail.getSerialno().trim().equalsIgnoreCase("")) {
-                            continue;
-                        }
+                        Log.d(TAG, "onResponse: " + inboundItemDetail);
+                        //temporary doesnt use serial no
+//                        if (inboundItemDetail.getSerialno() == null || inboundItemDetail.getSerialno().trim().equalsIgnoreCase("")) {
+//                            continue;
+//                        }
                         inboundList.add(new OutboundDetail(inboundItemDetail.getLine() + "",
                                 inboundItemDetail.getSku(), inboundItemDetail.getSerialno() == null ? "" : inboundItemDetail.getSerialno(),
                                 inboundItemDetail.getProductname(), inboundItemDetail.getQty() + "",
                                 inboundItemDetail.getSubkey() == null ? "" : inboundItemDetail.getSubkey(),
                                 inboundItemDetail.getVerif(), 0L));
                     }
+                    Log.d(TAG, "onResponse: " + inboundList);
                     HashMap<String, OutboundDetail> inboundMap = new HashMap<>();
+                    int idxA = 1;
                     for (OutboundDetail data : inboundList) {
+                        Log.d(TAG, "onResponse: ");
                         String defaultStatus = StatusNotVerified;
                         if (data.getSerialNo() == null) {
                             defaultStatus = StatusVerified;
                         }
-                        inboundMap.put(data.getSerialNo(), new OutboundDetail(data.getLineNo(), data.getSku(),
+                        inboundMap.put(Integer.toString(idxA), new OutboundDetail(data.getLineNo(), data.getSku(),
                                 data.getSerialNo(), data.getProductName(), data.getQty(),
                                 data.getSubkey(), defaultStatus, data.getInputDate()));
+                        idxA++;
                     }
 
                     String[][] dataToShowTemp = new String[inboundMap.size()][6];
@@ -407,6 +414,7 @@ public class GoodsShipmentActivity extends AppCompatActivity {
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanParent.toString());
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
                 Gson gson = new Gson();
+                Log.d(TAG, "initializeBtn: " + inboundMap);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
                 Intent intent = new Intent(this, BarcodeCaptureActivity.class);
@@ -520,21 +528,40 @@ public class GoodsShipmentActivity extends AppCompatActivity {
         String userID = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityUserID);
         Log.d(TAG, "verifyInboundDetails: id warehouse " + idWarehouse + " userID = " + userID);
         List<InboundVerifySerialNo> listSerialNo = new ArrayList<>();
+        HashMap<String, InboundVerifySKU> skuMap = new HashMap<>();
+        List<InboundVerifySKU> listSkuQty = new ArrayList<>();
         for (OutboundDetail outboundDetail : inboundMap.values()) {
             if (outboundDetail.getStatus().trim().equalsIgnoreCase(StatusVerified)) {
                 listSerialNo.add(new InboundVerifySerialNo(outboundDetail.getSerialNo(), outboundDetail.getInputDate()));
+                if (!skuMap.containsKey(outboundDetail.getSku())) {
+                    skuMap.put(outboundDetail.getSku(), new InboundVerifySKU(outboundDetail.getSku(), "1", outboundDetail.getInputDate()));
+                } else {
+                    InboundVerifySKU skuVerif = skuMap.get(outboundDetail.getSku());
+                    int qty = Integer.parseInt(skuVerif.getQty());
+                    qty = qty + 1;
+                    skuMap.put(outboundDetail.getSku(), new InboundVerifySKU(outboundDetail.getSku(), Integer.toString(qty), outboundDetail.getInputDate()));
+                }
             }
         }
+        for (String key : skuMap.keySet()) {
+            listSkuQty.add(new InboundVerifySKU(key, skuMap.get(key).getQty(), skuMap.get(key).getDate()));
+        }
+
         Log.d(TAG, "verifyInboundDetails: listSerialNo " + listSerialNo.toString());
-        Call<RetroInboundsVerifyResponse> call = service.verifyOutboundItemDetail(new RetroInboundVerifyRequest(idWarehouse, userID,
-                StatusVerified, MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()), listSerialNo));
+        Log.d(TAG, "verifyInboundDetails: sku " + listSkuQty.toString());
+        RetroInboundVerifyRequest request = new RetroInboundVerifyRequest(idWarehouse, userID,
+                StatusVerified, MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()), listSerialNo, listSkuQty);
+        Gson gson = new Gson();
+        String stringJson = gson.toJson(request);
+        Log.d(TAG, "verifyInboundDetails: json "+stringJson);
+        Call<RetroInboundsVerifyResponse> call = service.verifyOutboundItemDetail(request);
         call.enqueue(new Callback<RetroInboundsVerifyResponse>() {
             @Override
             public void onResponse(Call<RetroInboundsVerifyResponse> call, Response<RetroInboundsVerifyResponse> response) {
                 progressBar.setVisibility(View.GONE);
                 view.setVisibility(View.GONE);
                 if (response.body() != null && response.body().getResultCode() > 0) {
-                    Toast.makeText(GoodsShipmentActivity.this, "Success Confirm Inbound", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(GoodsShipmentActivity.this, "Success Confirm Outbound", Toast.LENGTH_SHORT).show();
                     String selectedInbound = inboundNoTextView.getText().toString();
                     clearAllData();
                     listInboundNos.remove(selectedInbound);
@@ -542,7 +569,8 @@ public class GoodsShipmentActivity extends AppCompatActivity {
                             R.layout.spinner_item_inbound, listInboundNos);
                     inboundNoTextView.setAdapter(adapter);
                 } else {
-                    Toast.makeText(GoodsShipmentActivity.this, "Failed verify inbound", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "onResponse: failed " + response.body());
+                    Toast.makeText(GoodsShipmentActivity.this, "Failed verify outbound", Toast.LENGTH_SHORT).show();
                 }
             }
 

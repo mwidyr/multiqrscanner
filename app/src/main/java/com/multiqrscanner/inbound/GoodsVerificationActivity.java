@@ -525,7 +525,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         }
         Log.d(TAG, "verifyInboundDetails: listSerialNo " + listSerialNo.toString());
         Call<RetroInboundsVerifyResponse> call = service.verifyInboundItemDetail(new RetroInboundVerifyRequest(idWarehouse, userID,
-                StatusVerified, MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()), listSerialNo));
+                StatusVerified, MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()), listSerialNo, null));
         call.enqueue(new Callback<RetroInboundsVerifyResponse>() {
             @Override
             public void onResponse(Call<RetroInboundsVerifyResponse> call, Response<RetroInboundsVerifyResponse> response) {
