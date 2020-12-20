@@ -107,6 +107,16 @@ public class PickingPlanActivity extends AppCompatActivity {
         totalScan = findViewById(R.id.tv_total_scan_val);
         totalSummaryInbound = findViewById(R.id.tv_total_summary_inbounds_val);
         recyclerView = findViewById(R.id.goods_verif_detail);
+        verifConfirm = findViewById(R.id.btn_goods_verif_confirm);
+        verifViewDetail = findViewById(R.id.btn_goods_verif_view_detail);
+        verifCancel = findViewById(R.id.custom_top_bar_back_button);
+        verifScan = findViewById(R.id.btn_goods_verif_scan);
+        verifClear = findViewById(R.id.btn_goods_verif_clear);
+        verifViewDetailTv = findViewById(R.id.verif_view_detail_text);
+        verifScanTv = findViewById(R.id.verif_btn_scan_tv);
+        totalScanConstrainLayout = findViewById(R.id.constraintLayout_total_scan);
+        searchButton = findViewById(R.id.btn_search_inbound);
+        inboundNoTextView = findViewById(R.id.spinner_inbound_no);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         setAdapterData();
         recyclerView.setVisibility(View.GONE);
@@ -329,16 +339,7 @@ public class PickingPlanActivity extends AppCompatActivity {
     }
 
     public void initializeBtn() {
-        verifConfirm = findViewById(R.id.btn_goods_verif_confirm);
-        verifViewDetail = findViewById(R.id.btn_goods_verif_view_detail);
-        verifCancel = findViewById(R.id.custom_top_bar_back_button);
-        verifScan = findViewById(R.id.btn_goods_verif_scan);
-        verifClear = findViewById(R.id.btn_goods_verif_clear);
-        verifViewDetailTv = findViewById(R.id.verif_view_detail_text);
-        verifScanTv = findViewById(R.id.verif_btn_scan_tv);
-        totalScanConstrainLayout = findViewById(R.id.constraintLayout_total_scan);
-        searchButton = findViewById(R.id.btn_search_inbound);
-        inboundNoTextView = findViewById(R.id.spinner_inbound_no);
+
         setSearchButtonInbound();
         verifViewDetail.setOnClickListener(view -> {
             if (recyclerView.getVisibility() == View.GONE) {
@@ -452,7 +453,7 @@ public class PickingPlanActivity extends AppCompatActivity {
     public void onBackPressed() {
         Intent intent = new Intent(this, NavigationViewActivity.class);
 
-        if(inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
+        if(inboundNoTextView == null || inboundNoTextView.getText() == null || inboundNoTextView.getText().toString().trim().equalsIgnoreCase("")) {
             clearAllData();
             startActivity(intent);
             finish();

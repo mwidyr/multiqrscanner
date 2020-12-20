@@ -26,6 +26,6 @@ public interface GetLoginService {
             "Accept:application/json",
             "X-Client-ID:DD2DC0A311F64EF28FD06D4C970581E1",
     })
-    @GET("datetime")
-    Call<GetTimeResponse> getServerTimeInMilis();
+    @POST("datetime")
+    Call<GetTimeResponse> getServerTimeInMilis(@Body RetroUser user);
 }

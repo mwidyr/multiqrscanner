@@ -23,6 +23,7 @@ import com.multiqrscanner.network.RetrofitClientInstance;
 import com.multiqrscanner.network.RetrofitClientInstanceInbound;
 import com.multiqrscanner.network.model.GetTimeResponse;
 import com.multiqrscanner.network.model.RetroInventory;
+import com.multiqrscanner.network.model.RetroUser;
 import com.multiqrscanner.network.model.RetroWarehouse;
 import com.multiqrscanner.network.user.GetInventoryService;
 import com.multiqrscanner.network.user.GetLoginService;
@@ -59,6 +60,7 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
     HashMap<String, InboundDetail> inboundMap;
     private Integer totalIntInvalidInbound = 0;
     private Integer totalIntValidInbound = 0;
+    private String timeInMilistDB;
     RecyclerView recyclerView;
 
 
@@ -67,7 +69,41 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_goods_verification_scan_result);
         inboundNoVal = findViewById(R.id.tv_goods_verif_result_inbound_no_val);
+        btnScan = findViewById(R.id.tv_rescan);
+        btnSubmit = findViewById(R.id.tv_submit);
+        btnCancel = findViewById(R.id.tv_cancel);
+        btnBack = findViewById(R.id.custom_top_bar_back_button);
+        totalScan = findViewById(R.id.total_scan_result);
+        totalValidInbound = findViewById(R.id.total_valid_inbound);
+        totalInvalidInbound = findViewById(R.id.total_invalid_inbound);
+        recyclerView = findViewById(R.id.goods_verif_result_detail);
 
+        GetLoginService service = RetrofitClientInstance.getRetrofitInstance().create(GetLoginService.class);
+        Call<GetTimeResponse> callSync = service.getServerTimeInMilis(new RetroUser());
+        callSync.enqueue(new Callback<GetTimeResponse>() {
+            @Override
+            public void onResponse(Call<GetTimeResponse> call, Response<GetTimeResponse> response) {
+                GetTimeResponse apiResponse = response.body();
+                Log.d(TAG, "onResponse: " + response.body());
+                if (apiResponse != null) {
+                    timeInMilistDB = apiResponse.getDate();
+                    Log.d(TAG, "onResponse: timeInMilistDB " + timeInMilistDB);
+                    initOnCreate();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GetTimeResponse> call, Throwable t) {
+                Log.e(TAG, "onFailure: get time " + t.getMessage(), t);
+                Toast.makeText(GoodsVerificationScanResultActivity.this, "Use Device Time...", Toast.LENGTH_SHORT).show();
+                initOnCreate();
+            }
+        });
+
+
+    }
+
+    public void initOnCreate(){
         Intent intent = getIntent();
         if (!MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundNoKey).trim().equalsIgnoreCase("")) {
             currentSelectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundNoKey);
@@ -86,16 +122,6 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
         String totalScanExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.TotalScanKey);
         totalScanFromParentAct = Integer.parseInt(totalScanExtra);
 
-//        String bitmapArrayExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.ImagePathKey);
-//        if (!bitmapArrayExtra.trim().equalsIgnoreCase("")) {
-//            imageView = findViewById(R.id.iv_goods_verif_scan_result);
-//            byte[] byteImage = gson.fromJson(bitmapArrayExtra, byte[].class);
-//            Bitmap imageBitmap = BitmapFactory.decodeByteArray(byteImage, 0, byteImage.length);
-//            ;
-//            if (imageBitmap != null) {
-//                imageView.setImageBitmap(imageBitmap);
-//            }
-//        }
 
         String qrCodeListExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.QrCodeGsonKey);
         if (!qrCodeListExtra.trim().equalsIgnoreCase("")) {
@@ -120,7 +146,7 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
                                 continue;
                             }
                             Long serialNoScanLong = qrCodeProductValue.getSerialNo();
-                            if(serialNoScanLong == null){
+                            if (serialNoScanLong == null) {
                                 continue;
                             }
                             String serialNoScan = serialNoScanLong.toString();
@@ -146,23 +172,9 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
                                 }
                                 if (inboundMapSharedPref.get(serialNoScan).getInputDate() == null || inboundMapSharedPref.get(serialNoScan).getInputDate() == 0L) {
                                     inboundMapSharedPref.get(serialNoScan).setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
-                                    GetLoginService service = RetrofitClientInstance.getRetrofitInstance().create(GetLoginService.class);
-                                    Call<GetTimeResponse> callSync = service.getServerTimeInMilis();
-                                    callSync.enqueue(new Callback<GetTimeResponse>() {
-                                        @Override
-                                        public void onResponse(Call<GetTimeResponse> call, Response<GetTimeResponse> response) {
-                                            GetTimeResponse apiResponse = response.body();
-                                            if (apiResponse != null) {
-                                                Objects.requireNonNull(inboundMapSharedPref.get(serialNoScan)).setInputDate(Long.parseLong(apiResponse.getDate()));
-                                                setInboundMap(inboundMapSharedPref);
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onFailure(Call<GetTimeResponse> call, Throwable t) {
-                                            Log.e(TAG, "onFailure: " + t.getMessage(), t);
-                                        }
-                                    });
+                                    if(timeInMilistDB != null && !timeInMilistDB.trim().equalsIgnoreCase("")){
+                                        inboundMapSharedPref.get(serialNoScan).setInputDate(Long.parseLong(timeInMilistDB));
+                                    }
                                 }
 
                             } else {
@@ -171,6 +183,7 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
                             }
                             qrCodeProductValuesDisplay.add(qrCodeProductValue);
                         }
+                        setInboundMap(inboundMapSharedPref);
                         this.inboundDetailList = inboundDetailDisplay;
                         this.qrCodeProductValues = qrCodeProductValuesDisplay;
                         Log.d(TAG, "onCreate: qrCodeProductValuesDisplay " + qrCodeProductValuesDisplay);
@@ -185,7 +198,6 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
                 }
             }
         }
-        recyclerView = findViewById(R.id.goods_verif_result_detail);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         initializeBtn();
         setAdapterData();
@@ -216,13 +228,6 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
     }
 
     public void initializeBtn() {
-        btnScan = findViewById(R.id.tv_rescan);
-        btnSubmit = findViewById(R.id.tv_submit);
-        btnCancel = findViewById(R.id.tv_cancel);
-        btnBack = findViewById(R.id.custom_top_bar_back_button);
-        totalScan = findViewById(R.id.total_scan_result);
-        totalValidInbound = findViewById(R.id.total_valid_inbound);
-        totalInvalidInbound = findViewById(R.id.total_invalid_inbound);
         btnBack.setOnClickListener(view -> {
             onBackPressed();
         });
@@ -244,6 +249,8 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
                 Log.d(TAG, "initializeBtn: " + totalScanAll);
                 Gson gson = new Gson();
+                Log.d(TAG, "initializeBtn: timeinmilistDB " + timeInMilistDB);
+                Log.d(TAG, "initializeBtn: inboundMap " + inboundMap);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListScanned, gson.toJson(this.inboundDetailList));
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
                 startActivity(intent);
