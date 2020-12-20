@@ -21,6 +21,9 @@ import com.multiqrscanner.inventory.adapter.ILoadMore;
 import com.multiqrscanner.inventory.adapter.ScanResultAdapter;
 import com.multiqrscanner.inventory.model.InventoryDetail;
 import com.multiqrscanner.misc.MiscUtil;
+import com.multiqrscanner.network.RetrofitClientInstance;
+import com.multiqrscanner.network.model.GetTimeResponse;
+import com.multiqrscanner.network.user.GetLoginService;
 import com.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
 import com.multiqrscanner.qrcode.QrCodeProductValue;
 
@@ -28,6 +31,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PutawayPalletProductScanResultActivity extends AppCompatActivity {
     private static String TAG = "PPPSRA";
@@ -43,12 +51,16 @@ public class PutawayPalletProductScanResultActivity extends AppCompatActivity {
     private Gson gson = new Gson();
     private String currentSelectedInboundNo;
     private List<InventoryDetail> inventoryDetailList;
-    private List<QrCodeProductValue> qrCodeProductValues;
-    HashMap<String, InventoryDetail> inboundMap;
+    private List<QrCodeProductValue> qrCodeProductValues = new ArrayList<>();
+    HashMap<String, InventoryDetail> inboundMap = new HashMap<>();
+    HashMap<String, InventoryDetail> productMap = new HashMap<>();
     private Integer totalIntInvalidInbound = 0;
     private Integer totalIntValidInbound = 0;
     RecyclerView recyclerView;
 
+    public void setProductMap(HashMap<String, InventoryDetail> productMap) {
+        this.productMap = productMap;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,17 +85,6 @@ public class PutawayPalletProductScanResultActivity extends AppCompatActivity {
 
         String totalScanExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.TotalScanKey);
         totalScanFromParentAct = Integer.parseInt(totalScanExtra);
-
-//        String bitmapArrayExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.ImagePathKey);
-//        if (!bitmapArrayExtra.trim().equalsIgnoreCase("")) {
-//            imageView = findViewById(R.id.iv_goods_verif_scan_result);
-//            byte[] byteImage = gson.fromJson(bitmapArrayExtra, byte[].class);
-//            Bitmap imageBitmap = BitmapFactory.decodeByteArray(byteImage, 0, byteImage.length);
-//            ;
-//            if (imageBitmap != null) {
-//                imageView.setImageBitmap(imageBitmap);
-//            }
-//        }
 
         String qrCodeListExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.QrCodeGsonKey);
         if (!qrCodeListExtra.trim().equalsIgnoreCase("")) {
@@ -125,19 +126,37 @@ public class PutawayPalletProductScanResultActivity extends AppCompatActivity {
                                     inventoryDetail.setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
                                 }
                                 inventoryDetailDisplay.add(inventoryDetail);
-                                if (inboundMapSharedPref.get(serialNoScan).getInputDate() == null || inboundMapSharedPref.get(serialNoScan).getInputDate() == 0L) {
-                                    inboundMapSharedPref.get(serialNoScan).setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
-                                }
                                 if (inboundMapSharedPref.get(serialNoScan).getStatus().trim().equalsIgnoreCase(PutawayActivity.StatusNotVerified)) {
                                     inboundMapSharedPref.get(serialNoScan).setStatus(PutawayActivity.StatusVerified);
                                 }
+                                if (inboundMapSharedPref.get(serialNoScan).getInputDate() == null || inboundMapSharedPref.get(serialNoScan).getInputDate() == 0L) {
+                                    inboundMapSharedPref.get(serialNoScan).setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
+                                    GetLoginService service = RetrofitClientInstance.getRetrofitInstance().create(GetLoginService.class);
+                                    Call<GetTimeResponse> callSync = service.getServerTimeInMilis();
+                                    callSync.enqueue(new Callback<GetTimeResponse>() {
+                                        @Override
+                                        public void onResponse(Call<GetTimeResponse> call, Response<GetTimeResponse> response) {
+                                            GetTimeResponse apiResponse = response.body();
+                                            if (apiResponse != null) {
+                                                Objects.requireNonNull(inboundMapSharedPref.get(serialNoScan)).setInputDate(Long.parseLong(apiResponse.getDate()));
+                                                setInboundMap(inboundMapSharedPref);
+                                                setProductMap(inboundMapSharedPref);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<GetTimeResponse> call, Throwable t) {
+                                            Log.e(TAG, "onFailure: " + t.getMessage(), t);
+                                        }
+                                    });
+                                }
+
                             } else {
                                 qrCodeProductValue.setValid(InvalidInbound);
                                 totalIntInvalidInbound++;
                             }
                             qrCodeProductValuesDisplay.add(qrCodeProductValue);
                         }
-                        setInboundMap(inboundMapSharedPref);
                         this.inventoryDetailList = inventoryDetailDisplay;
                         this.qrCodeProductValues = qrCodeProductValuesDisplay;
                         Log.d(TAG, "onCreate: qrCodeProductValuesDisplay " + qrCodeProductValuesDisplay);
@@ -213,6 +232,7 @@ public class PutawayPalletProductScanResultActivity extends AppCompatActivity {
                 Gson gson = new Gson();
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListScanned, gson.toJson(this.inventoryDetailList));
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.ScanProductListDetail, gson.toJson(this.productMap));
                 startActivity(intent);
                 finish();
             }else{

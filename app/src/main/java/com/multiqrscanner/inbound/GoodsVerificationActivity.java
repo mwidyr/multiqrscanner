@@ -28,7 +28,6 @@ import com.multiqrscanner.inbound.model.InboundData;
 import com.multiqrscanner.inbound.model.InboundDetail;
 import com.multiqrscanner.misc.MiscUtil;
 import com.multiqrscanner.navdrawer.NavigationViewActivity;
-import com.multiqrscanner.network.RetrofitClientInstance;
 import com.multiqrscanner.network.RetrofitClientInstanceInbound;
 import com.multiqrscanner.network.model.InboundItemDetail;
 import com.multiqrscanner.network.model.InboundVerifySerialNo;
@@ -114,7 +113,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
             warehouse = "";
         }
         inboundDatas = new ArrayList<>();
-        GetInboundsService service = RetrofitClientInstance.getRetrofitInstance().create(GetInboundsService.class);
+        GetInboundsService service = RetrofitClientInstanceInbound.getRetrofitInstanceInbound().create(GetInboundsService.class);
         Call<RetroInbounds> call = service.getInbounds(new RetroWarehouse(warehouse));
         progressBar.setVisibility(View.VISIBLE);
         call.enqueue(new Callback<RetroInbounds>() {
@@ -221,8 +220,9 @@ public class GoodsVerificationActivity extends AppCompatActivity {
 
 
     public void injectData(String inboundNo, InboundData data) {
-        GetInboundsService service = RetrofitClientInstance.getRetrofitInstance().create(GetInboundsService.class);
+        GetInboundsService service = RetrofitClientInstanceInbound.getRetrofitInstanceInbound().create(GetInboundsService.class);
         Call<RetroInboundsDetail> call = service.getInboundItemDetail(new RetroInboundId(inboundNo));
+
         call.enqueue(new Callback<RetroInboundsDetail>() {
             @Override
             public void onResponse(Call<RetroInboundsDetail> call, Response<RetroInboundsDetail> response) {
@@ -338,6 +338,9 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         searchButton = findViewById(R.id.btn_search_inbound);
         inboundNoTextView = findViewById(R.id.spinner_inbound_no);
         setSearchButtonInbound();
+        searchButton.setOnClickListener(view1 -> {
+            inboundNoTextView.showDropDown();
+        });
         verifViewDetail.setOnClickListener(view -> {
             if (recyclerView.getVisibility() == View.GONE) {
                 recyclerView.setVisibility(View.VISIBLE);

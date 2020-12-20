@@ -29,13 +29,18 @@ public class MiscUtil {
     public static final String ListBarcodeKey = "listBarcodes";
 
     public static String InboundNoKey = "inbound_no";
+    public static String CurrentPalletKey = "current_pallet";
     public static String InboundListDetail = "inbound_list_detail";
+    public static String ScanProductListDetail = "scan_product_list_detail";
     public static String TotalScanKey = "total_scan";
     public static String InboundListScanned = "inbound_list_scanned";
+    public static String PalletListDetail = "pallet_list_detail";
     public static String GoodsVerificationValue = "goods_verification";
     public static String GoodsShipmentValue = "goods_shipment";
     public static String PickingPlanValue = "picking_plan";
-    public static String PutawayValue = "putaway_value";
+    public static String PickingPlanPalletValue = "picking_plan_pallet";
+    public static String PutawayValue = "putaway";
+    public static String PutawayPalletValue = "putaway_pallet";
     public static String ReplenishmentValue = "replenishment";
     public static String InventoryMgmtValue = "inventory_mgmt";
     public static String FromActivityKey = "from_activity";

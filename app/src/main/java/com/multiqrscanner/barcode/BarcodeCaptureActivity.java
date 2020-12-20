@@ -45,6 +45,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.multiqrscanner.inbound.GoodsVerificationScanResultActivity;
+import com.multiqrscanner.inventory.PutawayActivity;
 import com.multiqrscanner.inventory.PutawayPalletProductScanResultActivity;
 import com.multiqrscanner.misc.MiscUtil;
 import com.multiqrscanner.outbound.GoodsShipmentScanResultActivity;
@@ -233,8 +234,28 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanFromParent);
                 startActivity(intent);
                 finish();
-            } else if (currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.PutawayValue)) {
+            } else if (currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.PickingPlanPalletValue)) {
+                Intent intent = new Intent(this, PickingPlanActivity.class);
+                String currentSelectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundNoKey);
+                intent.putExtra(MiscUtil.InboundNoKey, currentSelectedInboundNo);
+                String totalScanFromParent = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.TotalScanKey);
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanFromParent);
+                startActivity(intent);
+                finish();
+            }else if (currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.PutawayValue)) {
                 Intent intent = new Intent(this, PutawayPalletProductScanResultActivity.class);
+                String currentSelectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundNoKey);
+                intent.putExtra(MiscUtil.InboundNoKey, currentSelectedInboundNo);
+                if (qrCodeBarcodeSimpleWrapperList.size() > 0) {
+                    String qrCodeJsonValue = gson.toJson(qrCodeBarcodeSimpleWrapperList);
+                    MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.QrCodeGsonKey, qrCodeJsonValue);
+                }
+                String totalScanFromParent = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.TotalScanKey);
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanFromParent);
+                startActivity(intent);
+                finish();
+            }else if (currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.PutawayPalletValue)) {
+                Intent intent = new Intent(this, PutawayActivity.class);
                 String currentSelectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundNoKey);
                 intent.putExtra(MiscUtil.InboundNoKey, currentSelectedInboundNo);
                 if (qrCodeBarcodeSimpleWrapperList.size() > 0) {
@@ -409,13 +430,13 @@ public final class BarcodeCaptureActivity extends AppCompatActivity {
                 return "Goods Verification";
             } else if (currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.GoodsShipmentValue)) {
                 return "Goods Shipment";
-            } else if (currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.PickingPlanValue)) {
+            } else if (currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.PickingPlanValue)||currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.PickingPlanPalletValue)) {
                 return "Picking Plan";
             } else if (currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.InventoryMgmtValue)) {
                 return "Inventory Management";
             } else if (currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.ReplenishmentValue)) {
                 return "Replenishment";
-            } else if (currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.PutawayValue)) {
+            } else if (currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.PutawayValue) || currentActivityFrom.trim().equalsIgnoreCase(MiscUtil.PutawayPalletValue) ) {
                 return "Putaway";
             }
         }

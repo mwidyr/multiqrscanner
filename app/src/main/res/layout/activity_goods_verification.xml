@@ -454,7 +454,7 @@
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:layout_marginStart="8dp"
-                android:completionThreshold="1"
+                android:completionThreshold="0"
                 android:fontFamily="@font/ubuntu_light"
                 android:hint="Inbound No."
                 android:textAlignment="textStart"

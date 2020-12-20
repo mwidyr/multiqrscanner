@@ -26,6 +26,7 @@ import com.multiqrscanner.misc.MiscUtil;
 import com.multiqrscanner.navdrawer.NavigationViewActivity;
 import com.multiqrscanner.network.RetrofitClientInstance;
 import com.multiqrscanner.network.RetrofitClientInstanceInbound;
+import com.multiqrscanner.network.RetrofitClientInstanceOutbound;
 import com.multiqrscanner.network.model.InboundItemDetail;
 import com.multiqrscanner.network.model.InboundVerifySerialNo;
 import com.multiqrscanner.network.model.RetroInboundId;
@@ -115,7 +116,7 @@ public class GoodsShipmentActivity extends AppCompatActivity {
             warehouse = "";
         }
         outboundData = new ArrayList<>();
-        GetOutboundsService service = RetrofitClientInstance.getRetrofitInstance().create(GetOutboundsService.class);
+        GetOutboundsService service = RetrofitClientInstanceOutbound.getRetrofitInstanceOutbound().create(GetOutboundsService.class);
         Call<RetroOutbounds> call = service.getOutbounds(new RetroWarehouse(warehouse));
         progressBar.setVisibility(View.VISIBLE);
         call.enqueue(new Callback<RetroOutbounds>() {
@@ -144,6 +145,7 @@ public class GoodsShipmentActivity extends AppCompatActivity {
                             String item = (String) adapterView.getItemAtPosition(pos);
                             if (!item.trim().equalsIgnoreCase("")) {
                                 currentSelectedInboundNo = item;
+                                Log.d(TAG, "onItemClick: " + outboundData);
                                 for (OutboundData data : outboundData) {
                                     if (data.getInboundno().trim().equalsIgnoreCase(item)) {
                                         if (!currentSelectedInboundNo.trim().equalsIgnoreCase(selectedInboundNo)) {
@@ -222,8 +224,9 @@ public class GoodsShipmentActivity extends AppCompatActivity {
 
 
     public void injectData(String inboundNo, OutboundData data) {
-        GetInboundsService service = RetrofitClientInstance.getRetrofitInstance().create(GetInboundsService.class);
-        Call<RetroInboundsDetail> call = service.getInboundItemDetail(new RetroInboundId(inboundNo));
+        Log.d(TAG, "injectData: " + inboundNo + " - " + data);
+        GetOutboundsService service = RetrofitClientInstanceOutbound.getRetrofitInstanceOutbound().create(GetOutboundsService.class);
+        Call<RetroInboundsDetail> call = service.getOutboundItemDetail(new RetroInboundId(data.getId()));
         call.enqueue(new Callback<RetroInboundsDetail>() {
             @Override
             public void onResponse(Call<RetroInboundsDetail> call, Response<RetroInboundsDetail> response) {
@@ -304,6 +307,7 @@ public class GoodsShipmentActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<RetroInboundsDetail> call, Throwable t) {
+                Log.d(TAG, "onFailure: " + t.getMessage());
                 Toast.makeText(GoodsShipmentActivity.this, "Failed Retrieve Inbound Detail", Toast.LENGTH_SHORT).show();
             }
         });
@@ -339,6 +343,9 @@ public class GoodsShipmentActivity extends AppCompatActivity {
         searchButton = findViewById(R.id.btn_search_inbound);
         inboundNoTextView = findViewById(R.id.spinner_inbound_no);
         setSearchButtonInbound();
+        searchButton.setOnClickListener(view1 -> {
+            inboundNoTextView.showDropDown();
+        });
         verifViewDetail.setOnClickListener(view -> {
             if (recyclerView.getVisibility() == View.GONE) {
                 recyclerView.setVisibility(View.VISIBLE);
@@ -373,11 +380,11 @@ public class GoodsShipmentActivity extends AppCompatActivity {
         verifCancel.setOnClickListener(view -> {
             Intent intent = new Intent(this, NavigationViewActivity.class);
 
-            if(inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
+            if (inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
                 clearAllData();
                 startActivity(intent);
                 finish();
-            }else{
+            } else {
                 MiscUtil.CustomDialogClass cdc = MiscUtil.customAlertDialog(this, "Return to home?", "After you return to home, the data is lost and cannot be canceled");
                 View.OnClickListener confirmListener = viewA -> {
                     clearAllData();
@@ -451,11 +458,11 @@ public class GoodsShipmentActivity extends AppCompatActivity {
     public void onBackPressed() {
         Intent intent = new Intent(this, NavigationViewActivity.class);
 
-        if(inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
+        if (inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
             clearAllData();
             startActivity(intent);
             finish();
-        }else{
+        } else {
             MiscUtil.CustomDialogClass cdc = MiscUtil.customAlertDialog(this, "Return to home?", "After you return to home, the data is lost and cannot be canceled");
             View.OnClickListener confirmListener = viewA -> {
                 clearAllData();
@@ -508,7 +515,7 @@ public class GoodsShipmentActivity extends AppCompatActivity {
     public void verifyInboundDetails() {
         progressBar.setVisibility(View.VISIBLE);
         view.setVisibility(View.VISIBLE);
-        GetInboundsService service = RetrofitClientInstanceInbound.getRetrofitInstanceInbound().create(GetInboundsService.class);
+        GetOutboundsService service = RetrofitClientInstanceOutbound.getRetrofitInstanceOutbound().create(GetOutboundsService.class);
         String idWarehouse = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityWSID);
         String userID = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityUserID);
         Log.d(TAG, "verifyInboundDetails: id warehouse " + idWarehouse + " userID = " + userID);
@@ -519,7 +526,7 @@ public class GoodsShipmentActivity extends AppCompatActivity {
             }
         }
         Log.d(TAG, "verifyInboundDetails: listSerialNo " + listSerialNo.toString());
-        Call<RetroInboundsVerifyResponse> call = service.verifyInboundItemDetail(new RetroInboundVerifyRequest(idWarehouse, userID,
+        Call<RetroInboundsVerifyResponse> call = service.verifyOutboundItemDetail(new RetroInboundVerifyRequest(idWarehouse, userID,
                 StatusVerified, MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()), listSerialNo));
         call.enqueue(new Callback<RetroInboundsVerifyResponse>() {
             @Override

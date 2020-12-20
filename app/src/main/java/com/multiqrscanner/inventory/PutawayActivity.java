@@ -22,14 +22,20 @@ import com.google.gson.reflect.TypeToken;
 import com.multiqrscanner.R;
 import com.multiqrscanner.barcode.BarcodeCaptureActivity;
 import com.multiqrscanner.barcode.MainBarcodeQRCodeActivity;
+import com.multiqrscanner.inbound.model.InboundDetail;
+import com.multiqrscanner.inventory.adapter.HorizontalAdapter;
 import com.multiqrscanner.inventory.adapter.ILoadMore;
 import com.multiqrscanner.inventory.adapter.InboundDetailsAdapter;
 import com.multiqrscanner.inventory.model.InventoryData;
 import com.multiqrscanner.inventory.model.InventoryDetail;
+import com.multiqrscanner.inventory.model.PalletDetail;
+import com.multiqrscanner.inventory.model.PutawayData;
 import com.multiqrscanner.misc.MiscUtil;
 import com.multiqrscanner.navdrawer.NavigationViewActivity;
 import com.multiqrscanner.network.RetrofitClientInstance;
 import com.multiqrscanner.network.RetrofitClientInstanceInbound;
+import com.multiqrscanner.network.RetrofitClientInstanceInventory;
+import com.multiqrscanner.network.model.GetTimeResponse;
 import com.multiqrscanner.network.model.InboundItemDetail;
 import com.multiqrscanner.network.model.InboundVerifySerialNo;
 import com.multiqrscanner.network.model.RetroInboundId;
@@ -40,6 +46,8 @@ import com.multiqrscanner.network.model.RetroInventory;
 import com.multiqrscanner.network.model.RetroWarehouse;
 import com.multiqrscanner.network.user.GetInboundsService;
 import com.multiqrscanner.network.user.GetInventoryService;
+import com.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
+import com.multiqrscanner.qrcode.QrCodePalletValue;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -64,32 +72,92 @@ public class PutawayActivity extends AppCompatActivity {
     private static final String ALL_WAREHOUSE = "All Warehouse";
 
     private HashMap<String, InventoryDetail> inboundMap;
+    private HashMap<String, PutawayData> palletMap = new HashMap<>();
 
     private TextView inboundDate, inboundCustomer, inboundWarehouse, totalScan, totalSummaryInbound, searchButton, verifViewDetailTv, verifScanTv;
-    private LinearLayout verifConfirm, verifViewDetail, verifScan, verifClear;
+    private LinearLayout verifConfirm, verifViewDetail, verifScan, verifClear, verifAddPallet;
     private ConstraintLayout totalScanConstrainLayout;
     private ImageView verifCancel;
     private ProgressBar progressBar;
     private AutoCompleteTextView inboundNoTextView;
     private View view;
-    private String[][] dataToShow = {};
+    private String currentSelectedPalletNo = "";
 
     List<String> listInboundNos = new ArrayList<>();
 
     private List<InventoryData> inventoryData;
-    RecyclerView recyclerView;
+    RecyclerView recyclerViewDetailProduct;
     List<InventoryDetail> items = new ArrayList<>();
+
+    public void setPalletMap(HashMap<String, PutawayData> palletMap) {
+        this.palletMap = palletMap;
+    }
 
     public void setAdapterData() {
         InboundDetailsAdapter adapter;
-        adapter = new InboundDetailsAdapter(recyclerView, this, items);
-        recyclerView.setAdapter(adapter);
+        adapter = new InboundDetailsAdapter(recyclerViewDetailProduct, this, items);
+        recyclerViewDetailProduct.setAdapter(adapter);
         adapter.setLoadMore(new ILoadMore() {
             @Override
             public void onLoadMore() {
 
             }
         });
+    }
+
+    // Recycler View object
+    RecyclerView recyclerView;
+    // Array list for recycler view data source
+    ArrayList<String> palletList;
+    // Layout Manager
+    RecyclerView.LayoutManager RecyclerViewLayoutManager;
+    // adapter class object
+    HorizontalAdapter adapter;
+    // Linear Layout Manager
+    LinearLayoutManager HorizontalLayout;
+
+    public void AddItemsToRecyclerViewArrayList() {
+        // Adding items to ArrayList
+        palletList = new ArrayList<>();
+    }
+
+    private void setupHorizontalPalletView() {
+        //begin set pallet list
+        // initialisation with id's
+        recyclerView = findViewById(R.id.putaway_pallet_list);
+        RecyclerViewLayoutManager = new LinearLayoutManager(getApplicationContext());
+        // Set LayoutManager on Recycler View
+        recyclerView.setLayoutManager(RecyclerViewLayoutManager);
+        // Adding items to RecyclerView.
+        AddItemsToRecyclerViewArrayList();
+        setupDataHorizontalPalletView();
+    }
+
+    private void setupDataHorizontalPalletView() {
+        // calling constructor of adapter
+        // with source list as a parameter
+        adapter = new HorizontalAdapter(this, palletList);
+        // Set Horizontal Layout Manager
+        // for Recycler view
+        HorizontalLayout = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        recyclerView.setLayoutManager(HorizontalLayout);
+        // Set adapter on recycler view
+        recyclerView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();// Notify the adapter
+        adapter.setOnItemClickListener(new HorizontalAdapter.onRecyclerViewItemClickListener() {
+            @Override
+            public void onItemClickListener(View view, int position) {
+                Log.d(TAG, "onItemClickListener: view " + view.toString() + " pos " + position);
+                Log.d(TAG, "onItemClickListener: pallet_no " + palletList.get(position));
+                currentSelectedPalletNo = palletList.get(position);
+                PutawayData putawayData = palletMap.get(currentSelectedPalletNo);
+                if (putawayData != null) {
+                    items = new ArrayList<>(putawayData.getProductDetail().values());
+                    setAdapterData();
+                }
+            }
+        });
+        // done set pallet list
     }
 
     @Override
@@ -105,208 +173,445 @@ public class PutawayActivity extends AppCompatActivity {
         inboundWarehouse = findViewById(R.id.tv_inbound_warehouse_val);
         totalScan = findViewById(R.id.tv_total_scan_val);
         totalSummaryInbound = findViewById(R.id.tv_total_summary_inbounds_val);
-        recyclerView = findViewById(R.id.goods_verif_detail);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewDetailProduct = findViewById(R.id.goods_verif_detail);
+        recyclerViewDetailProduct.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewDetailProduct.setVisibility(View.GONE);
         setAdapterData();
-        recyclerView.setVisibility(View.GONE);
-
+        setupHorizontalPalletView();
+        getDataFromScanForPalletCode();
         String warehouse = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityWS);
         if (warehouse.equalsIgnoreCase(ALL_WAREHOUSE)) {
             warehouse = "";
         }
         inventoryData = new ArrayList<>();
-        GetInventoryService service = RetrofitClientInstance.getRetrofitInstance().create(GetInventoryService.class);
-        Call<RetroInventory> call = service.getInventory(new RetroWarehouse(warehouse));
+        GetInventoryService service = RetrofitClientInstanceInventory.getRetrofitInstanceInventory().create(GetInventoryService.class);
+        Call<RetroInventory> callSync = service.getInventory(new RetroWarehouse(warehouse));
         progressBar.setVisibility(View.VISIBLE);
-        call.enqueue(new Callback<RetroInventory>() {
-            @Override
-            public void onResponse(Call<RetroInventory> call, Response<RetroInventory> response) {
-                if (response.body() != null && response.body().getInbounds() != null) {
-                    progressBar.setVisibility(View.GONE);
-                    Log.d(TAG, "getInbounds = " + response.body().getInbounds());
-                    inventoryData.addAll(response.body().getInbounds());
-                    for (InventoryData inventoryData1 : inventoryData) {
-                        listInboundNos.add(inventoryData1.getInboundno());
-                    }
-                    initializeBtn();
-                    // Create an ArrayAdapter using the string array and a default spinner layout
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(PutawayActivity.this,
-                            R.layout.spinner_item_inbound, listInboundNos);
+        try {
+            Response<RetroInventory> response = callSync.execute();
+            if (response.body() != null && response.body().getInbounds() != null) {
+                progressBar.setVisibility(View.GONE);
+                Log.d(TAG, "getInbounds = " + response.body().getInbounds());
+                inventoryData.addAll(response.body().getInbounds());
+                for (InventoryData inventoryData1 : inventoryData) {
+                    listInboundNos.add(inventoryData1.getInboundno());
+                }
+                initializeBtn();
+                // Create an ArrayAdapter using the string array and a default spinner layout
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(PutawayActivity.this,
+                        R.layout.spinner_item_inbound, listInboundNos);
 //                    // Specify the layout to use when the list of choices appears
 //                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    // Apply the adapter to the spinner
-                    inboundNoTextView.setAdapter(adapter);
-                    String selectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.InboundNoKey);
-                    inboundNoTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
-                            Log.d(TAG, "adapter = " + (String) adapterView.getItemAtPosition(pos));
-                            String item = (String) adapterView.getItemAtPosition(pos);
-                            if (!item.trim().equalsIgnoreCase("")) {
-                                currentSelectedInboundNo = item;
-                                for (InventoryData data : inventoryData) {
-                                    if (data.getInboundno().trim().equalsIgnoreCase(item)) {
-                                        if (!currentSelectedInboundNo.trim().equalsIgnoreCase(selectedInboundNo)) {
-                                            clearSharedPreferences();
-                                            MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.TotalScanKey);
-                                            totalScanParent = 0;
-                                            totalScan.setText("0");
-                                        }
-                                        MiscUtil.saveStringSharedPreferenceAsString(PutawayActivity.this,
-                                                MiscUtil.LoginActivityWSID, data.getId());
-                                        injectData(currentSelectedInboundNo, data);
-                                        verifScan.setVisibility(View.VISIBLE);
-                                        verifScan.setClickable(true);
-                                        break;
+                // Apply the adapter to the spinner
+                inboundNoTextView.setAdapter(adapter);
+                String selectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.InboundNoKey);
+                inboundNoTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
+                        Log.d(TAG, "adapter = " + (String) adapterView.getItemAtPosition(pos));
+                        String item = (String) adapterView.getItemAtPosition(pos);
+                        if (!item.trim().equalsIgnoreCase("")) {
+                            currentSelectedInboundNo = item;
+                            for (InventoryData data : inventoryData) {
+                                if (data.getInboundno().trim().equalsIgnoreCase(item)) {
+                                    if (!currentSelectedInboundNo.trim().equalsIgnoreCase(selectedInboundNo)) {
+                                        clearSharedPreferences();
+                                        MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.TotalScanKey);
+                                        totalScanParent = 0;
+                                        totalScan.setText("0");
                                     }
+                                    MiscUtil.saveStringSharedPreferenceAsString(PutawayActivity.this,
+                                            MiscUtil.LoginActivityWSID, data.getId());
+                                    injectData(currentSelectedInboundNo, data);
+                                    verifScan.setVisibility(View.VISIBLE);
+                                    verifScan.setClickable(true);
+                                    verifAddPallet.setVisibility(View.VISIBLE);
+                                    verifAddPallet.setClickable(true);
+                                    break;
                                 }
-                            } else {
-                                setInboundDetailValue(false, currentSelectedInboundNo, new InventoryData("", "", "", "", "", new ArrayList<>()));
-                                verifScan.setVisibility(View.GONE);
+                            }
+                        } else {
+                            setInboundDetailValue(false, currentSelectedInboundNo, new InventoryData("", "", "", "", "", new ArrayList<>()));
+                            verifScan.setVisibility(View.GONE);
 //                    setTableData();
-                            }
                         }
-                    });
+                    }
+                });
 
-                    if (!selectedInboundNo.trim().equalsIgnoreCase("")) {
-                        currentSelectedInboundNo = selectedInboundNo;
-                        for (int i = 0; i < listInboundNos.size(); i++) {
-                            if (currentSelectedInboundNo.trim().equalsIgnoreCase(listInboundNos.get(i))) {
-                                inboundNoTextView.setText(currentSelectedInboundNo);
-                                for (InventoryData data : inventoryData) {
-                                    if (data.getInboundno().trim().equalsIgnoreCase(currentSelectedInboundNo)) {
-                                        MiscUtil.saveStringSharedPreferenceAsString(PutawayActivity.this,
-                                                MiscUtil.LoginActivityWSID, data.getId());
-                                        injectData(currentSelectedInboundNo, data);
-                                        verifScan.setVisibility(View.VISIBLE);
-                                        verifScan.setClickable(true);
-                                        break;
-                                    }
+                if (!selectedInboundNo.trim().equalsIgnoreCase("")) {
+                    currentSelectedInboundNo = selectedInboundNo;
+                    for (int i = 0; i < listInboundNos.size(); i++) {
+                        if (currentSelectedInboundNo.trim().equalsIgnoreCase(listInboundNos.get(i))) {
+                            inboundNoTextView.setText(currentSelectedInboundNo);
+                            for (InventoryData data : inventoryData) {
+                                if (data.getInboundno().trim().equalsIgnoreCase(currentSelectedInboundNo)) {
+                                    MiscUtil.saveStringSharedPreferenceAsString(PutawayActivity.this,
+                                            MiscUtil.LoginActivityWSID, data.getId());
+                                    injectData(currentSelectedInboundNo, data);
+                                    verifScan.setVisibility(View.VISIBLE);
+                                    verifScan.setClickable(true);
+                                    verifAddPallet.setVisibility(View.VISIBLE);
+                                    verifAddPallet.setClickable(true);
+                                    break;
                                 }
-                                break;
                             }
+                            break;
                         }
                     }
-                    String totalScanExtra = MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.TotalScanKey);
-                    Log.d(TAG, "onResponse: " + totalScanExtra);
-                    if (!totalScanExtra.trim().equalsIgnoreCase("")) {
-                        totalScanParent = Integer.parseInt(totalScanExtra);
-                        totalScan.setText(totalScanExtra);
-                        if (totalScanParent > 0) {
-                            verifConfirm.setVisibility(View.VISIBLE);
-                            verifConfirm.setClickable(true);
-                            verifViewDetail.setVisibility(View.VISIBLE);
-                            verifViewDetail.setClickable(true);
-                            verifScan.setVisibility(View.VISIBLE);
-                            verifScan.setClickable(true);
-                            verifClear.setVisibility(View.VISIBLE);
-                            verifClear.setClickable(true);
-                            totalScanConstrainLayout.setVisibility(View.VISIBLE);
-                            setSearchButtonInbound();
-                            verifScanTv.setText("Rescan");
-                        }
-                    } else {
-                        verifScanTv.setText("Scan");
+                }
+                String totalScanExtra = MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.TotalScanKey);
+                Log.d(TAG, "onResponse: " + totalScanExtra);
+                if (!totalScanExtra.trim().equalsIgnoreCase("")) {
+                    totalScanParent = Integer.parseInt(totalScanExtra);
+                    totalScan.setText(totalScanExtra);
+                    if (totalScanParent > 0) {
+                        verifConfirm.setVisibility(View.VISIBLE);
+                        verifConfirm.setClickable(true);
+                        verifViewDetail.setVisibility(View.VISIBLE);
+                        verifViewDetail.setClickable(true);
+                        verifScan.setVisibility(View.VISIBLE);
+                        verifScan.setClickable(true);
+                        verifClear.setVisibility(View.VISIBLE);
+                        verifClear.setClickable(true);
+                        verifAddPallet.setVisibility(View.VISIBLE);
+                        verifAddPallet.setClickable(true);
+                        totalScanConstrainLayout.setVisibility(View.VISIBLE);
+                        setSearchButtonInbound();
+                        verifScanTv.setText("Rescan");
                     }
+                } else {
+                    verifScanTv.setText("Scan");
                 }
             }
 
-            @Override
-            public void onFailure(Call<RetroInventory> call, Throwable t) {
-                Toast.makeText(PutawayActivity.this, "Failed retrieve data", Toast.LENGTH_SHORT).show();
-                progressBar.setVisibility(View.GONE);
-            }
-        });
+        } catch (Exception ex) {
+            Toast.makeText(PutawayActivity.this, "Failed retrieve data", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+            Log.d(TAG, "onCreate: " + ex.getMessage());
+        }
+//        callSync.enqueue(new Callback<RetroInventory>() {
+//            @Override
+//            public void onResponse(Call<RetroInventory> call, Response<RetroInventory> response) {
+//                if (response.body() != null && response.body().getInbounds() != null) {
+//                    progressBar.setVisibility(View.GONE);
+//                    Log.d(TAG, "getInbounds = " + response.body().getInbounds());
+//                    inventoryData.addAll(response.body().getInbounds());
+//                    for (InventoryData inventoryData1 : inventoryData) {
+//                        listInboundNos.add(inventoryData1.getInboundno());
+//                    }
+//                    initializeBtn();
+//                    // Create an ArrayAdapter using the string array and a default spinner layout
+//                    ArrayAdapter<String> adapter = new ArrayAdapter<>(PutawayActivity.this,
+//                            R.layout.spinner_item_inbound, listInboundNos);
+////                    // Specify the layout to use when the list of choices appears
+////                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//                    // Apply the adapter to the spinner
+//                    inboundNoTextView.setAdapter(adapter);
+//                    String selectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.InboundNoKey);
+//                    inboundNoTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//                        @Override
+//                        public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
+//                            Log.d(TAG, "adapter = " + (String) adapterView.getItemAtPosition(pos));
+//                            String item = (String) adapterView.getItemAtPosition(pos);
+//                            if (!item.trim().equalsIgnoreCase("")) {
+//                                currentSelectedInboundNo = item;
+//                                for (InventoryData data : inventoryData) {
+//                                    if (data.getInboundno().trim().equalsIgnoreCase(item)) {
+//                                        if (!currentSelectedInboundNo.trim().equalsIgnoreCase(selectedInboundNo)) {
+//                                            clearSharedPreferences();
+//                                            MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.TotalScanKey);
+//                                            totalScanParent = 0;
+//                                            totalScan.setText("0");
+//                                        }
+//                                        MiscUtil.saveStringSharedPreferenceAsString(PutawayActivity.this,
+//                                                MiscUtil.LoginActivityWSID, data.getId());
+//                                        injectData(currentSelectedInboundNo, data);
+//                                        verifScan.setVisibility(View.VISIBLE);
+//                                        verifScan.setClickable(true);
+//                                        break;
+//                                    }
+//                                }
+//                            } else {
+//                                setInboundDetailValue(false, currentSelectedInboundNo, new InventoryData("", "", "", "", "", new ArrayList<>()));
+//                                verifScan.setVisibility(View.GONE);
+////                    setTableData();
+//                            }
+//                        }
+//                    });
+//
+//                    if (!selectedInboundNo.trim().equalsIgnoreCase("")) {
+//                        currentSelectedInboundNo = selectedInboundNo;
+//                        for (int i = 0; i < listInboundNos.size(); i++) {
+//                            if (currentSelectedInboundNo.trim().equalsIgnoreCase(listInboundNos.get(i))) {
+//                                inboundNoTextView.setText(currentSelectedInboundNo);
+//                                for (InventoryData data : inventoryData) {
+//                                    if (data.getInboundno().trim().equalsIgnoreCase(currentSelectedInboundNo)) {
+//                                        MiscUtil.saveStringSharedPreferenceAsString(PutawayActivity.this,
+//                                                MiscUtil.LoginActivityWSID, data.getId());
+//                                        injectData(currentSelectedInboundNo, data);
+//                                        verifScan.setVisibility(View.VISIBLE);
+//                                        verifScan.setClickable(true);
+//                                        break;
+//                                    }
+//                                }
+//                                break;
+//                            }
+//                        }
+//                    }
+//                    String totalScanExtra = MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.TotalScanKey);
+//                    Log.d(TAG, "onResponse: " + totalScanExtra);
+//                    if (!totalScanExtra.trim().equalsIgnoreCase("")) {
+//                        totalScanParent = Integer.parseInt(totalScanExtra);
+//                        totalScan.setText(totalScanExtra);
+//                        if (totalScanParent > 0) {
+//                            verifConfirm.setVisibility(View.VISIBLE);
+//                            verifConfirm.setClickable(true);
+//                            verifViewDetail.setVisibility(View.VISIBLE);
+//                            verifViewDetail.setClickable(true);
+//                            verifScan.setVisibility(View.VISIBLE);
+//                            verifScan.setClickable(true);
+//                            verifClear.setVisibility(View.VISIBLE);
+//                            verifClear.setClickable(true);
+//                            totalScanConstrainLayout.setVisibility(View.VISIBLE);
+//                            setSearchButtonInbound();
+//                            verifScanTv.setText("Rescan");
+//                        }
+//                    } else {
+//                        verifScanTv.setText("Scan");
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<RetroInventory> call, Throwable t) {
+//
+//            }
+//        });
 
     }
 
-
-    public void injectData(String inboundNo, InventoryData data) {
-        GetInboundsService service = RetrofitClientInstance.getRetrofitInstance().create(GetInboundsService.class);
-        Call<RetroInboundsDetail> call = service.getInboundItemDetail(new RetroInboundId(inboundNo));
-        call.enqueue(new Callback<RetroInboundsDetail>() {
-            @Override
-            public void onResponse(Call<RetroInboundsDetail> call, Response<RetroInboundsDetail> response) {
-                if (response.body() != null && response.body().getItems() != null && response.body().getItems().size() > 0) {
-                    Log.d(TAG, "role = " + response.body().getItems());
-                    List<InventoryDetail> inboundList = new ArrayList<>();
-                    for (InboundItemDetail inboundItemDetail : response.body().getItems()) {
-                        if (inboundItemDetail.getSerialno() == null || inboundItemDetail.getSerialno().trim().equalsIgnoreCase("")) {
+    //flow when add pallet -> get scanned qr code, parse to qrCodeProductValue, add pallet detail to palletmap with empty map product, set adapter again
+    public void getDataFromScanForPalletCode() {
+        String currentActivityFrom = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.FromActivityKey);
+        Log.d(TAG, "getDataFromScanForPalletCode: " + currentActivityFrom);
+        if (currentActivityFrom.equalsIgnoreCase(MiscUtil.PutawayPalletValue)) {
+            Gson gson = new Gson();
+            String palletMapString = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.PalletListDetail);
+            Log.d(TAG, "getDataFromScanForPalletCode: pmString " + palletMapString);
+            Log.d(TAG, "getDataFromScanForPalletCode: pmLocal " + this.palletMap);
+            if (!palletMapString.equalsIgnoreCase("")) {
+                this.palletMap = gson.fromJson(palletMapString, new TypeToken<HashMap<String, PutawayData>>() {
+                }.getType());
+                Log.d(TAG, "getDataFromScanForPalletCode: pmParse " + this.palletMap);
+            }
+            String qrCodeListExtra = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.QrCodeGsonKey);
+            Log.d(TAG, "getDataFromScanForPalletCode: " + qrCodeListExtra);
+            if (!qrCodeListExtra.equalsIgnoreCase("")) {
+                List<QrCodeBarcodeSimpleWrapper> qrCodeBarcodeSimpleWrappers = gson.fromJson(qrCodeListExtra, new TypeToken<ArrayList<QrCodeBarcodeSimpleWrapper>>() {
+                }.getType());
+                if (qrCodeBarcodeSimpleWrappers.size() > 0) {
+                    for (QrCodeBarcodeSimpleWrapper qrCode : qrCodeBarcodeSimpleWrappers) {
+                        // get qrcode detail value
+                        QrCodePalletValue qrCodePalletValue = new QrCodePalletValue();
+                        try {
+                            Log.d(TAG, "getDataFromScanForPalletCode: " + qrCode.getQrValue());
+                            qrCodePalletValue = gson.fromJson(qrCode.getQrValue(), QrCodePalletValue.class);
+                            Log.d(TAG, "getDataFromScanForPalletCode: " + qrCodePalletValue);
+                            String palletNoString = qrCodePalletValue.getPallet_no().toString();
+                            if (!this.palletMap.containsKey(palletNoString)) {
+                                PutawayData inputPutawayData = new PutawayData(new PalletDetail(Long.parseLong(palletNoString)), new HashMap<>());
+                                this.palletMap.put(palletNoString, inputPutawayData);
+                                break;// because only 1 pallet needed
+                            }
+                        } catch (Exception ex) {
+                            Log.e(TAG, "onCreate: " + ex.getMessage(), ex);
                             continue;
                         }
-                        inboundList.add(new InventoryDetail(inboundItemDetail.getLine() + "",
-                                inboundItemDetail.getSku(), inboundItemDetail.getSerialno() == null ? "" : inboundItemDetail.getSerialno(),
-                                inboundItemDetail.getProductname(), inboundItemDetail.getQty() + "",
-                                inboundItemDetail.getSubkey() == null ? "" : inboundItemDetail.getSubkey(),
-                                inboundItemDetail.getVerif(), 0L));
                     }
-                    HashMap<String, InventoryDetail> inboundMap = new HashMap<>();
-                    for (InventoryDetail data : inboundList) {
-                        String defaultStatus = StatusNotVerified;
-                        if (data.getSerialNo() == null) {
-                            defaultStatus = StatusVerified;
-                        }
-                        inboundMap.put(data.getSerialNo(), new InventoryDetail(data.getLineNo(), data.getSku(),
-                                data.getSerialNo(), data.getProductName(), data.getQty(),
-                                data.getSubkey(), defaultStatus, data.getInputDate()));
-                    }
-
-                    String[][] dataToShowTemp = new String[inboundMap.size()][6];
-                    Log.d(TAG, "onResponse:setDataToVerifiedAndSavedPref before verif");
-
-                    Gson gson = new Gson();
-                    String inboundMapString = MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.InboundListDetail);
-                    Log.d(TAG, "onResponse: sharedPref " + inboundMapString);
-                    Log.d(TAG, "onResponse: savedMap " + inboundMap);
-                    if (!inboundMapString.trim().equalsIgnoreCase("")) {
-                        HashMap<String, InventoryDetail> inboundDetailListScanned = gson.fromJson(inboundMapString, new TypeToken<HashMap<String, InventoryDetail>>() {
-                        }.getType());
-                        Log.d(TAG, "onResponse: inboundDetailListScanned " + inboundDetailListScanned);
-                        inboundMap = inboundDetailListScanned;
-                    }
-                    setInboundMap(inboundMap);
-                    Log.d(TAG, "onResponse: after edit savedMap " + inboundMap);
-
-                    List<InventoryDetail> itemInventoryDetail = new ArrayList<>();
-                    // Iterating over keys only
-                    int idx = 0;
-                    for (String key : inboundMap.keySet()) {
-                        InventoryDetail inventoryDetailData = inboundMap.get(key);
-                        if (inventoryDetailData != null && inventoryDetailData.getStatus().equalsIgnoreCase(StatusVerified)) {
-                            dataToShowTemp[idx][0] = inventoryDetailData.getLineNo();
-                            dataToShowTemp[idx][1] = inventoryDetailData.getSku();
-                            dataToShowTemp[idx][2] = inventoryDetailData.getSerialNo();
-                            dataToShowTemp[idx][3] = inventoryDetailData.getProductName();
-                            dataToShowTemp[idx][4] = inventoryDetailData.getQty();
-                            dataToShowTemp[idx][5] = inventoryDetailData.getSubkey();
-                            itemInventoryDetail.add(inventoryDetailData);
-                            idx++;
-                        }
-                    }
-                    items = itemInventoryDetail;
-                    setAdapterData();
-
-                    totalScanVerified = idx;
-                    dataToShow = new String[idx][6];
-                    for (int i = 0; i < idx; i++) {
-                        Log.d(TAG, "onResponse: " + Arrays.toString(dataToShowTemp[i]));
-                        dataToShow[i][0] = dataToShowTemp[i][0];
-                        dataToShow[i][1] = dataToShowTemp[i][1];
-                        dataToShow[i][2] = dataToShowTemp[i][2];
-                        dataToShow[i][3] = dataToShowTemp[i][3];
-                        dataToShow[i][4] = dataToShowTemp[i][4];
-                        dataToShow[i][5] = dataToShowTemp[i][5];
-                        Log.d(TAG, "onResponse: " + Arrays.toString(dataToShow[i]));
-                    }
-                    setInboundDetailValue(false, currentSelectedInboundNo, data);
                 }
             }
+            palletList.addAll(this.palletMap.keySet());
+            setupDataHorizontalPalletView();
+        }
+    }
 
-            @Override
-            public void onFailure(Call<RetroInboundsDetail> call, Throwable t) {
-                Toast.makeText(PutawayActivity.this, "Failed Retrieve Inbound Detail", Toast.LENGTH_SHORT).show();
+    public void injectData(String inboundNo, InventoryData data) {
+        GetInventoryService service = RetrofitClientInstanceInventory.getRetrofitInstanceInventory().create(GetInventoryService.class);
+        Call<RetroInboundsDetail> callSync = service.getInventoryItemDetail(new RetroInboundId(inboundNo));
+        try {
+            Response<RetroInboundsDetail> response = callSync.execute();
+            if (response.body() != null && response.body().getItems() != null && response.body().getItems().size() > 0) {
+                Log.d(TAG, "role = " + response.body().getItems());
+                List<InventoryDetail> inboundList = new ArrayList<>();
+                for (InboundItemDetail inboundItemDetail : response.body().getItems()) {
+                    if (inboundItemDetail.getSerialno() == null || inboundItemDetail.getSerialno().trim().equalsIgnoreCase("")) {
+                        continue;
+                    }
+                    inboundList.add(new InventoryDetail(inboundItemDetail.getLine() + "",
+                            inboundItemDetail.getSku(), inboundItemDetail.getSerialno() == null ? "" : inboundItemDetail.getSerialno(),
+                            inboundItemDetail.getProductname(), inboundItemDetail.getQty() + "",
+                            inboundItemDetail.getSubkey() == null ? "" : inboundItemDetail.getSubkey(),
+                            inboundItemDetail.getVerif(), 0L));
+                }
+                HashMap<String, InventoryDetail> inboundMap = new HashMap<>();
+                for (InventoryDetail detail : inboundList) {
+                    String defaultStatus = StatusNotVerified;
+                    if (detail.getSerialNo() == null) {
+                        defaultStatus = StatusVerified;
+                    }
+                    inboundMap.put(detail.getSerialNo(), new InventoryDetail(detail.getLineNo(), detail.getSku(),
+                            detail.getSerialNo(), detail.getProductName(), detail.getQty(),
+                            detail.getSubkey(), defaultStatus, detail.getInputDate()));
+                }
+
+                Gson gson = new Gson();
+                String inboundMapString = MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.InboundListDetail);
+                if (!inboundMapString.trim().equalsIgnoreCase("")) {
+                    inboundMap = gson.fromJson(inboundMapString, new TypeToken<HashMap<String, InventoryDetail>>() {
+                    }.getType());
+                }
+                setInboundMap(inboundMap);
+
+                HashMap<String, PutawayData> palletMap = new HashMap<>();
+                // step to get scan result and map to core pallet map
+                //get core pallet map sharedpref
+                String palletMapString = MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.PalletListDetail);
+                if (!palletMapString.trim().equalsIgnoreCase("")) {
+                    palletMap = gson.fromJson(palletMapString, new TypeToken<HashMap<String, PutawayData>>() {
+                    }.getType());
+                }
+
+                //get scan result
+                HashMap<String, InventoryDetail> productMap = new HashMap<>();
+                String productListString = MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.ScanProductListDetail);
+                if (!productListString.trim().equalsIgnoreCase("")) {
+                    productMap = gson.fromJson(productListString, new TypeToken<HashMap<String, InventoryDetail>>() {
+                    }.getType());
+                    /*
+                    1. filter scan result so there are no duplicate across map (loop core map and compare values map to scan result, if values same and key == current selected its okay)
+                    2. check if key current selected pallet already exist in core pallet
+                    3. if exist then replace data with scan result
+                     */
+                    for (String key : palletMap.keySet()) {
+                        PutawayData putawayData = palletMap.get(key);
+                        assert putawayData != null;
+                        for (String keyData : putawayData.getProductDetail().keySet()) {
+                            // filter key data if it exist then remove
+                            productMap.remove(keyData);
+                        }
+                    }
+                }
+                PutawayData putawayData = palletMap.get(currentSelectedPalletNo);
+                for (String key : productMap.keySet()) {
+                    InventoryDetail productData = productMap.get(key);
+                    assert productData != null;
+                    assert putawayData != null;
+                    putawayData.getProductDetail().put(productData.getSerialNo(), productData);
+                }
+                setPalletMap(palletMap);
+
+                List<InventoryDetail> itemInventoryDetail = new ArrayList<>();
+                // Iterating over keys only
+                int idx = 0;
+                assert putawayData != null;
+                for (String key : putawayData.getProductDetail().keySet()) {
+                    InventoryDetail inventoryDetailData = putawayData.getProductDetail().get(key);
+                    itemInventoryDetail.add(inventoryDetailData);
+                    idx++;
+                }
+                items = itemInventoryDetail;
+                setAdapterData();
+
+                totalScanVerified = idx;
+                setInboundDetailValue(false, currentSelectedInboundNo, data);
             }
-        });
+        } catch (Exception ex) {
+            Toast.makeText(PutawayActivity.this, "Failed Retrieve Inbound Detail", Toast.LENGTH_SHORT).show();
+        }
+
+//        callSync.enqueue(new Callback<RetroInboundsDetail>() {
+//            @Override
+//            public void onResponse(Call<RetroInboundsDetail> call, Response<RetroInboundsDetail> response) {
+//                if (response.body() != null && response.body().getItems() != null && response.body().getItems().size() > 0) {
+//                    Log.d(TAG, "role = " + response.body().getItems());
+//                    List<InventoryDetail> inboundList = new ArrayList<>();
+//                    for (InboundItemDetail inboundItemDetail : response.body().getItems()) {
+//                        if (inboundItemDetail.getSerialno() == null || inboundItemDetail.getSerialno().trim().equalsIgnoreCase("")) {
+//                            continue;
+//                        }
+//                        inboundList.add(new InventoryDetail(inboundItemDetail.getLine() + "",
+//                                inboundItemDetail.getSku(), inboundItemDetail.getSerialno() == null ? "" : inboundItemDetail.getSerialno(),
+//                                inboundItemDetail.getProductname(), inboundItemDetail.getQty() + "",
+//                                inboundItemDetail.getSubkey() == null ? "" : inboundItemDetail.getSubkey(),
+//                                inboundItemDetail.getVerif(), 0L));
+//                    }
+//                    HashMap<String, InventoryDetail> inboundMap = new HashMap<>();
+//                    for (InventoryDetail data : inboundList) {
+//                        String defaultStatus = StatusNotVerified;
+//                        if (data.getSerialNo() == null) {
+//                            defaultStatus = StatusVerified;
+//                        }
+//                        inboundMap.put(data.getSerialNo(), new InventoryDetail(data.getLineNo(), data.getSku(),
+//                                data.getSerialNo(), data.getProductName(), data.getQty(),
+//                                data.getSubkey(), defaultStatus, data.getInputDate()));
+//                    }
+//
+//                    String[][] dataToShowTemp = new String[inboundMap.size()][6];
+//                    Log.d(TAG, "onResponse:setDataToVerifiedAndSavedPref before verif");
+//
+//                    Gson gson = new Gson();
+//                    String inboundMapString = MiscUtil.getStringSharedPreferenceByKey(PutawayActivity.this, MiscUtil.InboundListDetail);
+//                    Log.d(TAG, "onResponse: sharedPref " + inboundMapString);
+//                    Log.d(TAG, "onResponse: savedMap " + inboundMap);
+//                    if (!inboundMapString.trim().equalsIgnoreCase("")) {
+//                        HashMap<String, InventoryDetail> inboundDetailListScanned = gson.fromJson(inboundMapString, new TypeToken<HashMap<String, InventoryDetail>>() {
+//                        }.getType());
+//                        Log.d(TAG, "onResponse: inboundDetailListScanned " + inboundDetailListScanned);
+//                        inboundMap = inboundDetailListScanned;
+//                    }
+//                    setInboundMap(inboundMap);
+//                    Log.d(TAG, "onResponse: after edit savedMap " + inboundMap);
+//
+//                    List<InventoryDetail> itemInventoryDetail = new ArrayList<>();
+//                    // Iterating over keys only
+//                    int idx = 0;
+//                    for (String key : inboundMap.keySet()) {
+//                        InventoryDetail inventoryDetailData = inboundMap.get(key);
+//                        if (inventoryDetailData != null && inventoryDetailData.getStatus().equalsIgnoreCase(StatusVerified)) {
+//                            dataToShowTemp[idx][0] = inventoryDetailData.getLineNo();
+//                            dataToShowTemp[idx][1] = inventoryDetailData.getSku();
+//                            dataToShowTemp[idx][2] = inventoryDetailData.getSerialNo();
+//                            dataToShowTemp[idx][3] = inventoryDetailData.getProductName();
+//                            dataToShowTemp[idx][4] = inventoryDetailData.getQty();
+//                            dataToShowTemp[idx][5] = inventoryDetailData.getSubkey();
+//                            itemInventoryDetail.add(inventoryDetailData);
+//                            idx++;
+//                        }
+//                    }
+//                    items = itemInventoryDetail;
+//                    setAdapterData();
+//
+//                    totalScanVerified = idx;
+//                    dataToShow = new String[idx][6];
+//                    for (int i = 0; i < idx; i++) {
+//                        Log.d(TAG, "onResponse: " + Arrays.toString(dataToShowTemp[i]));
+//                        dataToShow[i][0] = dataToShowTemp[i][0];
+//                        dataToShow[i][1] = dataToShowTemp[i][1];
+//                        dataToShow[i][2] = dataToShowTemp[i][2];
+//                        dataToShow[i][3] = dataToShowTemp[i][3];
+//                        dataToShow[i][4] = dataToShowTemp[i][4];
+//                        dataToShow[i][5] = dataToShowTemp[i][5];
+//                        Log.d(TAG, "onResponse: " + Arrays.toString(dataToShow[i]));
+//                    }
+//                    setInboundDetailValue(false, currentSelectedInboundNo, data);
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<RetroInboundsDetail> call, Throwable t) {
+//                Toast.makeText(PutawayActivity.this, "Failed Retrieve Inbound Detail", Toast.LENGTH_SHORT).show();
+//            }
+//        });
     }
 
     public void setInboundMap(HashMap<String, InventoryDetail> inboundMap) {
@@ -332,6 +637,26 @@ public class PutawayActivity extends AppCompatActivity {
         verifViewDetail = findViewById(R.id.btn_goods_verif_view_detail);
         verifCancel = findViewById(R.id.custom_top_bar_back_button);
         verifScan = findViewById(R.id.btn_goods_verif_scan);
+        verifAddPallet = findViewById(R.id.btn_goods_verif_scan_pallet);
+        verifAddPallet.setOnClickListener(view -> {
+            if (currentSelectedInboundNo.trim().equalsIgnoreCase("")) {
+                Toast.makeText(this, "Please choose inbound no first", Toast.LENGTH_SHORT).show();
+            } else {
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.FromActivityKey, MiscUtil.PutawayPalletValue);
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanParent.toString());
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
+                Gson gson = new Gson();
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.PalletListDetail, gson.toJson(this.palletMap));
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanParent.toString());
+                Intent intent = new Intent(this, BarcodeCaptureActivity.class);
+                intent.putExtra(BarcodeCaptureActivity.AutoFocus, true);
+                intent.putExtra(BarcodeCaptureActivity.UseFlash, false);
+                MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.ListBarcodeKey);
+                startActivityForResult(intent, MainBarcodeQRCodeActivity.RC_BARCODE_CAPTURE);
+            }
+        });
         verifClear = findViewById(R.id.btn_goods_verif_clear);
         verifViewDetailTv = findViewById(R.id.verif_view_detail_text);
         verifScanTv = findViewById(R.id.verif_btn_scan_tv);
@@ -340,11 +665,11 @@ public class PutawayActivity extends AppCompatActivity {
         inboundNoTextView = findViewById(R.id.spinner_inbound_no);
         setSearchButtonInbound();
         verifViewDetail.setOnClickListener(view -> {
-            if (recyclerView.getVisibility() == View.GONE) {
-                recyclerView.setVisibility(View.VISIBLE);
+            if (recyclerViewDetailProduct.getVisibility() == View.GONE) {
+                recyclerViewDetailProduct.setVisibility(View.VISIBLE);
                 verifViewDetailTv.setText("Hide");
             } else {
-                recyclerView.setVisibility(View.GONE);
+                recyclerViewDetailProduct.setVisibility(View.GONE);
                 verifViewDetailTv.setText("Show");
             }
         });
@@ -373,11 +698,11 @@ public class PutawayActivity extends AppCompatActivity {
         verifCancel.setOnClickListener(view -> {
             Intent intent = new Intent(this, NavigationViewActivity.class);
 
-            if(inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
+            if (inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
                 clearAllData();
                 startActivity(intent);
                 finish();
-            }else{
+            } else {
                 MiscUtil.CustomDialogClass cdc = MiscUtil.customAlertDialog(this, "Return to home?", "After you return to home, the data is lost and cannot be canceled");
                 View.OnClickListener confirmListener = viewA -> {
                     clearAllData();
@@ -393,12 +718,13 @@ public class PutawayActivity extends AppCompatActivity {
 
         });
         verifScan.setOnClickListener(view -> {
-            if (currentSelectedInboundNo.trim().equalsIgnoreCase("")) {
-                Toast.makeText(this, "Please choose inbound no first", Toast.LENGTH_SHORT).show();
+            if (currentSelectedPalletNo == null || currentSelectedPalletNo.trim().equalsIgnoreCase("")) {
+                Toast.makeText(this, "Please choose pallet no first", Toast.LENGTH_SHORT).show();
             } else {
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.FromActivityKey, MiscUtil.PutawayValue);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, totalScanParent.toString());
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
+                MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.CurrentPalletKey, currentSelectedPalletNo);
                 Gson gson = new Gson();
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey, currentSelectedInboundNo);
@@ -410,9 +736,11 @@ public class PutawayActivity extends AppCompatActivity {
                 startActivityForResult(intent, MainBarcodeQRCodeActivity.RC_BARCODE_CAPTURE);
             }
         });
+
         verifConfirm.setVisibility(View.GONE);
         verifViewDetail.setVisibility(View.GONE);
         verifScan.setVisibility(View.GONE);
+        verifAddPallet.setVisibility(View.GONE);
         verifClear.setVisibility(View.GONE);
         totalScanConstrainLayout.setVisibility(View.GONE);
     }
@@ -433,7 +761,8 @@ public class PutawayActivity extends AppCompatActivity {
         verifViewDetail.setVisibility(View.GONE);
         verifClear.setVisibility(View.GONE);
         verifScan.setVisibility(View.GONE);
-        recyclerView.setVisibility(View.GONE);
+        verifAddPallet.setVisibility(View.GONE);
+        recyclerViewDetailProduct.setVisibility(View.GONE);
         inboundMap = new HashMap<>();
         setAdapterData();
         setSearchButtonInbound();
@@ -452,11 +781,11 @@ public class PutawayActivity extends AppCompatActivity {
     public void onBackPressed() {
         Intent intent = new Intent(this, NavigationViewActivity.class);
 
-        if(inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
+        if (inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
             clearAllData();
             startActivity(intent);
             finish();
-        }else{
+        } else {
             MiscUtil.CustomDialogClass cdc = MiscUtil.customAlertDialog(this, "Return to home?", "After you return to home, the data is lost and cannot be canceled");
             View.OnClickListener confirmListener = viewA -> {
                 clearAllData();
@@ -509,7 +838,7 @@ public class PutawayActivity extends AppCompatActivity {
     public void verifyInboundDetails() {
         progressBar.setVisibility(View.VISIBLE);
         view.setVisibility(View.VISIBLE);
-        GetInboundsService service = RetrofitClientInstanceInbound.getRetrofitInstanceInbound().create(GetInboundsService.class);
+        GetInventoryService service = RetrofitClientInstanceInventory.getRetrofitInstanceInventory().create(GetInventoryService.class);
         String idWarehouse = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityWSID);
         String userID = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityUserID);
         Log.d(TAG, "verifyInboundDetails: id warehouse " + idWarehouse + " userID = " + userID);
@@ -520,7 +849,7 @@ public class PutawayActivity extends AppCompatActivity {
             }
         }
         Log.d(TAG, "verifyInboundDetails: listSerialNo " + listSerialNo.toString());
-        Call<RetroInboundsVerifyResponse> call = service.verifyInboundItemDetail(new RetroInboundVerifyRequest(idWarehouse, userID,
+        Call<RetroInboundsVerifyResponse> call = service.verifyInventoryItemDetail(new RetroInboundVerifyRequest(idWarehouse, userID,
                 StatusVerified, MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()), listSerialNo));
         call.enqueue(new Callback<RetroInboundsVerifyResponse>() {
             @Override

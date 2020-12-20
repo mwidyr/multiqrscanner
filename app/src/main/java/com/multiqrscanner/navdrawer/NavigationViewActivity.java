@@ -44,6 +44,7 @@ public class NavigationViewActivity extends AppCompatActivity {
         MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail);
         MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.InboundNoKey);
         MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey);
+        MiscUtil.clearStringSharedPreferenceAsString(this, MiscUtil.PalletListDetail);
     }
 
     @Override

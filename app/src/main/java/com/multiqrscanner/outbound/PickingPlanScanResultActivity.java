@@ -43,7 +43,7 @@ public class PickingPlanScanResultActivity extends AppCompatActivity {
     private Gson gson = new Gson();
     private String currentSelectedInboundNo;
     private List<OutboundDetail> outboundDetailList;
-    private List<QrCodeProductValue> qrCodeProductValues;
+    private List<QrCodeProductValue> qrCodeProductValues = new ArrayList<>();
     HashMap<String, OutboundDetail> inboundMap;
     private Integer totalIntInvalidInbound = 0;
     private Integer totalIntValidInbound = 0;

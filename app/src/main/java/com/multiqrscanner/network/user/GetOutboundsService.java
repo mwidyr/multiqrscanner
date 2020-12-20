@@ -21,7 +21,7 @@ public interface GetOutboundsService {
             "Accept:application/json",
             "X-Client-ID:DD2DC0A311F64EF28FD06D4C970581E1",
     })
-    @POST("inbounds")
+    @POST("goods-shipments")
     Call<RetroOutbounds> getOutbounds(@Body RetroWarehouse warehouse);
 
     @Headers({
@@ -30,7 +30,7 @@ public interface GetOutboundsService {
             "Accept:application/json",
             "X-Client-ID:DD2DC0A311F64EF28FD06D4C970581E1",
     })
-    @POST("inbound-item")
+    @POST("goods-shipments-item")
     Call<RetroInboundsDetail> getOutboundItemDetail(@Body RetroInboundId id);
 
     @Headers({
@@ -40,6 +40,6 @@ public interface GetOutboundsService {
             "X-Client-ID:DD2DC0A311F64EF28FD06D4C970581E1",
     })
 
-    @PUT("inbound-item")
+    @PUT("goods-shipments")
     Call<RetroInboundsVerifyResponse> verifyOutboundItemDetail(@Body RetroInboundVerifyRequest id);
 }
