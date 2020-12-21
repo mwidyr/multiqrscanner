@@ -18,6 +18,10 @@ import com.multiqrscanner.R;
 import com.multiqrscanner.barcode.BarcodeCaptureActivity;
 import com.multiqrscanner.barcode.MainBarcodeQRCodeActivity;
 import com.multiqrscanner.misc.MiscUtil;
+import com.multiqrscanner.network.RetrofitClientInstance;
+import com.multiqrscanner.network.model.GetTimeResponse;
+import com.multiqrscanner.network.model.RetroUser;
+import com.multiqrscanner.network.user.GetLoginService;
 import com.multiqrscanner.outbound.adapter.ILoadMore;
 import com.multiqrscanner.outbound.adapter.ScanResultAdapter;
 import com.multiqrscanner.outbound.model.OutboundDetail;
@@ -29,6 +33,10 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class GoodsShipmentScanResultActivity extends AppCompatActivity {
     private static String TAG = "GVSSRA";
@@ -49,6 +57,7 @@ public class GoodsShipmentScanResultActivity extends AppCompatActivity {
     private Integer totalIntInvalidInbound = 0;
     private Integer totalIntValidInbound = 0;
     RecyclerView recyclerView;
+    private String timeInMilistDB;
 
 
     @Override
@@ -56,7 +65,32 @@ public class GoodsShipmentScanResultActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_goods_shipment_scan_result);
         inboundNoVal = findViewById(R.id.tv_goods_verif_result_inbound_no_val);
+        GetLoginService service = RetrofitClientInstance.getRetrofitInstance().create(GetLoginService.class);
+        Call<GetTimeResponse> callSync = service.getServerTimeInMilis(new RetroUser());
+        callSync.enqueue(new Callback<GetTimeResponse>() {
+            @Override
+            public void onResponse(Call<GetTimeResponse> call, Response<GetTimeResponse> response) {
+                GetTimeResponse apiResponse = response.body();
+                Log.d(TAG, "onResponse: " + response.body());
+                if (apiResponse != null) {
+                    timeInMilistDB = apiResponse.getDate();
+                    Log.d(TAG, "onResponse: timeInMilistDB " + timeInMilistDB);
+                    initOnCreate();
+                }
+            }
 
+            @Override
+            public void onFailure(Call<GetTimeResponse> call, Throwable t) {
+                Log.e(TAG, "onFailure: " + t.getMessage(), t);
+                Toast.makeText(GoodsShipmentScanResultActivity.this, "Use Device Time...", Toast.LENGTH_SHORT).show();
+                initOnCreate();
+            }
+        });
+
+
+    }
+
+    public void initOnCreate(){
         Intent intent = getIntent();
         if (!MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundNoKey).trim().equalsIgnoreCase("")) {
             currentSelectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundNoKey);
@@ -139,6 +173,9 @@ public class GoodsShipmentScanResultActivity extends AppCompatActivity {
                                     outboundDetailDisplay.add(outboundDetail);
                                     if (Objects.requireNonNull(detail).getInputDate() == null || Objects.requireNonNull(detail).getInputDate() == 0L) {
                                         Objects.requireNonNull(detail).setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
+                                        if(timeInMilistDB != null && !timeInMilistDB.trim().equalsIgnoreCase("")){
+                                            Objects.requireNonNull(detail).setInputDate(Long.parseLong(timeInMilistDB));
+                                        }
                                     }
                                     if (Objects.requireNonNull(detail).getStatus().trim().equalsIgnoreCase(GoodsShipmentActivity.StatusNotVerified)) {
                                         Objects.requireNonNull(detail).setStatus(GoodsShipmentActivity.StatusVerified);
@@ -222,7 +259,8 @@ public class GoodsShipmentScanResultActivity extends AppCompatActivity {
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
                 Log.d(TAG, "initializeBtn: " + totalScanAll);
                 Gson gson = new Gson();
-                Log.d(TAG, "initializeBtn: "+inboundMap);
+                Log.d(TAG, "initializeBtn: timeinmilistDB " + timeInMilistDB);
+                Log.d(TAG, "initializeBtn: inboundMap " + inboundMap);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListScanned, gson.toJson(this.outboundDetailList));
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
                 startActivity(intent);

@@ -108,6 +108,16 @@ public class GoodsShipmentActivity extends AppCompatActivity {
         totalScan = findViewById(R.id.tv_total_scan_val);
         totalSummaryInbound = findViewById(R.id.tv_total_summary_inbounds_val);
         recyclerView = findViewById(R.id.goods_verif_detail);
+        verifConfirm = findViewById(R.id.btn_goods_verif_confirm);
+        verifViewDetail = findViewById(R.id.btn_goods_verif_view_detail);
+        verifCancel = findViewById(R.id.custom_top_bar_back_button);
+        verifScan = findViewById(R.id.btn_goods_verif_scan);
+        verifClear = findViewById(R.id.btn_goods_verif_clear);
+        verifViewDetailTv = findViewById(R.id.verif_view_detail_text);
+        verifScanTv = findViewById(R.id.verif_btn_scan_tv);
+        totalScanConstrainLayout = findViewById(R.id.constraintLayout_total_scan);
+        searchButton = findViewById(R.id.btn_search_inbound);
+        inboundNoTextView = findViewById(R.id.spinner_inbound_no);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         setAdapterData();
         recyclerView.setVisibility(View.GONE);
@@ -280,19 +290,24 @@ public class GoodsShipmentActivity extends AppCompatActivity {
                     List<OutboundDetail> itemOutboundDetail = new ArrayList<>();
                     // Iterating over keys only
                     int idx = 0;
-                    for (String key : inboundMap.keySet()) {
-                        OutboundDetail outboundDetailData = inboundMap.get(key);
-                        if (outboundDetailData != null && outboundDetailData.getStatus().equalsIgnoreCase(StatusVerified)) {
-                            dataToShowTemp[idx][0] = outboundDetailData.getLineNo();
-                            dataToShowTemp[idx][1] = outboundDetailData.getSku();
-                            dataToShowTemp[idx][2] = outboundDetailData.getSerialNo();
-                            dataToShowTemp[idx][3] = outboundDetailData.getProductName();
-                            dataToShowTemp[idx][4] = outboundDetailData.getQty();
-                            dataToShowTemp[idx][5] = outboundDetailData.getSubkey();
-                            itemOutboundDetail.add(outboundDetailData);
-                            idx++;
+                    if (inboundMap != null) {
+                        for (String key : inboundMap.keySet()) {
+                            OutboundDetail outboundDetailData = inboundMap.get(key);
+                            if (outboundDetailData != null && outboundDetailData.getStatus().equalsIgnoreCase(StatusVerified)) {
+                                dataToShowTemp[idx][0] = outboundDetailData.getLineNo();
+                                dataToShowTemp[idx][1] = outboundDetailData.getSku();
+                                dataToShowTemp[idx][2] = outboundDetailData.getSerialNo();
+                                dataToShowTemp[idx][3] = outboundDetailData.getProductName();
+                                dataToShowTemp[idx][4] = outboundDetailData.getQty();
+                                dataToShowTemp[idx][5] = outboundDetailData.getSubkey();
+                                itemOutboundDetail.add(outboundDetailData);
+                                idx++;
+                            }
                         }
+                    } else {
+                        inboundMap = new HashMap<>();
                     }
+
                     items = itemOutboundDetail;
                     setAdapterData();
 
@@ -339,16 +354,7 @@ public class GoodsShipmentActivity extends AppCompatActivity {
     }
 
     public void initializeBtn() {
-        verifConfirm = findViewById(R.id.btn_goods_verif_confirm);
-        verifViewDetail = findViewById(R.id.btn_goods_verif_view_detail);
-        verifCancel = findViewById(R.id.custom_top_bar_back_button);
-        verifScan = findViewById(R.id.btn_goods_verif_scan);
-        verifClear = findViewById(R.id.btn_goods_verif_clear);
-        verifViewDetailTv = findViewById(R.id.verif_view_detail_text);
-        verifScanTv = findViewById(R.id.verif_btn_scan_tv);
-        totalScanConstrainLayout = findViewById(R.id.constraintLayout_total_scan);
-        searchButton = findViewById(R.id.btn_search_inbound);
-        inboundNoTextView = findViewById(R.id.spinner_inbound_no);
+
         setSearchButtonInbound();
         searchButton.setOnClickListener(view1 -> {
             inboundNoTextView.showDropDown();
@@ -466,7 +472,7 @@ public class GoodsShipmentActivity extends AppCompatActivity {
     public void onBackPressed() {
         Intent intent = new Intent(this, NavigationViewActivity.class);
 
-        if (inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
+        if (inboundNoTextView == null || inboundNoTextView.getText() == null || inboundNoTextView.getText().toString().trim().equalsIgnoreCase("")) {
             clearAllData();
             startActivity(intent);
             finish();
@@ -553,7 +559,7 @@ public class GoodsShipmentActivity extends AppCompatActivity {
                 StatusVerified, MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()), listSerialNo, listSkuQty);
         Gson gson = new Gson();
         String stringJson = gson.toJson(request);
-        Log.d(TAG, "verifyInboundDetails: json "+stringJson);
+        Log.d(TAG, "verifyInboundDetails: json " + stringJson);
         Call<RetroInboundsVerifyResponse> call = service.verifyOutboundItemDetail(request);
         call.enqueue(new Callback<RetroInboundsVerifyResponse>() {
             @Override

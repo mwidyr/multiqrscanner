@@ -269,19 +269,24 @@ public class GoodsVerificationActivity extends AppCompatActivity {
                     List<InboundDetail> itemInboundDetail = new ArrayList<>();
                     // Iterating over keys only
                     int idx = 0;
-                    for (String key : inboundMap.keySet()) {
-                        InboundDetail inboundDetailData = inboundMap.get(key);
-                        if (inboundDetailData != null && inboundDetailData.getStatus().equalsIgnoreCase(StatusVerified)) {
-                            dataToShowTemp[idx][0] = inboundDetailData.getLineNo();
-                            dataToShowTemp[idx][1] = inboundDetailData.getSku();
-                            dataToShowTemp[idx][2] = inboundDetailData.getSerialNo();
-                            dataToShowTemp[idx][3] = inboundDetailData.getProductName();
-                            dataToShowTemp[idx][4] = inboundDetailData.getQty();
-                            dataToShowTemp[idx][5] = inboundDetailData.getSubkey();
-                            itemInboundDetail.add(inboundDetailData);
-                            idx++;
+                    if (inboundMap != null) {
+                        for (String key : inboundMap.keySet()) {
+                            InboundDetail inboundDetailData = inboundMap.get(key);
+                            if (inboundDetailData != null && inboundDetailData.getStatus().equalsIgnoreCase(StatusVerified)) {
+                                dataToShowTemp[idx][0] = inboundDetailData.getLineNo();
+                                dataToShowTemp[idx][1] = inboundDetailData.getSku();
+                                dataToShowTemp[idx][2] = inboundDetailData.getSerialNo();
+                                dataToShowTemp[idx][3] = inboundDetailData.getProductName();
+                                dataToShowTemp[idx][4] = inboundDetailData.getQty();
+                                dataToShowTemp[idx][5] = inboundDetailData.getSubkey();
+                                itemInboundDetail.add(inboundDetailData);
+                                idx++;
+                            }
                         }
+                    } else {
+                        inboundMap = new HashMap<>();
                     }
+
                     items = itemInboundDetail;
                     setAdapterData();
 
@@ -375,11 +380,11 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         verifCancel.setOnClickListener(view -> {
             Intent intent = new Intent(this, NavigationViewActivity.class);
 
-            if(inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
+            if (inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
                 clearAllData();
                 startActivity(intent);
                 finish();
-            }else{
+            } else {
                 MiscUtil.CustomDialogClass cdc = MiscUtil.customAlertDialog(this, "Return to home?", "After you return to home, the data is lost and cannot be canceled");
                 View.OnClickListener confirmListener = viewA -> {
                     clearAllData();
@@ -420,7 +425,6 @@ public class GoodsVerificationActivity extends AppCompatActivity {
     }
 
 
-
     public void clearAllData() {
         clearSharedPreferences();
         inboundNoTextView.setText("");
@@ -456,11 +460,11 @@ public class GoodsVerificationActivity extends AppCompatActivity {
     public void onBackPressed() {
         Intent intent = new Intent(this, NavigationViewActivity.class);
 
-        if(inboundNoTextView.getText().toString().equalsIgnoreCase("")) {
+        if (inboundNoTextView == null || inboundNoTextView.getText() == null || inboundNoTextView.getText().toString().trim().equalsIgnoreCase("")) {
             clearAllData();
             startActivity(intent);
             finish();
-        }else{
+        } else {
             MiscUtil.CustomDialogClass cdc = MiscUtil.customAlertDialog(this, "Return to home?", "After you return to home, the data is lost and cannot be canceled");
             View.OnClickListener confirmListener = viewA -> {
                 clearAllData();

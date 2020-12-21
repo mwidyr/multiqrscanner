@@ -23,6 +23,7 @@ import com.multiqrscanner.inventory.model.InventoryDetail;
 import com.multiqrscanner.misc.MiscUtil;
 import com.multiqrscanner.network.RetrofitClientInstance;
 import com.multiqrscanner.network.model.GetTimeResponse;
+import com.multiqrscanner.network.model.RetroUser;
 import com.multiqrscanner.network.user.GetLoginService;
 import com.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
 import com.multiqrscanner.qrcode.QrCodeProductValue;
@@ -57,6 +58,7 @@ public class PutawayPalletProductScanResultActivity extends AppCompatActivity {
     private Integer totalIntInvalidInbound = 0;
     private Integer totalIntValidInbound = 0;
     RecyclerView recyclerView;
+    private String timeInMilistDB;
 
     public void setProductMap(HashMap<String, InventoryDetail> productMap) {
         this.productMap = productMap;
@@ -67,7 +69,30 @@ public class PutawayPalletProductScanResultActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inventory_putaway_scan_result);
         inboundNoVal = findViewById(R.id.tv_goods_verif_result_inbound_no_val);
+        GetLoginService service = RetrofitClientInstance.getRetrofitInstance().create(GetLoginService.class);
+        Call<GetTimeResponse> callSync = service.getServerTimeInMilis(new RetroUser());
+        callSync.enqueue(new Callback<GetTimeResponse>() {
+            @Override
+            public void onResponse(Call<GetTimeResponse> call, Response<GetTimeResponse> response) {
+                GetTimeResponse apiResponse = response.body();
+                if (apiResponse != null) {
+                    timeInMilistDB = apiResponse.getDate();
+                    initOnCreate();
+                }
+            }
 
+            @Override
+            public void onFailure(Call<GetTimeResponse> call, Throwable t) {
+                Log.e(TAG, "onFailure: " + t.getMessage(), t);
+                Toast.makeText(PutawayPalletProductScanResultActivity.this, "Use Device Time...", Toast.LENGTH_SHORT).show();
+                initOnCreate();
+            }
+        });
+
+
+    }
+
+    public void initOnCreate() {
         Intent intent = getIntent();
         if (!MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundNoKey).trim().equalsIgnoreCase("")) {
             currentSelectedInboundNo = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.InboundNoKey);
@@ -109,7 +134,7 @@ public class PutawayPalletProductScanResultActivity extends AppCompatActivity {
                                 continue;
                             }
                             Long serialNoScanLong = qrCodeProductValue.getSerialNo();
-                            if(serialNoScanLong == null){
+                            if (serialNoScanLong == null) {
                                 continue;
                             }
                             String serialNoScan = serialNoScanLong.toString();
@@ -134,25 +159,10 @@ public class PutawayPalletProductScanResultActivity extends AppCompatActivity {
                                     inboundMapSharedPref.get(serialNoScan).setStatus(PutawayActivity.StatusVerified);
                                 }
                                 if (inboundMapSharedPref.get(serialNoScan).getInputDate() == null || inboundMapSharedPref.get(serialNoScan).getInputDate() == 0L) {
-                                    inboundMapSharedPref.get(serialNoScan).setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
-                                    GetLoginService service = RetrofitClientInstance.getRetrofitInstance().create(GetLoginService.class);
-                                    Call<GetTimeResponse> callSync = service.getServerTimeInMilis();
-                                    callSync.enqueue(new Callback<GetTimeResponse>() {
-                                        @Override
-                                        public void onResponse(Call<GetTimeResponse> call, Response<GetTimeResponse> response) {
-                                            GetTimeResponse apiResponse = response.body();
-                                            if (apiResponse != null) {
-                                                Objects.requireNonNull(inboundMapSharedPref.get(serialNoScan)).setInputDate(Long.parseLong(apiResponse.getDate()));
-                                                setInboundMap(inboundMapSharedPref);
-                                                setProductMap(inboundMapSharedPref);
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onFailure(Call<GetTimeResponse> call, Throwable t) {
-                                            Log.e(TAG, "onFailure: " + t.getMessage(), t);
-                                        }
-                                    });
+                                    Objects.requireNonNull(inboundMapSharedPref.get(serialNoScan)).setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
+                                    if (timeInMilistDB != null && !timeInMilistDB.trim().equalsIgnoreCase("")) {
+                                        Objects.requireNonNull(inboundMapSharedPref.get(serialNoScan)).setInputDate(Long.parseLong(timeInMilistDB));
+                                    }
                                 }
 
                             } else {
@@ -161,6 +171,8 @@ public class PutawayPalletProductScanResultActivity extends AppCompatActivity {
                             }
                             qrCodeProductValuesDisplay.add(qrCodeProductValue);
                         }
+                        setInboundMap(inboundMapSharedPref);
+                        setProductMap(inboundMapSharedPref);
                         this.inventoryDetailList = inventoryDetailDisplay;
                         this.qrCodeProductValues = qrCodeProductValuesDisplay;
                         Log.d(TAG, "onCreate: qrCodeProductValuesDisplay " + qrCodeProductValuesDisplay);
@@ -234,12 +246,14 @@ public class PutawayPalletProductScanResultActivity extends AppCompatActivity {
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.TotalScanKey, Integer.toString(totalScanAll));
                 Log.d(TAG, "initializeBtn: " + totalScanAll);
                 Gson gson = new Gson();
+                Log.d(TAG, "initializeBtn: timeinmilistDB " + timeInMilistDB);
+                Log.d(TAG, "initializeBtn: inboundMap " + inboundMap);
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListScanned, gson.toJson(this.inventoryDetailList));
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.InboundListDetail, gson.toJson(this.inboundMap));
                 MiscUtil.saveStringSharedPreferenceAsString(this, MiscUtil.ScanProductListDetail, gson.toJson(this.productMap));
                 startActivity(intent);
                 finish();
-            }else{
+            } else {
                 onBackPressed();
 
             }

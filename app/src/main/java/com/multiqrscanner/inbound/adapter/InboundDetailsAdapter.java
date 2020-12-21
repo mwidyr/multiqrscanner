@@ -97,7 +97,7 @@ public class InboundDetailsAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         if (viewHolder instanceof ItemViewHolder) {
             InboundDetail item = items.get(position);
             ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;
-            itemViewHolder.lineNo.setText(item.getProductName());
+            itemViewHolder.lineNo.setText(item.getLineNo());
             itemViewHolder.sku.setText(item.getSku());
             itemViewHolder.serialNo.setText(item.getSerialNo());
             itemViewHolder.product.setText(item.getProductName());
