@@ -249,7 +249,7 @@ public class PickingPlanActivity extends AppCompatActivity {
                                 inboundItemDetail.getSku(), inboundItemDetail.getSerialno() == null ? "" : inboundItemDetail.getSerialno(),
                                 inboundItemDetail.getProductname(), inboundItemDetail.getQty() + "",
                                 inboundItemDetail.getSubkey() == null ? "" : inboundItemDetail.getSubkey(),
-                                inboundItemDetail.getVerif(), 0L));
+                                inboundItemDetail.getVerif(), 0L,""));
                     }
                     HashMap<String, OutboundDetail> inboundMap = new HashMap<>();
                     for (OutboundDetail data : inboundList) {
@@ -259,7 +259,7 @@ public class PickingPlanActivity extends AppCompatActivity {
                         }
                         inboundMap.put(data.getSerialNo(), new OutboundDetail(data.getLineNo(), data.getSku(),
                                 data.getSerialNo(), data.getProductName(), data.getQty(),
-                                data.getSubkey(), defaultStatus, data.getInputDate()));
+                                data.getSubkey(), defaultStatus, data.getInputDate(),""));
                     }
 
                     String[][] dataToShowTemp = new String[inboundMap.size()][6];
@@ -517,7 +517,7 @@ public class PickingPlanActivity extends AppCompatActivity {
         List<InboundVerifySerialNo> listSerialNo = new ArrayList<>();
         for (OutboundDetail outboundDetail : inboundMap.values()) {
             if (outboundDetail.getStatus().trim().equalsIgnoreCase(StatusVerified)) {
-                listSerialNo.add(new InboundVerifySerialNo(outboundDetail.getSerialNo(), outboundDetail.getInputDate()));
+                listSerialNo.add(new InboundVerifySerialNo(outboundDetail.getSerialNo(), outboundDetail.getInputDate(),""));
             }
         }
         Log.d(TAG, "verifyInboundDetails: listSerialNo " + listSerialNo.toString());

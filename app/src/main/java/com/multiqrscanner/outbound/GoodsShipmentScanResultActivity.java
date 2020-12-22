@@ -150,9 +150,15 @@ public class GoodsShipmentScanResultActivity extends AppCompatActivity {
                             qrCodeProductValue.setValid(InvalidInbound);
                             totalIntInvalidInbound++;
                             for (OutboundDetail detail : inboundMapSharedPref.values()) {
-                                //temporary validation by qty and sku
-                                if (!detail.getSku().trim().equalsIgnoreCase("") &&
-                                        !qrCodeProductValue.getSku().trim().equalsIgnoreCase("") && detail.getSku().trim().equalsIgnoreCase(qrCodeProductValue.getSku().trim())) {
+                                Log.d(TAG, "initOnCreate: detail "+detail);
+                                Log.d(TAG, "initOnCreate: qrCodeProductValue "+qrCodeProductValue);
+                                Long detailSerialNo;
+                                if(detail.getSerialNo().trim().equalsIgnoreCase("") ||
+                                        qrCodeProductValue.getSerialNo().toString().trim().equalsIgnoreCase("") ){
+                                    continue;
+                                }
+                                detailSerialNo = Long.parseLong(detail.getSerialNo().trim());
+                                if (detailSerialNo.equals(qrCodeProductValue.getSerialNo())) {
                                     Log.d(TAG, "onCreate: "+detail);
                                     OutboundDetail outboundDetail = new OutboundDetail(
                                             Objects.requireNonNull(detail).getLineNo(),
@@ -162,8 +168,9 @@ public class GoodsShipmentScanResultActivity extends AppCompatActivity {
                                             Objects.requireNonNull(detail).getQty(),
                                             Objects.requireNonNull(detail).getSubkey(),
                                             Objects.requireNonNull(detail).getStatus(),
-                                            Objects.requireNonNull(detail).getInputDate()
-                                    );
+                                            Objects.requireNonNull(detail).getInputDate(),
+                                            Objects.requireNonNull(detail).getIdItem()
+                                            );
                                     qrCodeProductValue.setValid(ValidInbound);
                                     totalIntValidInbound++;
                                     totalIntInvalidInbound--;

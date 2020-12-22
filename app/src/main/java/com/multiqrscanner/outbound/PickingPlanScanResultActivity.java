@@ -121,7 +121,7 @@ public class PickingPlanScanResultActivity extends AppCompatActivity {
                                         inboundMapSharedPref.get(serialNoScan).getQty(),
                                         inboundMapSharedPref.get(serialNoScan).getSubkey(),
                                         inboundMapSharedPref.get(serialNoScan).getStatus(),
-                                        inboundMapSharedPref.get(serialNoScan).getInputDate()
+                                        inboundMapSharedPref.get(serialNoScan).getInputDate(),""
                                 );
                                 qrCodeProductValue.setValid(ValidInbound);
                                 totalIntValidInbound++;

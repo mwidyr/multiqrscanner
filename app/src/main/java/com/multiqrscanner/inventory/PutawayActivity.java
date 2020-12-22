@@ -675,7 +675,7 @@ public class PutawayActivity extends AppCompatActivity {
         List<InboundVerifySerialNo> listSerialNo = new ArrayList<>();
         for (InventoryDetail inventoryDetail : inboundMap.values()) {
             if (inventoryDetail.getStatus().trim().equalsIgnoreCase(StatusVerified)) {
-                listSerialNo.add(new InboundVerifySerialNo(inventoryDetail.getSerialNo(), inventoryDetail.getInputDate()));
+                listSerialNo.add(new InboundVerifySerialNo(inventoryDetail.getSerialNo(), inventoryDetail.getInputDate(),""));
             }
         }
         Log.d(TAG, "verifyInboundDetails: listSerialNo " + listSerialNo.toString());
