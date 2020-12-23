@@ -524,7 +524,7 @@ public class GoodsVerificationActivity extends AppCompatActivity {
         List<InboundVerifySerialNo> listSerialNo = new ArrayList<>();
         for (InboundDetail inboundDetail : inboundMap.values()) {
             if (inboundDetail.getStatus().trim().equalsIgnoreCase(StatusVerified)) {
-                listSerialNo.add(new InboundVerifySerialNo(inboundDetail.getSerialNo(), inboundDetail.getInputDate()));
+                listSerialNo.add(new InboundVerifySerialNo(inboundDetail.getSerialNo(), inboundDetail.getInputDate(),""));
             }
         }
         Log.d(TAG, "verifyInboundDetails: listSerialNo " + listSerialNo.toString());

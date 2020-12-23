@@ -27,6 +27,8 @@ import com.multiqrscanner.network.model.RetroUser;
 import com.multiqrscanner.network.model.RetroWarehouse;
 import com.multiqrscanner.network.user.GetInventoryService;
 import com.multiqrscanner.network.user.GetLoginService;
+import com.multiqrscanner.outbound.GoodsShipmentActivity;
+import com.multiqrscanner.outbound.model.OutboundDetail;
 import com.multiqrscanner.qrcode.QrCodeBarcodeSimpleWrapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -150,36 +152,46 @@ public class GoodsVerificationScanResultActivity extends AppCompatActivity {
                                 continue;
                             }
                             String serialNoScan = serialNoScanLong.toString();
-                            if (inboundMapSharedPref.get(serialNoScan) != null) {
-                                InboundDetail inboundDetail = new InboundDetail(
-                                        inboundMapSharedPref.get(serialNoScan).getLineNo(),
-                                        inboundMapSharedPref.get(serialNoScan).getSku(),
-                                        inboundMapSharedPref.get(serialNoScan).getSerialNo(),
-                                        inboundMapSharedPref.get(serialNoScan).getProductName(),
-                                        inboundMapSharedPref.get(serialNoScan).getQty(),
-                                        inboundMapSharedPref.get(serialNoScan).getSubkey(),
-                                        inboundMapSharedPref.get(serialNoScan).getStatus(),
-                                        inboundMapSharedPref.get(serialNoScan).getInputDate()
-                                );
-                                qrCodeProductValue.setValid(ValidInbound);
-                                totalIntValidInbound++;
-                                if (inboundDetail.getInputDate() == null || inboundDetail.getInputDate() == 0L) {
-                                    inboundDetail.setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
+                            qrCodeProductValue.setValid(InvalidInbound);
+                            totalIntInvalidInbound++;
+                            for (InboundDetail detail : inboundMapSharedPref.values()) {
+                                Log.d(TAG, "initOnCreate: detail "+detail);
+                                Log.d(TAG, "initOnCreate: qrCodeProductValue "+qrCodeProductValue);
+                                Long detailSerialNo;
+                                if(detail.getSerialNo().trim().equalsIgnoreCase("") ||
+                                        qrCodeProductValue.getSerialNo().toString().trim().equalsIgnoreCase("") ){
+                                    continue;
                                 }
-                                inboundDetailDisplay.add(inboundDetail);
-                                if (inboundMapSharedPref.get(serialNoScan).getStatus().trim().equalsIgnoreCase(GoodsVerificationActivity.StatusNotVerified)) {
-                                    inboundMapSharedPref.get(serialNoScan).setStatus(GoodsVerificationActivity.StatusVerified);
-                                }
-                                if (inboundMapSharedPref.get(serialNoScan).getInputDate() == null || inboundMapSharedPref.get(serialNoScan).getInputDate() == 0L) {
-                                    inboundMapSharedPref.get(serialNoScan).setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
-                                    if(timeInMilistDB != null && !timeInMilistDB.trim().equalsIgnoreCase("")){
-                                        inboundMapSharedPref.get(serialNoScan).setInputDate(Long.parseLong(timeInMilistDB));
+                                detailSerialNo = Long.parseLong(detail.getSerialNo().trim());
+                                if (detailSerialNo.equals(qrCodeProductValue.getSerialNo())) {
+                                    Log.d(TAG, "onCreate: "+detail);
+                                    InboundDetail inboundDetail = new InboundDetail(
+                                            Objects.requireNonNull(detail).getLineNo(),
+                                            Objects.requireNonNull(detail).getSku(),
+                                            Objects.requireNonNull(detail).getSerialNo(),
+                                            Objects.requireNonNull(detail).getProductName(),
+                                            Objects.requireNonNull(detail).getQty(),
+                                            Objects.requireNonNull(detail).getSubkey(),
+                                            Objects.requireNonNull(detail).getStatus(),
+                                            Objects.requireNonNull(detail).getInputDate()
+                                    );
+                                    qrCodeProductValue.setValid(ValidInbound);
+                                    totalIntValidInbound++;
+                                    totalIntInvalidInbound--;
+                                    if (inboundDetail.getInputDate() == null || inboundDetail.getInputDate() == 0L) {
+                                        inboundDetail.setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
+                                    }
+                                    inboundDetailDisplay.add(inboundDetail);
+                                    if (Objects.requireNonNull(detail).getInputDate() == null || Objects.requireNonNull(detail).getInputDate() == 0L) {
+                                        Objects.requireNonNull(detail).setInputDate(MiscUtil.getCurrentTimeInMilis(Calendar.getInstance()));
+                                        if(timeInMilistDB != null && !timeInMilistDB.trim().equalsIgnoreCase("")){
+                                            Objects.requireNonNull(detail).setInputDate(Long.parseLong(timeInMilistDB));
+                                        }
+                                    }
+                                    if (Objects.requireNonNull(detail).getStatus().trim().equalsIgnoreCase(GoodsShipmentActivity.StatusNotVerified)) {
+                                        Objects.requireNonNull(detail).setStatus(GoodsShipmentActivity.StatusVerified);
                                     }
                                 }
-
-                            } else {
-                                qrCodeProductValue.setValid(InvalidInbound);
-                                totalIntInvalidInbound++;
                             }
                             qrCodeProductValuesDisplay.add(qrCodeProductValue);
                         }

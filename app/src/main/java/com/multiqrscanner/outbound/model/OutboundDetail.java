@@ -1,13 +1,13 @@
 package com.multiqrscanner.outbound.model;
 
 public class OutboundDetail {
-    private String lineNo, sku, serialNo, productName, qty, subkey, status;
+    private String lineNo, sku, serialNo, productName, qty, subkey, status, idItem;
     private Long inputDate;
 
     public OutboundDetail() {
     }
 
-    public OutboundDetail(String lineNo, String sku, String serialNo, String productName, String qty, String subkey, String status, Long inputDate) {
+    public OutboundDetail(String lineNo, String sku, String serialNo, String productName, String qty, String subkey, String status, Long inputDate, String idItem) {
         this.lineNo = lineNo;
         this.sku = sku;
         this.serialNo = serialNo;
@@ -16,6 +16,15 @@ public class OutboundDetail {
         this.subkey = subkey;
         this.status = status;
         this.inputDate = inputDate;
+        this.idItem = idItem;
+    }
+
+    public String getIdItem() {
+        return idItem;
+    }
+
+    public void setIdItem(String idItem) {
+        this.idItem = idItem;
     }
 
     public String getLineNo() {
@@ -93,6 +102,7 @@ public class OutboundDetail {
         sb.append(", subkey='").append(subkey).append('\'');
         sb.append(", status='").append(status).append('\'');
         sb.append(", inputDate='").append(inputDate).append('\'');
+        sb.append(", idItem='").append(idItem).append('\'');
         sb.append('}');
         return sb.toString();
     }

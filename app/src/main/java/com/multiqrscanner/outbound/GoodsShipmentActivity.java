@@ -246,15 +246,14 @@ public class GoodsShipmentActivity extends AppCompatActivity {
                     List<OutboundDetail> inboundList = new ArrayList<>();
                     for (InboundItemDetail inboundItemDetail : response.body().getItems()) {
                         Log.d(TAG, "onResponse: " + inboundItemDetail);
-                        //temporary doesnt use serial no
-//                        if (inboundItemDetail.getSerialno() == null || inboundItemDetail.getSerialno().trim().equalsIgnoreCase("")) {
-//                            continue;
-//                        }
+                        if (inboundItemDetail.getSerialno() == null || inboundItemDetail.getSerialno().trim().equalsIgnoreCase("")) {
+                            continue;
+                        }
                         inboundList.add(new OutboundDetail(inboundItemDetail.getLine() + "",
                                 inboundItemDetail.getSku(), inboundItemDetail.getSerialno() == null ? "" : inboundItemDetail.getSerialno(),
                                 inboundItemDetail.getProductname(), inboundItemDetail.getQty() + "",
                                 inboundItemDetail.getSubkey() == null ? "" : inboundItemDetail.getSubkey(),
-                                inboundItemDetail.getVerif(), 0L));
+                                inboundItemDetail.getVerif(), 0L,inboundItemDetail.getIditem()));
                     }
                     Log.d(TAG, "onResponse: " + inboundList);
                     HashMap<String, OutboundDetail> inboundMap = new HashMap<>();
@@ -267,7 +266,7 @@ public class GoodsShipmentActivity extends AppCompatActivity {
                         }
                         inboundMap.put(Integer.toString(idxA), new OutboundDetail(data.getLineNo(), data.getSku(),
                                 data.getSerialNo(), data.getProductName(), data.getQty(),
-                                data.getSubkey(), defaultStatus, data.getInputDate()));
+                                data.getSubkey(), defaultStatus, data.getInputDate(),data.getIdItem()));
                         idxA++;
                     }
 
@@ -534,23 +533,23 @@ public class GoodsShipmentActivity extends AppCompatActivity {
         String userID = MiscUtil.getStringSharedPreferenceByKey(this, MiscUtil.LoginActivityUserID);
         Log.d(TAG, "verifyInboundDetails: id warehouse " + idWarehouse + " userID = " + userID);
         List<InboundVerifySerialNo> listSerialNo = new ArrayList<>();
-        HashMap<String, InboundVerifySKU> skuMap = new HashMap<>();
+        HashMap<String, InboundVerifySKU> shipmentMap = new HashMap<>();
         List<InboundVerifySKU> listSkuQty = new ArrayList<>();
         for (OutboundDetail outboundDetail : inboundMap.values()) {
             if (outboundDetail.getStatus().trim().equalsIgnoreCase(StatusVerified)) {
-                listSerialNo.add(new InboundVerifySerialNo(outboundDetail.getSerialNo(), outboundDetail.getInputDate()));
-                if (!skuMap.containsKey(outboundDetail.getSku())) {
-                    skuMap.put(outboundDetail.getSku(), new InboundVerifySKU(outboundDetail.getSku(), "1", outboundDetail.getInputDate()));
+                listSerialNo.add(new InboundVerifySerialNo(outboundDetail.getSerialNo(), outboundDetail.getInputDate(),outboundDetail.getIdItem()));
+                if (!shipmentMap.containsKey(outboundDetail.getSku())) {
+                    shipmentMap.put(outboundDetail.getSku(), new InboundVerifySKU(outboundDetail.getSku(), "1", outboundDetail.getInputDate()));
                 } else {
-                    InboundVerifySKU skuVerif = skuMap.get(outboundDetail.getSku());
+                    InboundVerifySKU skuVerif = shipmentMap.get(outboundDetail.getSku());
                     int qty = Integer.parseInt(skuVerif.getQty());
                     qty = qty + 1;
-                    skuMap.put(outboundDetail.getSku(), new InboundVerifySKU(outboundDetail.getSku(), Integer.toString(qty), outboundDetail.getInputDate()));
+                    shipmentMap.put(outboundDetail.getSku(), new InboundVerifySKU(outboundDetail.getSku(), Integer.toString(qty), outboundDetail.getInputDate()));
                 }
             }
         }
-        for (String key : skuMap.keySet()) {
-            listSkuQty.add(new InboundVerifySKU(key, skuMap.get(key).getQty(), skuMap.get(key).getDate()));
+        for (String key : shipmentMap.keySet()) {
+            listSkuQty.add(new InboundVerifySKU(key, shipmentMap.get(key).getQty(), shipmentMap.get(key).getDate()));
         }
 
         Log.d(TAG, "verifyInboundDetails: listSerialNo " + listSerialNo.toString());

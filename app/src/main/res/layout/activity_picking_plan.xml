@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="Putaway"
+            android:text="Picking Plan"
             android:textStyle="bold"
             android:fontFamily="@font/ubuntu_light"
             android:textAlignment="textStart"
